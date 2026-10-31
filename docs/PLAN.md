@@ -72,7 +72,7 @@ redirected to emergency services. Only synthetic patient data is ever stored.
 - [x] Put your GitHub username in `.github/CODEOWNERS`
 - [ ] Enable branch protection on `main` (require CI) – in GitHub settings, after CI has run once
 
-## Phase 1 – Data layer
+## Phase 1 – Data layer ✅
 
 - [x] Add deps: `sqlalchemy>=2`, `psycopg[binary]`, `alembic`, `pgvector`
 - [x] `db/session.py` (engine + session dependency), port models with typed `Mapped[]` columns

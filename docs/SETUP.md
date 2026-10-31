@@ -48,6 +48,8 @@ uv run pre-commit install
 uv run pytest
 uv run uvicorn medagent.main:app --reload     # http://localhost:8000/health and /docs
 docker compose up -d                          # Postgres + pgvector on :5432
+uv run alembic upgrade head                   # create/upgrade the schema
+uv run python scripts/seed.py                 # synthetic doctors, schedules, patients (idempotent)
 ```
 
 ## Recommended VS Code extensions

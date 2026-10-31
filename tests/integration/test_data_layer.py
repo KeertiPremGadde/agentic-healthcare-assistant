@@ -30,11 +30,47 @@ def doctor_and_patient(session: Session) -> tuple[Doctor, Patient]:
 def test_seed_is_idempotent(session: Session) -> None:
     first = seed(session)
     second = seed(session)
-    assert first["doctors"] == 15
+    assert first["doctors"] == 100
     assert first["patients"] == 5
-    assert first["schedules"] > 0
+    assert first["schedules"] > 100
     assert second == {"doctors": 0, "schedules": 0, "patients": 0}
-    assert session.scalar(select(func.count()).select_from(Doctor)) == 15
+    assert session.scalar(select(func.count()).select_from(Doctor)) == 100
+    assert session.scalar(select(func.count()).select_from(DoctorSchedule)) == first["schedules"]
+
+
+def test_seed_is_reproducible_across_databases(session: Session) -> None:
+    seed(session)
+    first = [(d.name, d.specialty, d.city, d.languages) for d in repository.get_doctors(session)]
+    session.execute(text("TRUNCATE doctor_schedules, doctors RESTART IDENTITY CASCADE"))
+    session.commit()
+    session.expunge_all()  # drop stale objects whose ids the TRUNCATE just recycled
+    seed(session)
+    second = [(d.name, d.specialty, d.city, d.languages) for d in repository.get_doctors(session)]
+    assert first == second
+
+
+def test_seed_tops_up_a_partial_database(session: Session) -> None:
+    session.add(Doctor(name="Dr. John Smith", specialty="General Physician"))
+    session.commit()
+    created = seed(session)
+    assert created["doctors"] == 99  # the existing one is kept, not duplicated
+
+
+def test_get_doctors_filters(session: Session) -> None:
+    seed(session)
+    cardiologists = repository.get_doctors(session, specialty="Cardiologist")
+    assert len(cardiologists) >= 2
+    assert all(d.specialty == "Cardiologist" for d in cardiologists)
+
+    in_hamburg = repository.get_doctors(session, city="Hamburg")
+    assert in_hamburg
+    assert all(d.city == "Hamburg" for d in in_hamburg)
+
+    english = repository.get_doctors(session, language="English")
+    assert english
+    assert all("English" in d.languages for d in english)
+    both = repository.get_doctors(session, specialty="Dentist", city="Berlin", language="German")
+    assert all(d.specialty == "Dentist" and d.city == "Berlin" for d in both)
 
 
 def test_double_booking_is_rejected_by_the_database(

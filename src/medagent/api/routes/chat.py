@@ -25,8 +25,10 @@ from medagent.api.deps import CurrentUser, CurrentUserDep, ResourcesDep, enforce
 from medagent.api.errors import DEMO_NOTICE, ApiError
 from medagent.api.resources import Resources
 from medagent.api.schemas import (
+    BookingOut,
     ChatRequest,
     ChatResponse,
+    DoctorOut,
     ErrorResponse,
     HistoryResponse,
     LimitsOut,
@@ -156,8 +158,11 @@ async def _emit_final(
             if delay:
                 await asyncio.sleep(delay)
         payload: dict[str, Any] = {"text": result.reply, "kind": result.kind}
-        if result.appointment_id is not None:
+        if result.booking is not None:
             payload["appointment_id"] = result.appointment_id
+            payload["booking"] = result.booking
+        if result.doctors:
+            payload["doctors"] = result.doctors
         await queue.put(sse("message", payload))
     await queue.put(
         sse(
@@ -209,6 +214,8 @@ async def _respond(
         reply=result.reply,
         kind=result.kind,
         appointment_id=result.appointment_id,
+        booking=BookingOut(**result.booking) if result.booking else None,
+        doctors=[DoctorOut(**d) for d in result.doctors] if result.doctors else None,
         pending=result.pending,
         usage=_usage(result.cost),
     )

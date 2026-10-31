@@ -31,12 +31,18 @@ class AppointmentOption(TypedDict):
     start_local: str
 
 
+class BookingInfo(TypedDict):
+    appointment_id: int
+    doctor: str
+    start: str  # human label in the clinic timezone, same as the confirmation card
+
+
 class AgentState(TypedDict, total=False):
     messages: Annotated[list[AnyMessage], add_messages]
     # Per-turn values (reset by the guardrail at the start of every turn)
     route: str
     safety_notice: bool
-    appointment_id: int | None  # set only by the turn that booked an appointment
+    booking: BookingInfo | None  # set only by the turn that booked an appointment
     draft: str  # the reply a node produced; output_guard checks it and turns it into a message
     draft_kind: str  # "medical" | "doctors" | "booking" | "emergency" | "info"
     # Conversation memory used across turns

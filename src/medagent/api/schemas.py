@@ -54,6 +54,20 @@ class ResumeRequest(BaseModel):
     confirmed: bool = Field(description="true = go ahead (book/cancel), false = don't.")
 
 
+class DoctorOut(BaseModel):
+    id: int
+    name: str
+    specialty: str
+    city: str
+    languages: list[str]
+
+
+class BookingOut(BaseModel):
+    appointment_id: int
+    doctor: str
+    start: str = Field(description="Date and time in the clinic's timezone, as shown to the user.")
+
+
 class ChatResponse(BaseModel):
     """What `stream=false` returns (the SSE stream carries the same information as events)."""
 
@@ -63,6 +77,12 @@ class ChatResponse(BaseModel):
         default="normal", description="How to present the reply (e.g. a crisis card)."
     )
     appointment_id: int | None = Field(default=None, description="Set when this turn booked one.")
+    booking: BookingOut | None = Field(default=None, description="Details of that booking.")
+    doctors: list[DoctorOut] | None = Field(
+        default=None,
+        description="Set when the reply suggests doctors; the user's 'Book number N' refers to "
+        "the Nth entry.",
+    )
     pending: dict[str, Any] | None = Field(
         description="Set when the assistant needs a yes/no: call /resume with your answer."
     )

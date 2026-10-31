@@ -28,7 +28,7 @@ def guardrail_node(state: AgentState) -> dict[str, Any]:
         "draft": "",
         "draft_kind": "",
         "safety_notice": False,
-        "appointment_id": None,
+        "booking": None,
     }
     text = last_user_text(state)
     screen = screen_message(text)

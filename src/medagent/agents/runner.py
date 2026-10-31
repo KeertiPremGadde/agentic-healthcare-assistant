@@ -29,7 +29,12 @@ class TurnResult:
     pending: dict[str, Any] | None  # the interrupt payload (e.g. the booking proposal)
     route: str
     cost: RunCost
-    appointment_id: int | None = None  # set when this turn booked an appointment
+    booking: dict[str, Any] | None = None  # appointment_id, doctor, start: this turn booked it
+    doctors: list[dict[str, Any]] | None = None  # the bookable options this turn suggested
+
+    @property
+    def appointment_id(self) -> int | None:
+        return int(self.booking["appointment_id"]) if self.booking else None
 
     @property
     def kind(self) -> str:
@@ -116,14 +121,18 @@ async def stream_turn(
         unpriced_models=list(cost.unpriced_models) or None,
         latency_ms=latency_ms,
     )
-    appointment_id = snapshot.values.get("appointment_id")
+    booking = snapshot.values.get("booking") if reply is not None else None
+    # `doctor_options` is conversation memory; only the turn that suggested them shows them.
+    suggested = snapshot.values.get("draft_kind") == "doctors" and reply is not None
+    doctors = [dict(d) for d in snapshot.values.get("doctor_options") or []] if suggested else None
     yield FinalEvent(
         TurnResult(
             reply=reply,
             pending=pending,
             route=route,
             cost=cost,
-            appointment_id=appointment_id if reply is not None else None,
+            booking=dict(booking) if booking else None,
+            doctors=doctors or None,
         )
     )
 

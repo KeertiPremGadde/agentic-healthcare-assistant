@@ -20,7 +20,7 @@ from medagent.agents.llm import LLMError
 from medagent.agents.nodes.common import APOLOGY, ConfigNode, Node, recent_messages
 from medagent.agents.prompts.booking import BOOKING_SYSTEM_PROMPT
 from medagent.agents.schemas import BookingRequest
-from medagent.agents.state import AgentState, DoctorOption, Proposal
+from medagent.agents.state import AgentState, BookingInfo, DoctorOption, Proposal
 from medagent.tools.clinic import ClinicTools, ToolError
 from medagent.tools.models import DoctorInfo
 
@@ -273,7 +273,11 @@ def make_book_appointment_node(deps: AgentDeps) -> ConfigNode:
                     update={
                         **done,
                         "booking_doctor_id": None,
-                        "appointment_id": result.appointment_id,
+                        "booking": BookingInfo(
+                            appointment_id=result.appointment_id,
+                            doctor=proposal["doctor_name"],
+                            start=proposal["start_local"],
+                        ),
                         "draft": text,
                     },
                 )

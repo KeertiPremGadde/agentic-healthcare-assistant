@@ -162,6 +162,18 @@ redirected to emergency services. Only synthetic patient data is ever stored.
 - [ ] `evals/`: golden datasets for RAG (reuse legacy `testset.csv`), routing, booking
 - [ ] RAGAS: faithfulness, answer relevancy, context precision; DeepEval: task completion, tool correctness
 - [ ] CI eval gate on PRs that touch `agents/`, `rag/`, prompts (thresholds in `evals/thresholds.yaml`)
+- [ ] **RAG improvements, each measured before/after with RAGAS** (record a baseline on the Phase 2
+  pipeline first, then change one thing at a time and keep a results table):
+  - **Contextual chunk headers:** prepend the topic title and its "Also called" synonyms to every chunk
+    before embedding (and before the `tsvector` is built), then re-ingest. Motivation: Phase 2 retrieval
+    for "symptoms of diabetes" ranked a risk-factors chunk first because a mid-topic chunk carries no
+    mention of its topic. Show the header in citations/prompt text only if it helps; the stored text
+    can stay clean.
+  - **Cross-encoder reranker:** a local cross-encoder behind the existing `Reranker` interface
+    (compare against `ScoreReranker`: quality, latency, install size).
+  - **Re-measure `RAG_MIN_SCORE`** on a larger labelled question set (in-scope, near-miss and off-topic;
+    Phase 2 used only 18 questions with a narrow 0.65-0.74 gap). Re-do it after each change above,
+    because the threshold is specific to the embedding model, chunk text and corpus.
 - [ ] Results table + chart in README
 - **Done when:** CI fails if faithfulness drops below threshold.
 

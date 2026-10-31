@@ -5,6 +5,10 @@ updates:
     schedule: { interval: "weekly" }
     groups:
       python-deps: { patterns: ["*"] }
+    ignore:
+      # langchain-mcp-adapters still requires mcp<2 (ADR 0007); lift when it supports mcp 2.x.
+      - dependency-name: "mcp"
+        versions: [">=2"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule: { interval: "weekly" }

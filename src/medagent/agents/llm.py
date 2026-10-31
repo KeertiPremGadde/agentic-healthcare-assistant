@@ -23,7 +23,7 @@ class LLMError(Exception):
 
 
 class StructuredLLM(Protocol):
-    def invoke(self, schema: type[T], system: str, messages: Sequence[BaseMessage]) -> T: ...
+    async def ainvoke(self, schema: type[T], system: str, messages: Sequence[BaseMessage]) -> T: ...
 
 
 def make_chat_model(settings: Settings, effort: Effort, max_tokens: int = 4096) -> ChatAnthropic:
@@ -44,10 +44,10 @@ class AnthropicStructuredLLM:
     def __init__(self, settings: Settings | None = None, effort: Effort = "low") -> None:
         self._model = make_chat_model(settings or get_settings(), effort)
 
-    def invoke(self, schema: type[T], system: str, messages: Sequence[BaseMessage]) -> T:
+    async def ainvoke(self, schema: type[T], system: str, messages: Sequence[BaseMessage]) -> T:
         chain = self._model.with_structured_output(schema, method="json_schema")
         try:
-            result = chain.invoke([SystemMessage(system), *messages])
+            result = await chain.ainvoke([SystemMessage(system), *messages])
         except Exception as exc:  # network, 4xx/5xx, refusal, schema violation
             raise LLMError(f"{type(exc).__name__} during {schema.__name__}") from exc
         if not isinstance(result, schema):

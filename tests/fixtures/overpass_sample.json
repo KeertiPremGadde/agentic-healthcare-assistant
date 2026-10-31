@@ -1,0 +1,43 @@
+{
+  "version": 0.6,
+  "generator": "hand-written test fixture in Overpass API JSON format",
+  "elements": [
+    {
+      "type": "node",
+      "id": 1001,
+      "lat": 53.5503,
+      "lon": 10.0007,
+      "tags": {
+        "amenity": "doctors",
+        "name": "Praxis am Testweg",
+        "addr:street": "Testweg",
+        "addr:housenumber": "5",
+        "addr:postcode": "20095",
+        "addr:city": "Hamburg"
+      }
+    },
+    {
+      "type": "way",
+      "id": 2002,
+      "center": { "lat": 53.5601, "lon": 9.9902 },
+      "tags": {
+        "amenity": "hospital",
+        "name": "Beispiel-Klinikum",
+        "website": "https://example.org/klinikum"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1003,
+      "lat": 53.551,
+      "lon": 10.002,
+      "tags": { "amenity": "clinic" }
+    },
+    {
+      "type": "relation",
+      "id": 3004,
+      "center": { "lat": 53.545, "lon": 10.01 },
+      "tags": { "amenity": "clinic", "name": "Ambulantes Zentrum Muster" }
+    }
+  ]
+}

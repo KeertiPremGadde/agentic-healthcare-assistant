@@ -5,14 +5,29 @@ When they run, every LLM call in the session is metered and the total tokens and
 are printed at the end, so a model or prompt change shows its real price.
 """
 
-from collections.abc import Iterator
+import asyncio
+import sys
+from collections.abc import Callable, Iterator, Mapping
 
 import pytest
 from langchain_core.callbacks import get_usage_metadata_callback
 
 
+def pytest_asyncio_loop_factories(
+    config: pytest.Config, item: pytest.Item
+) -> Mapping[str, Callable[[], asyncio.AbstractEventLoop]]:
+    """psycopg's async mode (the LangGraph checkpointer) needs a selector loop on Windows; the
+    MCP client brings its own loop for subprocesses (see medagent/core/aio.py). Elsewhere the
+    default loop does both. The hook must return a non-empty mapping on every platform."""
+    if sys.platform == "win32":
+        return {"selector": asyncio.SelectorEventLoop}
+    return {"default": asyncio.new_event_loop}
+
+
 def _llm_selected(config: pytest.Config) -> bool:
-    return "llm" in (config.getoption("-m") or "")
+    """True for `-m llm` (or e.g. `-m "llm and integration"`), false for `-m "not llm"`."""
+    expr = config.getoption("-m") or ""
+    return "llm" in expr and "not llm" not in expr
 
 
 def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:

@@ -114,31 +114,17 @@ redirected to emergency services. Only synthetic patient data is ever stored.
 - **Done when:** a CLI chat can answer a question, recommend a cardiologist and book a slot with confirmation, and memory survives restart. *(Verified with the real CLI in two separate processes.)*
 - Later: query rewriting for follow-ups, cancel/reschedule, negation handling + more languages in red-flag rules.
 
-## Phase 4 – Tools & integrations (MCP)
+## Phase 4 – Tools & integrations (MCP) ✅
 
-- [ ] `mcp_server/`: expose `search_doctors`, `check_availability`, `book_appointment`, `cancel_appointment` via the official MCP Python SDK
-- [ ] Agents load tools through the MCP client adapter (`langchain-mcp-adapters`)
-- [ ] Google Calendar event on booking (port `calendar_helper.py`, service-account or OAuth, secrets outside repo)
-- [ ] Confirmation email (e.g. Resend/SES), optional
-- [ ] **`find_nearby_clinics` tool (OpenStreetMap Overpass)** – real-world places near a city/coordinates,
-  *kept strictly separate from the bookable demo doctors*:
-  - Distinct tool and result schema (`NearbyClinic`, `bookable: false`, `source: "OpenStreetMap"`); never
-    written to the `doctors` table and never offered to `book_appointment`. The agent must say these are
-    real places it cannot book, while the seeded doctors are fictional demo data.
-  - **Licence:** data is ODbL. Show "© OpenStreetMap contributors" (link to openstreetmap.org/copyright)
-    in tool output and in the UI wherever results appear. Cache only; don't build a persistent
-    derived database.
-  - **Usage policy:** descriptive `User-Agent` with contact, small bbox/`around` queries with a short
-    `[timeout:]`, sequential requests, back off on HTTP 429/504, no bulk scraping. If geocoding is
-    needed, use Nominatim within its policy (max 1 req/s, cache, no autocomplete), or take lat/lon
-    from the UI. Consider a self-hosted/mirror endpoint if usage grows.
-  - **Caching:** Postgres or in-memory TTL cache (~24 h) keyed by rounded coordinates + radius + filter,
-    so repeated questions never hit Overpass; return stale cache on upstream errors.
-  - Tests with a recorded Overpass JSON fixture (no network in CI); a `@pytest.mark.llm`-style marker is
-    not needed because the tool is deterministic.
-  - Only public place data (name, address, website); no personal data from OSM is logged.
-- **Done when:** the MCP server works in MCP Inspector and the graph books through it, and the nearby-clinics
-  tool returns attributed, cached results that are clearly labelled non-bookable.
+- [x] `mcp_server/`: `search_doctors`, `get_doctor`, `check_availability`, `check_slot`, `book_appointment`, `list_appointments`, `cancel_appointment`, `find_nearby_clinics` via the official MCP Python SDK (`mcp>=1.30,<2`, FastMCP), typed output schemas, stdio only
+- [x] Agents load tools through the MCP client adapter (`langchain-mcp-adapters`, one persistent session); `ClinicTools` interface with local + MCP implementations (`TOOLS_TRANSPORT`)
+- [x] Graph made async (`AsyncPostgresSaver`); Windows selector/proactor loop split for psycopg async + MCP subprocess (ADR 0007)
+- [x] Cancellation with `interrupt()` confirmation; own future appointments only
+- [x] Google Calendar event on booking, removed on cancel: service account + one shared demo calendar, optional (`NullCalendar`), best-effort after commit, idempotent event ids, no patient data; `scripts/check_calendar.py`
+- [ ] Confirmation email (Resend/SES) – deferred to Phase 8 (SES)
+- [x] **`find_nearby_clinics` tool (OpenStreetMap)**, separate from the bookable demo doctors: `bookable: false`, ODbL attribution in tool output and enforced by the output guard, Nominatim ≤1 req/s + identifying User-Agent, bounding-box Overpass query with per-kind caps, 429/504 backoff, timeout-remark detection, 24 h Postgres cache with stale-on-error, configurable `OVERPASS_URL`; tests with a fixture and `httpx.MockTransport` (no network in CI)
+- **Done when:** the MCP server works in MCP Inspector and the graph books through it, and the nearby-clinics tool returns attributed, cached results that are clearly labelled non-bookable. *(Graph books and cancels through the MCP server over stdio in tests and the live CLI; real calendar event created and removed; live OSM lookup cached. Inspector: `uv run mcp dev src/medagent/mcp_server/server.py`.)*
+- Later: streamable-HTTP transport with auth, calendar outbox/retries, `.ics` download, mirror/self-hosted Overpass.
 
 ## Phase 5 – API
 

@@ -3,12 +3,15 @@
 LangGraph's `setup()` creates and migrates its own tables (`checkpoints`, `checkpoint_blobs`,
 `checkpoint_writes`, `checkpoint_migrations`). They are owned by the library, not by our Alembic
 migrations (ADR 0006). `setup()` is idempotent, so calling it on every start is safe.
+
+The async saver uses psycopg's async mode, which on Windows needs a SelectorEventLoop
+(`medagent.core.aio.run` takes care of that).
 """
 
-from collections.abc import Iterator
-from contextlib import contextmanager
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
-from langgraph.checkpoint.postgres import PostgresSaver
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 from medagent.core.config import get_settings
 
@@ -18,9 +21,11 @@ def psycopg_url(sqlalchemy_url: str) -> str:
     return sqlalchemy_url.replace("postgresql+psycopg://", "postgresql://", 1)
 
 
-@contextmanager
-def postgres_checkpointer(database_url: str | None = None) -> Iterator[PostgresSaver]:
+@asynccontextmanager
+async def postgres_checkpointer(
+    database_url: str | None = None,
+) -> AsyncIterator[AsyncPostgresSaver]:
     url = psycopg_url(database_url or get_settings().database_url)
-    with PostgresSaver.from_conn_string(url) as saver:
-        saver.setup()
+    async with AsyncPostgresSaver.from_conn_string(url) as saver:
+        await saver.setup()
         yield saver

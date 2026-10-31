@@ -80,3 +80,22 @@ def find_doctors_by_name(session: Session, name: str, limit: int = 5) -> list[Do
 
 def get_patient_by_email(session: Session, email: str) -> Patient | None:
     return session.scalars(select(Patient).where(Patient.email == email)).one_or_none()
+
+
+def get_appointment(session: Session, appointment_id: int) -> Appointment | None:
+    return session.get(Appointment, appointment_id)
+
+
+def list_patient_appointments(
+    session: Session, patient_id: int, after: datetime | None = None
+) -> list[tuple[Appointment, Doctor]]:
+    """A patient's booked appointments (optionally only those starting after `after`)."""
+    stmt = (
+        select(Appointment, Doctor)
+        .join(Doctor, Doctor.id == Appointment.doctor_id)
+        .where(Appointment.patient_id == patient_id, Appointment.status == AppointmentStatus.BOOKED)
+        .order_by(Appointment.start_time)
+    )
+    if after is not None:
+        stmt = stmt.where(Appointment.start_time > after)
+    return [(a, d) for a, d in session.execute(stmt).all()]

@@ -25,6 +25,12 @@ class Proposal(TypedDict):
     start_local: str  # human label in the clinic timezone: what the user confirms
 
 
+class AppointmentOption(TypedDict):
+    id: int
+    doctor_name: str
+    start_local: str
+
+
 class AgentState(TypedDict, total=False):
     messages: Annotated[list[AnyMessage], add_messages]
     # Per-turn values (reset by the guardrail at the start of every turn)
@@ -36,3 +42,5 @@ class AgentState(TypedDict, total=False):
     doctor_options: list[DoctorOption]
     booking_doctor_id: int | None
     proposal: Proposal | None
+    appointment_options: list[AppointmentOption]
+    cancel_proposal: AppointmentOption | None

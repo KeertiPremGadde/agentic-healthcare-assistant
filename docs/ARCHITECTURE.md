@@ -33,7 +33,14 @@ flowchart TD
     SUP -->|medical_question| RAG[medical_rag<br/>Phase 2 hybrid RAG · citations]
     SUP -->|find_doctor| DF[doctor_finder<br/>Specialty enum · DB lookup]
     SUP -->|book| BK[booking<br/>extract doctor/day/time · find a valid free slot]
+    SUP -->|cancel| CX[cancel<br/>own upcoming appointments]
+    SUP -->|nearby_clinics| NB[nearby_clinics<br/>OpenStreetMap · cached · not bookable]
     SUP -->|smalltalk / out_of_scope| RS[respond<br/>fixed replies]
+    CX --> CC{{confirm_cancel<br/>interrupt&#40;&#41;: Cancel it?}}
+    CC -->|yes| CA[cancel_appointment]
+    CC -->|no| OUT
+    CA --> OUT
+    NB --> OUT
     BK -->|proposal| HITL{{confirm<br/>interrupt&#40;&#41;: Book this slot?}}
     BK -->|question / refusal| OUT
     HITL -->|yes| BOOK[book_appointment<br/>re-validate · insert · unique index]
@@ -46,6 +53,9 @@ flowchart TD
     OUT --> END((END))
 ```
 
+Scheduling nodes (booking, cancel, doctor_finder, nearby_clinics) call `ClinicTools`; by default
+that is the MCP clinic server over stdio (`mcp_server/`), which also creates/deletes the optional
+Google Calendar event and queries OpenStreetMap ([ADR 0007](adr/0007-mcp-tools-calendar-and-osm.md)).
 The exact compiled graph is generated into [docs/diagrams/agent_graph.md](diagrams/agent_graph.md)
 by `scripts/export_graph.py`. State (`AgentState`) is persisted by the Postgres checkpointer per
 `thread_id`, so each conversation keeps its memory and a paused confirmation can be answered after a

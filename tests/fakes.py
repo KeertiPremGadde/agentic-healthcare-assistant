@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from medagent.db.models import EMBEDDING_DIM
+from medagent.integrations.calendar import CalendarEvent, event_id_for
 from medagent.rag.answer import AnswerPayload
 from medagent.rag.types import Candidate
 
@@ -105,7 +106,7 @@ class FakeStructuredLLM:
         for output in outputs:
             self.script.setdefault(type(output), []).append(output)
 
-    def invoke(self, schema: type[T], system: str, messages: Sequence[BaseMessage]) -> T:
+    async def ainvoke(self, schema: type[T], system: str, messages: Sequence[BaseMessage]) -> T:
         self.calls.append((schema, system, list(messages)))
         queue = self.script.get(schema)
         if not queue:
@@ -135,3 +136,33 @@ class FakeRetriever:
 def no_database() -> Iterator[Session]:
     raise AssertionError("this test must not touch the database")
     yield  # pragma: no cover
+
+
+class FakeCalendar:
+    """Records calendar calls; can be told to fail, to test the best-effort behaviour."""
+
+    enabled = True
+
+    def __init__(self, fail: bool = False) -> None:
+        self.fail = fail
+        self.added: list[int] = []
+        self.removed: list[int] = []
+
+    def add(self, event: "CalendarEvent") -> str | None:
+        if self.fail:
+            raise ConnectionError("calendar down")
+        self.added.append(event.appointment_id)
+        return event_id_for(event.appointment_id)
+
+    def remove(self, appointment_id: int) -> bool:
+        if self.fail:
+            raise ConnectionError("calendar down")
+        self.removed.append(appointment_id)
+        return True
+
+
+class NoTools:
+    """Tools for graph tests that must not touch scheduling: any call fails the test."""
+
+    def __getattr__(self, name: str) -> object:
+        raise AssertionError(f"unexpected tool call: {name}")

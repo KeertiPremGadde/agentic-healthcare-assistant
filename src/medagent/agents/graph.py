@@ -1,7 +1,9 @@
 """Builds the multi-agent graph.
 
-START -> guardrail -> supervisor -> {medical_rag | doctor_finder | booking | respond}
+START -> guardrail -> supervisor -> {medical_rag | doctor_finder | booking | cancel |
+                                     nearby_clinics | respond}
 booking -> confirm (interrupt) -> book_appointment
+cancel  -> confirm_cancel (interrupt) -> cancel_appointment
 every path ends in output_guard -> END (emergencies skip the supervisor entirely)
 """
 
@@ -15,9 +17,15 @@ from medagent.agents.nodes.booking import (
     make_book_appointment_node,
     make_booking_node,
 )
+from medagent.agents.nodes.cancel import (
+    confirm_cancel_node,
+    make_cancel_appointment_node,
+    make_cancel_node,
+)
 from medagent.agents.nodes.doctor_finder import make_doctor_finder_node
 from medagent.agents.nodes.guardrail import after_guardrail, guardrail_node
 from medagent.agents.nodes.medical_rag import make_medical_rag_node
+from medagent.agents.nodes.nearby import make_nearby_node
 from medagent.agents.nodes.output_guard import output_guard_node
 from medagent.agents.nodes.respond import respond_node
 from medagent.agents.nodes.supervisor import after_supervisor, make_supervisor_node
@@ -35,6 +43,7 @@ def build_graph(
     graph.add_node("supervisor", make_supervisor_node(deps))
     graph.add_node("medical_rag", make_medical_rag_node(deps))
     graph.add_node("doctor_finder", make_doctor_finder_node(deps))
+    graph.add_node("nearby_clinics", make_nearby_node(deps))
     graph.add_node("respond", respond_node)
     # Nodes that route with Command(goto=...) declare where they can go (for the diagram).
     graph.add_node("booking", make_booking_node(deps), destinations=("confirm", "output_guard"))
@@ -44,6 +53,13 @@ def build_graph(
         make_book_appointment_node(deps),
         destinations=("confirm", "output_guard"),
     )
+    graph.add_node(
+        "cancel", make_cancel_node(deps), destinations=("confirm_cancel", "output_guard")
+    )
+    graph.add_node(
+        "confirm_cancel", confirm_cancel_node, destinations=("cancel_appointment", "output_guard")
+    )
+    graph.add_node("cancel_appointment", make_cancel_appointment_node(deps))
     graph.add_node("output_guard", output_guard_node)
 
     graph.add_edge(START, "guardrail")
@@ -51,9 +67,17 @@ def build_graph(
     graph.add_conditional_edges(
         "supervisor",
         after_supervisor,
-        ["medical_rag", "doctor_finder", "booking", "respond", "output_guard"],
+        [
+            "medical_rag",
+            "doctor_finder",
+            "booking",
+            "cancel",
+            "nearby_clinics",
+            "respond",
+            "output_guard",
+        ],
     )
-    for node in ("medical_rag", "doctor_finder", "respond"):
+    for node in ("medical_rag", "doctor_finder", "nearby_clinics", "respond", "cancel_appointment"):
         graph.add_edge(node, "output_guard")
     graph.add_edge("output_guard", END)
 

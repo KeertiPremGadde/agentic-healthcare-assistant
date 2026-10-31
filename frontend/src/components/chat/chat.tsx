@@ -54,6 +54,7 @@ export function Chat() {
           role="log"
           aria-label="Conversation"
           aria-live="polite"
+          aria-busy={chat.busy}
           className="flex flex-1 flex-col gap-3 pb-4"
         >
           {chat.messages.map((message) => (
@@ -83,7 +84,7 @@ export function Chat() {
               {chat.step}
             </p>
           )}
-          <div ref={bottom} />
+          <div ref={bottom} className="scroll-mb-32" />
         </div>
       )}
       {chat.limitNotice && (
@@ -103,9 +104,7 @@ export function Chat() {
         limits={chat.limits}
         disabled={blocked}
         placeholder={
-          chat.pending
-            ? "Answer the question above to continue"
-            : "Ask a health question or book an appointment"
+          chat.pending ? "Answer the question above to continue" : "Ask a health question…"
         }
         onSend={chat.send}
       />

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<health-topics total="5" date-generated="10/31/2026 02:30:35">
+<health-topic title="Diabetes" url="https://medlineplus.gov/diabetes.html" id="100" language="English">
+<also-called>Diabetes mellitus</also-called>
+<also-called>High blood sugar</also-called>
+<full-summary>&lt;p&gt;Diabetes means your blood glucose is too high. Common symptoms are increased thirst, frequent urination and fatigue.&lt;/p&gt;
+&lt;ul&gt;&lt;li&gt;Type 1 diabetes&lt;/li&gt;&lt;li&gt;Type 2 diabetes&lt;/li&gt;&lt;/ul&gt;</full-summary>
+<site url="https://example.org/merck" id="1"><title>Merck Manual</title></site>
+</health-topic>
+<health-topic title="Diabetes" url="https://medlineplus.gov/spanish/diabetes.html" id="101" language="Spanish">
+<full-summary>&lt;p&gt;La diabetes significa que el nivel de glucosa en la sangre es demasiado alto.&lt;/p&gt;</full-summary>
+</health-topic>
+<health-topic title="Adam's Apple" url="https://medlineplus.gov/adamsapple.html" id="102" language="English">
+<full-summary>&lt;p&gt;The Adam's apple is the visible bump of the larynx at the front of the neck.&lt;/p&gt;</full-summary>
+</health-topic>
+<health-topic title="Licensed Encyclopedia Entry" url="https://medlineplus.gov/third.html" id="103" language="English">
+<full-summary>&lt;p&gt;Medical content provided by A.D.A.M. Copyright 2024. All rights reserved.&lt;/p&gt;</full-summary>
+</health-topic>
+<health-topic title="Empty Topic" url="https://medlineplus.gov/empty.html" id="104" language="English">
+<full-summary></full-summary>
+</health-topic>
+</health-topics>

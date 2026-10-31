@@ -79,6 +79,7 @@ redirected to emergency services. Only synthetic patient data is ever stored.
 - [x] Appointment: *partial* unique index on `(doctor_id, start_time) WHERE status='booked'` (cancelled slots can be rebooked), `status` enum + CHECK, timestamps
 - [x] `DoctorSchedule` model (weekday, start, end in clinic timezone, `Europe/Berlin` via settings); all stored times UTC
 - [x] Alembic init + first migration; `scripts/seed.py` (doctors, weekly schedules, synthetic patients)
+- [x] Seed expanded with Faker (`de_DE`, fixed seed): 100 doctors, 19 specialties, cities, languages, varied schedules
 - [x] Port `availability_service` + `validation_service` as pure functions (timezone-aware)
 - [x] Unit tests for slot generation/validation; integration test against Docker Postgres
 - **Done when:** `docker compose up -d && uv run alembic upgrade head && uv run python scripts/seed.py` works and tests pass.
@@ -111,7 +112,25 @@ redirected to emergency services. Only synthetic patient data is ever stored.
 - [ ] Agents load tools through the MCP client adapter (`langchain-mcp-adapters`)
 - [ ] Google Calendar event on booking (port `calendar_helper.py`, service-account or OAuth, secrets outside repo)
 - [ ] Confirmation email (e.g. Resend/SES), optional
-- **Done when:** the MCP server works in MCP Inspector and the graph books through it.
+- [ ] **`find_nearby_clinics` tool (OpenStreetMap Overpass)** – real-world places near a city/coordinates,
+  *kept strictly separate from the bookable demo doctors*:
+  - Distinct tool and result schema (`NearbyClinic`, `bookable: false`, `source: "OpenStreetMap"`); never
+    written to the `doctors` table and never offered to `book_appointment`. The agent must say these are
+    real places it cannot book, while the seeded doctors are fictional demo data.
+  - **Licence:** data is ODbL. Show "© OpenStreetMap contributors" (link to openstreetmap.org/copyright)
+    in tool output and in the UI wherever results appear. Cache only; don't build a persistent
+    derived database.
+  - **Usage policy:** descriptive `User-Agent` with contact, small bbox/`around` queries with a short
+    `[timeout:]`, sequential requests, back off on HTTP 429/504, no bulk scraping. If geocoding is
+    needed, use Nominatim within its policy (max 1 req/s, cache, no autocomplete), or take lat/lon
+    from the UI. Consider a self-hosted/mirror endpoint if usage grows.
+  - **Caching:** Postgres or in-memory TTL cache (~24 h) keyed by rounded coordinates + radius + filter,
+    so repeated questions never hit Overpass; return stale cache on upstream errors.
+  - Tests with a recorded Overpass JSON fixture (no network in CI); a `@pytest.mark.llm`-style marker is
+    not needed because the tool is deterministic.
+  - Only public place data (name, address, website); no personal data from OSM is logged.
+- **Done when:** the MCP server works in MCP Inspector and the graph books through it, and the nearby-clinics
+  tool returns attributed, cached results that are clearly labelled non-bookable.
 
 ## Phase 5 – API
 

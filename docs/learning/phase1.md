@@ -69,10 +69,38 @@ migrations into it (so migrations are tested too), and check: double booking is 
 cancelled slot can be rebooked, CHECK constraints reject bad status/weekday, UTC round-trips, seed
 idempotency, and the DB → services pipeline. CI runs them against a pgvector Postgres service.
 
-### Why is the seed idempotent, and why synthetic data?
+### Why is the seed idempotent?
 Re-running must never duplicate rows or fail (it's run in dev, CI and deploys), so it looks up by
-natural key (doctor name, patient email) and only fills in what's missing. Patients use
-`example.com` emails and fictional phone numbers: no real PII ever enters the repo, logs or traces.
+natural key (doctor name, patient email) and only fills in what's missing, including topping up a
+partially seeded database. Test: seed twice → second run creates 0 rows.
+
+### Why synthetic data instead of real or scraped data?
+- **GDPR / privacy:** health-related and personal data is a special category. With fully synthetic
+  data there is no data subject, no lawful-basis question, no breach risk, and nothing to delete on
+  request. Patients use `example.com` emails and fictional phone numbers; no PII enters the repo,
+  logs or traces. The doctors are random first/last-name combinations, so any resemblance to real
+  people is coincidental; I never scraped directories (also avoids licence/ToS problems).
+- **Reproducibility:** a fixed seed means every laptop, CI job and deployment gets the identical 100
+  doctors, so tests, evals and demos are stable and a failing test can be reproduced anywhere.
+- **Realistic scale:** 15 doctors made routing trivial. 100 doctors over 19 specialties, 10 cities
+  and mixed languages/schedules exercise filtering, ranking and slot logic the way production would.
+
+### How does the Faker seed stay deterministic *and* idempotent?
+`generate_doctor_specs(seed, total)` is a pure function: `Faker("de_DE")` seeded per instance
+(`seed_instance`) plus a seeded `random.Random` for the choices (cities, languages, schedule
+pattern). It always generates the *whole* list in the same order, regardless of what is already in
+the database; `seed()` then inserts only the specs whose name is missing. Same inputs → same
+doctors; re-runs → no changes. Names are kept unique inside the generator, since the DB is matched
+by name. The 15 original doctors are hard-coded and come first, so their specialties are always there.
+Because the seed runs in deployed environments too, Faker is a runtime dependency, not dev-only.
+
+### How did you model varied working hours?
+A pool of schedule patterns (full day with lunch 12–13, shifted lunch, long lunch, early shift, late
+shift, 4-day week, part-time mornings/afternoons, a long no-break day) is assigned per doctor. Each
+becomes `DoctorSchedule` rows (one per weekday per block), so a lunch break is just two blocks.
+Languages and city live on `Doctor` (a Postgres `ARRAY` column and an indexed string), added in a
+second migration with server defaults so existing rows migrated cleanly. Language filtering uses the
+array `@>` operator (`Doctor.languages.contains([...])`).
 
 ### Why enable the pgvector extension in this phase?
 The first migration is the schema's single source of truth, and Phase 2 (RAG) needs `vector`.

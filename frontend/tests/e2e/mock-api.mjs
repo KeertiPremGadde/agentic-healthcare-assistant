@@ -18,8 +18,38 @@ const HARMFUL =
     "I can't help with that, but I'm concerned about you and I'm glad you reached out.\n\nIf you're thinking about ending your life, or you might hurt someone, please talk to someone now:\n- Germany: TelefonSeelsorge 0800 111 0 111 (free, 24/7)\n- Emergency: 112 (EU) or 911 (US), or 988 in the US\n- Poison control, if someone may have swallowed something harmful";
 const MIGRAINE =
     "Migraines are recurring headaches, often with throbbing pain on one side, nausea and sensitivity to light and sound. Triggers vary: stress, lack of sleep, skipped meals, hormonal changes and some foods are common ones.\n\nSources:\n- MedlinePlus: Migraine <https://medlineplus.gov/migraine.html>\n- MedlinePlus: Headache <https://medlineplus.gov/headache.html>\n\nContent: MedlinePlus, National Library of Medicine (public domain)\n\nThis is general health information from the sources listed above, not medical advice or a diagnosis. Please consult a qualified healthcare professional. In an emergency, call your local emergency number (112 in the EU, 911 in the US).";
-const DOCTORS =
-    'For a skin rash a dermatologist is the right specialist. Here are some options:\n\n1. Dr. Anna Schmidt, Dermatology, Berlin (German, English)\n2. Dr. Jonas Weber, Dermatology, München (German, English)\n\nSay "book number 1" to pick a time.';
+const DOCTOR_LIST = [
+    {
+        id: 11,
+        name: "Dr. Anna Schmidt",
+        specialty: "Dermatologist",
+        city: "Berlin",
+        languages: ["German", "English"],
+    },
+    {
+        id: 12,
+        name: "Dr. Jonas Weber",
+        specialty: "Dermatologist",
+        city: "München",
+        languages: ["German", "English", "French"],
+    },
+    {
+        id: 13,
+        name: "Dr. Mira Okafor",
+        specialty: "Dermatologist",
+        city: "Leipzig",
+        languages: ["German", "English"],
+    },
+];
+// Same layout as the real doctor_finder node and output guard.
+const DOCTORS = [
+    "Based on what you describe, a Dermatologist is the right specialist to see.",
+    "Doctors you can book:",
+    ...DOCTOR_LIST.map((d, i) => `${i + 1}. ${d.name} - ${d.city} (${d.languages.join(", ")})`),
+    'Tell me which doctor and when, for example: "Book number 1 next Tuesday afternoon".',
+    "",
+    "This suggestion is based on what you described and is not a diagnosis. If symptoms are severe or getting worse, seek urgent care.",
+].join("\n");
 const HOSPITALS =
     "Hospitals near Berlin (from OpenStreetMap, not bookable here):\n- Charité Campus Mitte\n- Vivantes Klinikum im Friedrichshain";
 
@@ -121,7 +151,7 @@ async function chat(req, res) {
         event(res, "step", { node: "doctor_finder", label: "Looking for suitable doctors…" });
         await sleep(500);
         remember(id, "assistant", DOCTORS);
-        return finish(res, id, DOCTORS);
+        return finish(res, id, DOCTORS, "normal", { doctors: DOCTOR_LIST });
     }
     if (text.includes("migraine")) {
         event(res, "step", { node: "medical_rag", label: "Searching the knowledge base…" });
@@ -171,7 +201,14 @@ async function resume(req, res, id) {
     state.appointments.push(appointment);
     const code = `#A-${String(appointment.id).padStart(4, "0")}`;
     const text = `Booked: Dr. Anna Schmidt, Mon 4 Mar 2030, 09:00 (Europe/Berlin). Confirmation ${code}.`;
-    return finish(res, id, text, "booked", { appointment_id: appointment.id });
+    return finish(res, id, text, "booked", {
+        appointment_id: appointment.id,
+        booking: {
+            appointment_id: appointment.id,
+            doctor: appointment.doctor_name,
+            start: "Mon 4 Mar 2030, 09:00",
+        },
+    });
 }
 
 const server = createServer(async (req, res) => {

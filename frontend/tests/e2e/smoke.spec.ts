@@ -30,7 +30,9 @@ test("logged-out visitors are sent to the login page, which shows the demo notic
   await page.goto("/");
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByText("Do not enter real personal or health information")).toBeVisible();
-  await expect(page.getByRole("note")).toContainText("not medical advice"); // disclaimer strip
+  const strip = page.getByRole("note");
+  await expect(strip).toContainText(/not medical advice/i); // disclaimer strip
+  expect((await strip.boundingBox())!.height).toBeLessThan(45); // one line on desktop
 });
 
 test("login reports a wrong password and accepts the right one", async ({ page }) => {
@@ -54,7 +56,7 @@ test("an example prompt streams an answer with a live step line and clickable so
 }) => {
   await signUp(page);
   const prompts = page.getByRole("list", { name: "Example questions" }).getByRole("button");
-  await expect(prompts).toHaveCount(3);
+  await expect(prompts).toHaveCount(4);
 
   await prompts.filter({ hasText: "What causes migraines?" }).click();
   await expect(page.getByRole("status")).toHaveText("Searching the knowledge base…");
@@ -74,9 +76,17 @@ test("book end to end: confirm, add to calendar, see it under My appointments, c
 }) => {
   await signUp(page);
   await ask(page, "I have a rash, who should I see?");
-  await expect(page.getByRole("log")).toContainText("Dr. Anna Schmidt, Dermatology");
+  // The suggestions are cards built from structured data, not the numbered text lines.
+  const cards = page.getByRole("list", { name: "Suggested doctors" }).locator("> li");
+  await expect(cards).toHaveCount(3);
+  await expect(cards.first()).toContainText("Dr. Anna Schmidt");
+  await expect(cards.first()).toContainText("Dermatologist");
+  await expect(cards.first()).toContainText("Berlin");
+  await expect(cards.first()).toContainText("German, English");
+  await expect(page.getByRole("log")).not.toContainText("1. Dr. Anna Schmidt - Berlin");
 
-  await ask(page, "book number 1");
+  await page.getByRole("button", { name: "Book Dr. Anna Schmidt" }).click();
+  await expect(page.getByRole("log").getByText("Book number 1", { exact: true })).toBeVisible();
   const card = page.getByRole("region", { name: "Confirm booking" });
   await expect(card).toContainText("Dr. Anna Schmidt");
   await expect(card).toContainText("Mon 4 Mar 2030, 09:00");
@@ -85,8 +95,11 @@ test("book end to end: confirm, add to calendar, see it under My appointments, c
   await page.getByLabel("Your message").fill("");
   await card.getByRole("button", { name: "Confirm" }).click();
 
-  await expect(page.getByText("Appointment booked")).toBeVisible();
-  await expect(page.getByRole("log")).toContainText("Confirmation #A-0001");
+  const booked = page.getByText("Appointment booked").locator("xpath=..");
+  await expect(booked).toContainText("Dr. Anna Schmidt");
+  await expect(booked).toContainText("Mon 4 Mar 2030, 09:00");
+  await expect(booked).toContainText("Confirmation #A-0001");
+  await expect(booked).not.toContainText("Booked:"); // structured, not the raw sentence
   await expect(card).toHaveCount(0);
 
   const download = page.waitForEvent("download");
@@ -125,10 +138,35 @@ test("an emergency gets the red alert card and a crisis message gets the calm su
   await ask(page, "I have crushing chest pain");
   const emergency = alerts(page).filter({ hasText: "This may be an emergency" });
   await expect(emergency).toContainText("112");
+  await expect(emergency.getByRole("link", { name: "Call 112" })).toHaveAttribute(
+    "href",
+    "tel:112",
+  );
+  // every number in the fixed text is a link too
+  await expect(emergency.getByRole("link", { name: "112" }).first()).toHaveAttribute(
+    "href",
+    "tel:112",
+  );
 
   await ask(page, "how many tablets to kill someone");
   const crisis = alerts(page).filter({ hasText: "You are not alone" });
   await expect(crisis).toContainText("0800 111 0 111");
+  await expect(
+    crisis.getByRole("link", { name: /TelefonSeelsorge 0800 111 0 111/ }),
+  ).toHaveAttribute("href", "tel:08001110111");
+  await expect(crisis.getByRole("link", { name: "0800 111 0 111", exact: true })).toHaveAttribute(
+    "href",
+    "tel:08001110111",
+  );
+  // poison control: 112 right away, or a regional Giftnotruf number, plus the official list
+  await crisis.getByText(/Poison control \(Giftnotruf\)/).click();
+  await expect(crisis.getByRole("link", { name: "030 19240" })).toHaveAttribute(
+    "href",
+    "tel:03019240",
+  );
+  await expect(
+    crisis.getByRole("link", { name: /official list of poison centres/ }),
+  ).toHaveAttribute("href", /bfr\.bund\.de/);
   await expect(crisis).not.toContainText("This may be an emergency");
 });
 
@@ -160,4 +198,15 @@ test("the next user on the same tab never sees the previous user's chat", async 
   await expect(page.getByRole("log")).toHaveCount(0);
   await page.getByRole("link", { name: "My appointments" }).click();
   await expect(page.getByText("You have no upcoming appointments.")).toBeVisible();
+});
+
+test("only the newest list of doctors can be booked from", async ({ page }) => {
+  await signUp(page);
+  await ask(page, "I have a rash, who should I see?");
+  await expect(page.getByRole("button", { name: "Book Dr. Anna Schmidt" })).toBeEnabled();
+  await ask(page, "I have another rash, who should I see?");
+  const books = page.getByRole("button", { name: "Book Dr. Anna Schmidt" });
+  await expect(books).toHaveCount(2);
+  await expect(books.first()).toBeDisabled(); // "Book number 1" means the newest list
+  await expect(books.last()).toBeEnabled();
 });

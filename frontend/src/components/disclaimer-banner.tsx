@@ -7,8 +7,8 @@ export function DisclaimerBanner() {
       <p className="mx-auto flex max-w-3xl items-start gap-2 px-4 py-2 text-xs leading-relaxed sm:text-sm">
         <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
         <span>
-          <strong>Demo with synthetic data.</strong> General information only, not medical advice.
-          In an emergency call <strong>112</strong> (EU) or <strong>911</strong> (US).
+          <strong>Demo with synthetic data.</strong> Not medical advice. Emergency:{" "}
+          <strong>112</strong> (EU) · <strong>911</strong> (US)
         </span>
       </p>
     </div>

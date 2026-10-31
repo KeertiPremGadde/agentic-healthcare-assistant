@@ -2,7 +2,9 @@ import { readSse } from "./sse";
 import type {
   Appointment,
   ChatEvent,
+  Booking,
   Confirmation,
+  Doctor,
   Limits,
   MessageKind,
   Usage,
@@ -122,6 +124,8 @@ export function decodeEvent(event: string, raw: string): ChatEvent | null {
         text: String(data.text),
         kind: (data.kind as MessageKind | undefined) ?? "normal",
         appointmentId: typeof data.appointment_id === "number" ? data.appointment_id : undefined,
+        booking: (data.booking as Booking | undefined) ?? undefined,
+        doctors: Array.isArray(data.doctors) ? (data.doctors as Doctor[]) : undefined,
       };
     case "done":
       return {

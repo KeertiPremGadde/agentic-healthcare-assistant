@@ -4,6 +4,7 @@ export const EXAMPLE_PROMPTS = [
   "I have a rash, who should I see?",
   "What causes migraines?",
   "Show hospitals near Berlin",
+  "Book a cardiologist next week",
 ];
 
 export function EmptyState({

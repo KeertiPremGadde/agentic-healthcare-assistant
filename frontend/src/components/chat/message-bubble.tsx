@@ -1,23 +1,23 @@
 "use client";
 
-import {
-  CalendarPlus,
-  CircleCheck,
-  HeartHandshake,
-  Info,
-  ShieldAlert,
-  TriangleAlert,
-} from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import * as api from "@/lib/api";
-import { useAuth } from "@/lib/auth";
+import { Info, TriangleAlert } from "lucide-react";
 import { parseReply } from "@/lib/citations";
-import { downloadIcs } from "@/lib/ics";
 import type { ChatMessage } from "@/lib/use-chat";
-import { cn } from "@/lib/utils";
+import { BookedCard } from "./booked-card";
+import { DoctorCards } from "./doctor-cards";
+import { Notice } from "./notice";
+import { CrisisCard, EmergencyCard } from "./safety-cards";
 
-export function MessageBubble({ message }: { message: ChatMessage }) {
+export function MessageBubble({
+  message,
+  canBook,
+  onBook,
+}: {
+  message: ChatMessage;
+  /** true only for the newest doctor suggestion: "Book number N" refers to the latest list */
+  canBook: boolean;
+  onBook: (number: number) => void;
+}) {
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
@@ -27,22 +27,47 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
       </div>
     );
   }
-  if (message.isError)
+  if (message.isError) {
     return (
-      <Notice tone="danger" icon={TriangleAlert} title="Something went wrong" text={message.text} />
+      <div className="flex">
+        <Notice tone="danger" icon={TriangleAlert} title="Something went wrong">
+          <p className="mt-1.5 leading-relaxed">{message.text}</p>
+        </Notice>
+      </div>
     );
+  }
   if (message.kind === "emergency") return <EmergencyCard text={message.text} />;
   if (message.kind === "harmful_intent") return <CrisisCard text={message.text} />;
-  if (message.kind === "booked") return <BookedCard message={message} />;
-  return <AssistantBubble message={message} />;
+  if (message.kind === "booked")
+    return <BookedCard booking={message.booking} text={message.text} />;
+  return <AssistantBubble message={message} canBook={canBook} onBook={onBook} />;
 }
 
-function AssistantBubble({ message }: { message: ChatMessage }) {
+/** Drop the text lines that the doctor cards show instead ("1. Dr. X - Berlin (...)"). */
+function withoutDoctorLines(body: string, doctors: NonNullable<ChatMessage["doctors"]>): string {
+  const listed = (line: string) => doctors.some((d, i) => line.startsWith(`${i + 1}. ${d.name}`));
+  return body
+    .split("\n")
+    .filter((line) => !listed(line.trim()))
+    .join("\n");
+}
+
+function AssistantBubble({
+  message,
+  canBook,
+  onBook,
+}: {
+  message: ChatMessage;
+  canBook: boolean;
+  onBook: (number: number) => void;
+}) {
   const { body, sources, attributions, disclaimer } = parseReply(message.text);
+  const doctors = message.doctors;
+  const shown = doctors?.length ? withoutDoctorLines(body, doctors) : body;
   return (
-    <div className="flex">
+    <div className="flex flex-col items-start">
       <div className="bg-card max-w-[92%] rounded-2xl rounded-bl-md border px-4 py-3 text-sm leading-relaxed shadow-xs">
-        <p className="whitespace-pre-wrap">{body || (message.streaming ? "…" : "")}</p>
+        <p className="whitespace-pre-wrap">{shown || (message.streaming ? "…" : "")}</p>
         {sources.length > 0 && (
           <div className="mt-3 border-t pt-2.5">
             <p className="text-muted-foreground mb-1 text-xs font-medium">Sources</p>
@@ -81,99 +106,11 @@ function AssistantBubble({ message }: { message: ChatMessage }) {
           </p>
         )}
       </div>
-    </div>
-  );
-}
-
-function Notice({
-  tone,
-  icon: Icon,
-  title,
-  text,
-  children,
-}: {
-  tone: "danger" | "care" | "success";
-  icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
-  title: string;
-  text: string;
-  children?: React.ReactNode;
-}) {
-  const styles = {
-    danger: "border-danger-border bg-danger text-danger-foreground",
-    care: "border-care-border bg-care text-care-foreground",
-    success: "border-success-border bg-success text-success-foreground",
-  }[tone];
-  return (
-    <div className={cn("max-w-[92%] rounded-2xl rounded-bl-md border px-4 py-3 text-sm", styles)}>
-      <p className="flex items-center gap-2 font-semibold">
-        <Icon className="size-5 shrink-0" aria-hidden />
-        {title}
-      </p>
-      <p className="mt-1.5 leading-relaxed whitespace-pre-wrap">{text}</p>
-      {children}
-    </div>
-  );
-}
-
-/** Acute emergency: the one place red is used. role=alert so screen readers announce it. */
-function EmergencyCard({ text }: { text: string }) {
-  return (
-    <div role="alert" className="flex">
-      <Notice tone="danger" icon={ShieldAlert} title="This may be an emergency" text={text} />
-    </div>
-  );
-}
-
-/** Self-harm or harm to others: calm and supportive, not an alarm. Shows the fixed helplines. */
-function CrisisCard({ text }: { text: string }) {
-  return (
-    <div role="alert" className="flex">
-      <Notice tone="care" icon={HeartHandshake} title="You are not alone" text={text} />
-    </div>
-  );
-}
-
-function BookedCard({ message }: { message: ChatMessage }) {
-  const { token } = useAuth();
-  const [state, setState] = useState<"idle" | "loading" | "error">("idle");
-
-  async function addToCalendar() {
-    if (!token || message.appointmentId === undefined) return;
-    setState("loading");
-    try {
-      // The file is built in the browser from the appointment record (doctor and time only).
-      const all = await api.getAppointments(token);
-      const found = all.find((a) => a.id === message.appointmentId);
-      if (!found) throw new Error("not found");
-      downloadIcs({ id: found.id, doctorName: found.doctor_name, start: found.start });
-      setState("idle");
-    } catch {
-      setState("error");
-    }
-  }
-
-  return (
-    <div className="flex">
-      <Notice tone="success" icon={CircleCheck} title="Appointment booked" text={message.text}>
-        {message.appointmentId !== undefined && (
-          <div className="mt-3">
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={addToCalendar}
-              disabled={state === "loading"}
-            >
-              <CalendarPlus aria-hidden />
-              Add to calendar
-            </Button>
-            {state === "error" && (
-              <p role="status" className="mt-2 text-xs">
-                Couldn&apos;t create the calendar file. Please try again.
-              </p>
-            )}
-          </div>
-        )}
-      </Notice>
+      {doctors && doctors.length > 0 && (
+        <div className="w-full max-w-[92%]">
+          <DoctorCards doctors={doctors} enabled={canBook} onBook={onBook} />
+        </div>
+      )}
     </div>
   );
 }

@@ -35,6 +35,8 @@ export function Chat() {
     return <p className="text-muted-foreground py-10 text-center text-sm">Loading…</p>;
 
   const empty = chat.messages.length === 0 && !chat.pending;
+  // "Book number N" refers to the newest list of suggested doctors, so older cards stay inert.
+  const latestDoctors = chat.messages.findLast((m) => m.doctors?.length)?.id;
   const blocked = chat.busy || chat.pending !== null;
 
   return (
@@ -58,7 +60,12 @@ export function Chat() {
           className="flex flex-1 flex-col gap-3 pb-4"
         >
           {chat.messages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
+            <MessageBubble
+              key={message.id}
+              message={message}
+              canBook={!blocked && message.id === latestDoctors}
+              onBook={(number) => chat.send(`Book number ${number}`)}
+            />
           ))}
           {chat.pending && (
             <ConfirmationCard

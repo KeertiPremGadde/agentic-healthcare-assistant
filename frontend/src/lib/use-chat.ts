@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as api from "./api";
 import { useAuth } from "./auth";
 import { CONVERSATION_KEY, readSession, writeSession } from "./session-storage";
-import type { ChatEvent, Confirmation, Limits, MessageKind } from "./types";
+import type { Booking, ChatEvent, Confirmation, Doctor, Limits, MessageKind } from "./types";
 
 export interface ChatMessage {
   id: number;
@@ -12,6 +12,8 @@ export interface ChatMessage {
   text: string;
   kind: MessageKind;
   appointmentId?: number;
+  booking?: Booking;
+  doctors?: Doctor[];
   streaming?: boolean;
   isError?: boolean;
 }
@@ -123,6 +125,8 @@ export function useChat() {
                   text: event.text,
                   kind: event.kind,
                   appointmentId: event.appointmentId,
+                  booking: event.booking,
+                  doctors: event.doctors,
                 });
               } else {
                 // the final text replaces the replayed chunks and carries how to present it
@@ -130,6 +134,8 @@ export function useChat() {
                   text: event.text,
                   kind: event.kind,
                   appointmentId: event.appointmentId,
+                  booking: event.booking,
+                  doctors: event.doctors,
                 });
               }
               break;

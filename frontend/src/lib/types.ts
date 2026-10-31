@@ -9,6 +9,21 @@ export interface Confirmation {
   question: string;
 }
 
+export interface Doctor {
+  id: number;
+  name: string;
+  specialty: string;
+  city: string;
+  languages: string[];
+}
+
+/** Details of the appointment the turn just booked (the time as shown in the clinic's timezone). */
+export interface Booking {
+  appointment_id: number;
+  doctor: string;
+  start: string;
+}
+
 export interface Usage {
   input_tokens: number;
   output_tokens: number;
@@ -40,6 +55,13 @@ export type ChatEvent =
   | { type: "step"; node: string; label: string }
   | { type: "token"; text: string }
   | { type: "confirmation"; confirmation: Confirmation }
-  | { type: "message"; text: string; kind: MessageKind; appointmentId?: number }
+  | {
+      type: "message";
+      text: string;
+      kind: MessageKind;
+      appointmentId?: number;
+      booking?: Booking;
+      doctors?: Doctor[];
+    }
   | { type: "done"; conversationId: string; pending: boolean; usage: Usage }
   | { type: "error"; code: string; message: string };

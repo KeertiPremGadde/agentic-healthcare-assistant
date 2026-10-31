@@ -37,7 +37,23 @@ ERROR_TEXT = {
 YES = frozenset({"yes", "y", "ja", "j", "confirm"})  # explicit tokens only, not free-text parsing
 
 
-def error_text(code: str | None, doctor: str) -> str:
+def day_label(day: date) -> str:
+    return f"{day:%a} {day.day} {day:%b %Y}"
+
+
+def closed_text(doctor: str, day: date | None, holiday: str | None) -> str:
+    """ "Dr. X's practice is closed on Fri 31 Oct 2025 (Reformation Day)." (no trailing space)"""
+    on = f" on {day_label(day)}" if day else ""
+    name = f" ({holiday})" if holiday else ""
+    return f"{doctor}'s practice is closed{on}{name}."
+
+
+def error_text(
+    code: str | None, doctor: str, day: date | None = None, detail: str | None = None
+) -> str:
+    """User-facing reason for a booking error code (`detail` = the holiday's name, if any)."""
+    if code == "public_holiday":
+        return closed_text(doctor, day, detail)
     return ERROR_TEXT.get(code or "", "That time can't be booked.").format(doctor=doctor)
 
 
@@ -58,11 +74,20 @@ def is_yes(answer: object) -> bool:
 
 
 def _why_not_that_day(
-    doctor: str, day: date, time_of_day: str | None, works_that_weekday: bool
+    doctor: str,
+    day: date,
+    time_of_day: str | None,
+    works_that_weekday: bool,
+    holiday: str | None = None,
 ) -> str:
-    """Why the requested day can't be booked, when we are offering a different day instead."""
+    """Why the requested day can't be booked, when we are offering a different day instead.
+
+    In order: no working hours that weekday (a day off), a public holiday (the practice is
+    closed), otherwise the day simply has no matching free slot."""
     if not works_that_weekday:
-        return f"{doctor} doesn't work on {day:%A}s. "  # a day off, not a full diary
+        return f"{doctor} doesn't work on {day:%A}s. "
+    if holiday:
+        return closed_text(doctor, day, holiday) + " "
     when = f"{time_of_day} " if time_of_day else ""
     return f"{doctor} has no free {when}slot on that day. "
 
@@ -161,7 +186,7 @@ def make_booking_node(deps: AgentDeps) -> Node:
                 if check.ok:
                     slot = wanted.astimezone(UTC)
                 else:
-                    note = error_text(check.error, doctor.name) + " "
+                    note = error_text(check.error, doctor.name, day, check.detail) + " "
         if slot is None:
             found = await deps.tools.check_availability(
                 doctor.id, day, days=SEARCH_DAYS, time_of_day=request.time_of_day, limit=1
@@ -169,7 +194,7 @@ def make_booking_node(deps: AgentDeps) -> Node:
             slot = found.slots[0] if found.slots else None
             if slot is not None and slot.astimezone(deps.tz).date() != day and not note:
                 note = _why_not_that_day(
-                    doctor.name, day, request.time_of_day, found.works_on_from_day
+                    doctor.name, day, request.time_of_day, found.works_on_from_day, found.holiday
                 )
         if slot is None:
             text = (
@@ -258,7 +283,9 @@ def make_book_appointment_node(deps: AgentDeps) -> ConfigNode:
             log.warning("node_failed", node="book_appointment", error=str(exc))
             return Command(goto="output_guard", update={**done, "draft": APOLOGY})
 
-        message = error_text(result.error, proposal["doctor_name"])
+        message = error_text(
+            result.error, proposal["doctor_name"], start.astimezone(deps.tz).date(), result.detail
+        )
         if not found.slots:
             text = f"{message} I couldn't find another free slot soon. Would another doctor work?"
             return Command(goto="output_guard", update={**done, "draft": text})

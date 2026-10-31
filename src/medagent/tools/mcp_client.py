@@ -56,6 +56,7 @@ def server_env(settings: Settings) -> dict[str, str]:
         "CLINIC_TIMEZONE": settings.clinic_timezone,
         "SLOT_MINUTES": str(settings.slot_minutes),
         "OVERPASS_URL": settings.overpass_url,
+        "HOLIDAY_LANGUAGE": settings.holiday_language,
     }
     if settings.google_service_account_file:
         env["GOOGLE_SERVICE_ACCOUNT_FILE"] = settings.google_service_account_file

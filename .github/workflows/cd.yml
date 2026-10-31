@@ -1,0 +1,34 @@
+# Deploys the API to AWS on a version tag. Completed in Phase 8 (see docs/PLAN.md).
+# Uses GitHub OIDC -> IAM role, so no AWS keys are stored in GitHub.
+name: CD
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    if: vars.AWS_DEPLOY_ENABLED == 'true'   # set this repo variable once Phase 8 infra exists
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build and push image
+        env:
+          IMAGE: ${{ steps.ecr.outputs.registry }}/medagent-api:${{ github.ref_name }}
+        run: |
+          docker build -f infra/docker/api.Dockerfile -t "$IMAGE" .
+          docker push "$IMAGE"
+      # TODO(Phase 8): render ECS task definition with the new image and deploy
+      #   aws-actions/amazon-ecs-render-task-definition + amazon-ecs-deploy-task-definition

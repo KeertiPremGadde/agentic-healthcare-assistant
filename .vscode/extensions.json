@@ -1,0 +1,13 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "charliermarsh.ruff",
+    "ms-python.mypy-type-checker",
+    "ms-azuretools.vscode-docker",
+    "bierner.markdown-mermaid",
+    "tamasfe.even-better-toml",
+    "github.vscode-github-actions",
+    "hashicorp.terraform",
+    "editorconfig.editorconfig"
+  ]
+}

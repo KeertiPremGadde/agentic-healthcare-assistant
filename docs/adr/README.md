@@ -13,3 +13,4 @@ One file per significant decision: `NNNN-short-title.md` with Context, Decision,
 | [0007](0007-mcp-tools-calendar-and-osm.md) | Clinic tools behind MCP, async graph, optional calendar, OpenStreetMap lookups |
 | [0008](0008-api-auth-streaming-and-demo-protection.md) | API: JWT auth, SSE streaming, per-user isolation, demo cost protection |
 | [0009](0009-harmful-intent-guardrail-and-dose-guard.md) | Harmful-intent guardrail, router flag and dose guard |
+| [0010](0010-public-holidays-per-city.md) | Public holidays per doctor's city |

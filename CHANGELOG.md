@@ -5,6 +5,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- Public holidays: doctors are not bookable on the German public holidays of their own city
+  (31 Oct closes Leipzig but not Berlin; München also observes Assumption Day, Nürnberg does not).
+  Uses the `holidays` library through a static city table with a completeness test; pure
+  availability and validation services take an optional `holiday_on` lookup; new booking error
+  `public_holiday`; the tools report `holiday` and `detail`; replies say "Dr. X's practice is closed
+  on <date> (<holiday>)" and offer the next free slot. `HOLIDAY_LANGUAGE` (`en_US` | `de`).
+- ADR 0010, `docs/learning/public-holidays.md`; `.env.example` now documents `CLINIC_TIMEZONE`,
+  `SLOT_MINUTES` and `HOLIDAY_LANGUAGE` (the first two were missing).
+
+## [0.5.1] - 2026-10-31
+
+### Added
 - Deterministic `harmful_intent` guardrail (English + German) that runs before any LLM call,
   whatever the question form: lethal doses, how to kill/poison/harm someone, "enough to die",
   methods of suicide. Fixed compassionate reply with no information and crisis resources

@@ -15,6 +15,9 @@ from medagent.agents.state import AgentState
 from medagent.guardrails.disclaimer import DISCLAIMER
 from medagent.guardrails.emergency import SAFETY_NOTICE
 from medagent.rag.answer import NO_ANSWER
+from medagent.tools.models import NearbyClinics
+
+OSM_ATTRIBUTION = NearbyClinics.model_fields["attribution"].default
 
 DOCTOR_NOTE = (
     "This suggestion is based on what you described and is not a diagnosis. If symptoms are "
@@ -33,6 +36,8 @@ def output_guard_node(state: AgentState) -> dict[str, Any]:
             draft = f"{draft}\n\n{DISCLAIMER}"
     elif kind == "doctors":
         draft = f"{draft}\n\n{DOCTOR_NOTE}"
+    elif kind == "nearby" and OSM_ATTRIBUTION not in draft:
+        draft = f"{draft}\n\n{OSM_ATTRIBUTION}"  # ODbL: attribution wherever the data appears
 
     if state.get("safety_notice") and kind != EMERGENCY:
         draft = f"{SAFETY_NOTICE}\n\n{draft}"

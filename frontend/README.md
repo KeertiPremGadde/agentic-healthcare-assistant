@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MedAgent frontend
 
-## Getting Started
+Next.js (App Router) + TypeScript + Tailwind + shadcn/ui. A chat UI over the MedAgent API with live
+agent steps, source citations, a booking confirmation card, safety cards, "My appointments" and an
+"Add to calendar" (.ics) download. Decisions: [ADR 0011](../docs/adr/0011-frontend.md).
 
-First, run the development server:
+## Run it
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```powershell
+# 1. the API (from the repo root; needs the database and .env, see docs/SETUP.md)
+docker compose up -d
+uv run python scripts/serve.py          # http://localhost:8000
+
+# 2. the frontend
+cd frontend
+npm ci
+npm run dev                             # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`NEXT_PUBLIC_API_URL` (default `http://localhost:8000`) is the API address, baked in at build time.
+The API must allow the frontend's origin: `API_CORS_ORIGINS=http://localhost:3000` (the default).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command                                       | What it does                                                                                  |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `npm run lint` / `typecheck` / `format:check` | ESLint, `tsc`, Prettier                                                                       |
+| `npm test`                                    | Vitest: SSE parser, event decoding, citation parser, `.ics` builder                           |
+| `npm run e2e`                                 | Playwright smoke test against a mock API (`tests/e2e/mock-api.mjs`): no database, key or cost |
+| `npm run screenshots`                         | Regenerates `docs/screenshots/` (production build, desktop and mobile, light and dark)        |
 
-## Learn More
+First time only: `npx playwright install chromium`.
 
-To learn more about Next.js, take a look at the following resources:
+## Layout
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/app/                 routes: / (chat), /login, /appointments
+src/components/chat/     message bubbles, confirmation card, composer, empty state
+src/lib/sse.ts           incremental Server-Sent Events parser
+src/lib/api.ts           typed API client and event decoding
+src/lib/use-chat.ts      the chat state machine
+src/lib/ics.ts           RFC 5545 calendar file
+tests/                   unit (Vitest) and e2e (Playwright)
+```

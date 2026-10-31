@@ -4,6 +4,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 
 ## [Unreleased]
 
+### Added
+- Phase 6 frontend (`frontend/`): Next.js App Router, TypeScript, Tailwind, shadcn/ui. Streaming chat
+  with live agent steps and source citations, booking and cancel confirmation card (Confirm / Change
+  time through the resume endpoint), emergency (red) and crisis-support (calm violet) cards, login
+  and registration with the demo notice, "My appointments" with cancel, "Add to calendar" (.ics)
+  download, disclaimer banner, example prompts, light and dark themes, mobile layout, keyboard and
+  screen-reader support. Token in memory plus `sessionStorage`; one user per tab is enforced.
+- The `message` event and `ChatResponse` carry `kind` (`normal` | `booked` | `emergency` |
+  `harmful_intent`) and `appointment_id`, so clients don't parse text to decide how to present a reply.
+- Tests: Vitest (SSE parser, event decoding, citations, `.ics`) and a Playwright smoke test against a
+  mock API; a `frontend` CI job; an npm entry in `dependabot.yml`; `npm run screenshots` and
+  `docs/screenshots/`.
+- ADR 0011, `docs/learning/phase6.md`.
+
 ## [0.5.2] - 2026-10-31
 
 ### Added

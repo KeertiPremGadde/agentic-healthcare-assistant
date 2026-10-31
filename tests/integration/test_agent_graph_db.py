@@ -502,3 +502,39 @@ async def test_graph_books_and_cancels_through_the_mcp_server_over_stdio(
         assert cancelled.reply.startswith("Cancelled:")
     session.expire_all()
     assert session.scalars(select(Appointment)).one().status is AppointmentStatus.CANCELLED
+
+
+# -- the reason given for offering a different day ---------------------------------------------
+async def test_a_day_off_is_explained_as_a_day_off_not_a_full_diary(
+    graph: AgentGraph, llm: FakeStructuredLLM, patient_id: int
+) -> None:
+    """Regression: "tomorrow morning" on a Saturday is Sunday. The doctor doesn't work Sundays,
+    so the reply must say that, not "no free morning slot on that day"."""
+    thread = _thread()
+    await _find_cardiologist(graph, llm, thread, patient_id)
+    sunday = "2026-11-08"
+    request = BookingRequest(doctor_option=1, date=sunday, time_of_day="morning")
+    result = await _ask_to_book(graph, llm, thread, patient_id, request)
+    assert result.pending is not None
+    assert result.pending["question"] == (
+        "Dr. Michael Johnson doesn't work on Sundays. "
+        "Shall I book Mon 9 Nov 2026, 08:00 with Dr. Michael Johnson?"
+    )
+    assert "no free" not in result.pending["question"]
+
+
+async def test_a_working_day_without_a_matching_slot_keeps_the_no_free_slot_reason(
+    graph: AgentGraph, llm: FakeStructuredLLM, patient_id: int
+) -> None:
+    """Dr. Wilson works Tuesday afternoons only: she does work that day, there is just no
+    morning slot, so "no free morning slot" is the right reason."""
+    thread = _thread()
+    await _find_cardiologist(graph, llm, thread, patient_id)
+    request = BookingRequest(doctor_option=2, date=TOMORROW, time_of_day="morning")  # a Tuesday
+    result = await _ask_to_book(graph, llm, thread, patient_id, request)
+    assert result.pending is not None
+    assert result.pending["question"] == (
+        "Dr. Sarah Wilson has no free morning slot on that day. "
+        "Shall I book Wed 4 Nov 2026, 09:00 with Dr. Sarah Wilson?"
+    )
+    assert "doesn't work" not in result.pending["question"]

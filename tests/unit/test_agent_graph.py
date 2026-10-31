@@ -195,3 +195,31 @@ def test_estimate_cost_uses_model_prices() -> None:
     assert cost.usd == pytest.approx(1.80)
     assert cost.unpriced_models == ("some-new-model",)
     assert cost.cache_read_tokens == 500_000
+
+
+async def test_stream_turn_reports_cost_exactly_once_even_when_the_run_fails() -> None:
+    from medagent.agents.runner import stream_turn
+    from medagent.observability.cost import RunCost
+
+    class Exploding(FakeStructuredLLM):
+        async def ainvoke(self, schema, system, messages):  # type: ignore[no-untyped-def]
+            raise RuntimeError("provider blew up")
+
+    seen: list[RunCost] = []
+    stream = stream_turn(_graph(Exploding()), _thread(), 1, message="hello", on_cost=seen.append)
+    with pytest.raises(RuntimeError, match="provider blew up"):
+        async for _ in stream:
+            pass
+    assert len(seen) == 1  # a failed LLM call can still be billed, so it is metered
+
+
+async def test_stream_turn_yields_steps_as_nodes_start_then_one_final_event() -> None:
+    from medagent.agents.runner import FinalEvent, StepEvent, stream_turn
+
+    llm = FakeStructuredLLM({RouteDecision: [_route(Route.SMALLTALK)]})
+    events = [e async for e in stream_turn(_graph(llm), _thread(), 1, message="hello")]
+    steps = [e.node for e in events if isinstance(e, StepEvent)]
+    assert steps == ["guardrail", "supervisor", "respond", "output_guard"]
+    assert isinstance(events[-1], FinalEvent)
+    assert sum(isinstance(e, FinalEvent) for e in events) == 1
+    assert events[-1].result.reply == CAPABILITIES

@@ -57,6 +57,16 @@ def is_yes(answer: object) -> bool:
     return False
 
 
+def _why_not_that_day(
+    doctor: str, day: date, time_of_day: str | None, works_that_weekday: bool
+) -> str:
+    """Why the requested day can't be booked, when we are offering a different day instead."""
+    if not works_that_weekday:
+        return f"{doctor} doesn't work on {day:%A}s. "  # a day off, not a full diary
+    when = f"{time_of_day} " if time_of_day else ""
+    return f"{doctor} has no free {when}slot on that day. "
+
+
 def _options_text(options: list[DoctorOption]) -> str:
     lines = [f"{i}. {o['name']} ({o['specialty']})" for i, o in enumerate(options, 1)]
     return "\n".join(lines) or "None."
@@ -158,8 +168,9 @@ def make_booking_node(deps: AgentDeps) -> Node:
             )
             slot = found.slots[0] if found.slots else None
             if slot is not None and slot.astimezone(deps.tz).date() != day and not note:
-                when = f"{request.time_of_day} " if request.time_of_day else ""
-                note = f"{doctor.name} has no free {when}slot on that day. "
+                note = _why_not_that_day(
+                    doctor.name, day, request.time_of_day, found.works_on_from_day
+                )
         if slot is None:
             text = (
                 f"I couldn't find a free slot with {doctor.name} in the next {SEARCH_DAYS} days. "

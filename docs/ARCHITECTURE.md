@@ -91,6 +91,27 @@ sequenceDiagram
     G-->>UI: "Booked ✔ Confirmation #A-1042"
 ```
 
+### Booking confirmation over HTTP (Phase 5)
+
+```mermaid
+sequenceDiagram
+    actor U as Browser
+    participant API as FastAPI (/v1)
+    participant G as LangGraph
+    participant CK as Postgres checkpoint
+
+    U->>API: POST /v1/auth/login -> JWT
+    U->>API: POST /v1/chat {message}  (Authorization: Bearer JWT)
+    API->>API: verify JWT -> user -> patient_id; limits; thread = u{user}:{conversation}
+    API->>G: stream_turn(thread, patient_id, message)
+    G-->>U: SSE step "Checking availability..."
+    G->>CK: interrupt(): state saved, graph paused
+    API-->>U: SSE confirmation {"Book Tue 08:00 with Dr. X?"} + done {pending: true}
+    U->>API: POST /v1/chat/{id}/resume {"confirmed": true}
+    API->>G: stream_turn(resume=True)  (loads the checkpoint)
+    G-->>U: SSE step "Booking..." + message "Booked #A-0003"
+```
+
 ## 4. RAG pipeline
 
 ```mermaid

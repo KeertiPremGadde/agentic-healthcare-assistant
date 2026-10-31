@@ -4,8 +4,10 @@ import json
 from functools import lru_cache
 from typing import Annotated, Any, Literal
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
+
+PLACEHOLDER_SECRET = "change-me"  # noqa: S105  (the value we refuse outside local mode)
 
 
 class Settings(BaseSettings):
@@ -41,6 +43,21 @@ class Settings(BaseSettings):
     google_service_account_file: str | None = None
     google_calendar_id: str | None = None
 
+    # ---- API / auth (Phase 5) ----
+    # Sign tokens with a long random secret (see .env.example). The default is accepted only
+    # when APP_ENV=local; any other environment refuses to start with it.
+    jwt_secret: SecretStr = SecretStr(PLACEHOLDER_SECRET)
+    jwt_expire_minutes: int = Field(default=60, ge=1, le=24 * 60)
+
+    # ---- Demo protection: the API is public and spends real money per chat message ----
+    max_message_chars: int = Field(default=1000, ge=1, le=10_000)
+    daily_message_limit: int = Field(default=50, ge=1)  # per user per UTC day
+    daily_budget_usd: float = Field(default=1.00, gt=0)  # across ALL users per UTC day
+    chat_rate_per_minute: int = Field(default=20, ge=1)  # per user
+    login_rate_per_minute: int = Field(default=10, ge=1)  # per IP
+    register_rate_per_hour: int = Field(default=5, ge=1)  # per IP
+    token_replay_delay_ms: int = Field(default=15, ge=0)  # pacing of replayed `token` events
+
     # OpenStreetMap Overpass endpoint (public by default; set a mirror or self-hosted instance)
     overpass_url: str = "https://overpass-api.de/api/interpreter"
 
@@ -49,6 +66,17 @@ class Settings(BaseSettings):
     # Doctors' working hours are defined in this IANA timezone; all stored times are UTC.
     clinic_timezone: str = "Europe/Berlin"
     slot_minutes: int = Field(default=30, ge=5, le=240)
+
+    @model_validator(mode="after")
+    def _require_a_real_jwt_secret_outside_local(self) -> "Settings":
+        secret = self.jwt_secret.get_secret_value()
+        if self.app_env != "local" and (secret == PLACEHOLDER_SECRET or len(secret) < 32):
+            raise ValueError(
+                "JWT_SECRET must be a random string of at least 32 characters unless "
+                'APP_ENV=local (generate one: python -c "import secrets; '
+                'print(secrets.token_urlsafe(48))")'
+            )
+        return self
 
     @field_validator("api_cors_origins", mode="before")
     @classmethod

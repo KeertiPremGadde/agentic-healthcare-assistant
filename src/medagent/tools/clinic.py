@@ -113,6 +113,7 @@ class ClinicService:
         found: list[datetime] = []
         with self.session_factory() as session:
             windows = repository.get_working_windows(session, doctor_id)
+            works = any(w.weekday == from_day.weekday() for w in windows)
             for offset in range(days):
                 day = from_day + timedelta(days=offset)
                 booked = repository.get_booked_starts(session, doctor_id, day, self.tz)
@@ -120,8 +121,10 @@ class ClinicService:
                     if self._in_time_of_day(slot, time_of_day):
                         found.append(slot)
                         if len(found) >= limit:
-                            return Availability(doctor_id=doctor_id, slots=found)
-        return Availability(doctor_id=doctor_id, slots=found)
+                            return Availability(
+                                doctor_id=doctor_id, slots=found, works_on_from_day=works
+                            )
+        return Availability(doctor_id=doctor_id, slots=found, works_on_from_day=works)
 
     def check_slot(self, doctor_id: int, start: datetime) -> SlotCheck:
         with self.session_factory() as session:

@@ -126,14 +126,18 @@ redirected to emergency services. Only synthetic patient data is ever stored.
 - **Done when:** the MCP server works in MCP Inspector and the graph books through it, and the nearby-clinics tool returns attributed, cached results that are clearly labelled non-bookable. *(Graph books and cancels through the MCP server over stdio in tests and the live CLI; real calendar event created and removed; live OSM lookup cached. Inspector: `uv run mcp dev src/medagent/mcp_server/server.py`.)*
 - Later: streamable-HTTP transport with auth, calendar outbox/retries, `.ics` download, mirror/self-hosted Overpass.
 
-## Phase 5 – API
+## Phase 5 – API ✅
 
-- [ ] `POST /v1/chat` streaming via SSE (tokens + tool-step events), `thread_id` per conversation
-- [ ] `POST /v1/chat/{thread_id}/resume` for HITL confirmation
-- [ ] `GET /v1/appointments` (own appointments), `DELETE` to cancel
-- [ ] JWT auth (register/login, hashed passwords), rate limiting, request IDs, error handlers
-- [ ] OpenAPI docs clean; API tests with httpx
-- **Done when:** the full flow works from `/docs` (Swagger) and with `curl`.
+- [x] `POST /v1/chat` streaming via SSE (`step` events as nodes start, replayed `token` chunks, `confirmation`, `message`, `done`, `error`; keepalives), `?stream=false` JSON mode; conversation id per conversation, namespaced per user
+- [x] `POST /v1/chat/{id}/resume` for HITL confirmation (409 if nothing pending); `GET /v1/chat/{id}` history + pending; `GET /v1/limits`
+- [x] `GET /v1/appointments`, `DELETE` to cancel (own only; 404 for others')
+- [x] JWT auth (register/login, Argon2 hashes, OAuth2 form so `/docs` Authorize works), username-only accounts (no PII), patient id from the token
+- [x] Rate limiting (per IP on register/login, per user on chat), request IDs, one error envelope (no input echoed), CORS without credentials
+- [x] **Cost protection:** 1,000-char messages, 50 messages/user/day, **global daily budget (`DAILY_BUDGET_USD`)** from recorded spend; confirmations and emergencies still work at the limit
+- [x] OpenAPI documented (tags, response models, error models, security scheme); `/demo` page (local mode); `scripts/serve.py` (Windows selector loop)
+- [x] API tests with httpx (auth attacks, isolation, SSE, confirmation round trip, limits, budget), plus mutation checks of the isolation and budget tests
+- **Done when:** the full flow works from `/docs` (Swagger) and with `curl`. *(Verified live on Windows with the real server, MCP, Postgres checkpointer and Haiku: register, login, SSE chat, booking with confirmation, cancel, second user denied, budget cap.)*
+- Later: refresh tokens + logout, account deletion (erasure), real token streaming, Redis-backed limits/locks, `--proxy-headers` behind a load balancer.
 
 ## Phase 6 – Frontend
 

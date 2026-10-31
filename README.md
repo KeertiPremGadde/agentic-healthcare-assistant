@@ -56,13 +56,32 @@ More diagrams (agent graph, booking sequence, RAG pipeline, CI/CD): [docs/ARCHIT
 ## Quick start
 
 ```powershell
-copy .env.example .env          # add your keys
+copy .env.example .env          # add your keys (ANTHROPIC_API_KEY, a JWT_SECRET)
 uv sync
 docker compose up -d            # Postgres + pgvector
-uv run uvicorn medagent.main:app --reload
+uv run alembic upgrade head
+uv run python scripts/seed.py
+uv run python scripts/serve.py  # API; on Windows this starts uvicorn on the right event loop
 ```
 
-Open http://localhost:8000/docs. Full setup: [docs/SETUP.md](docs/SETUP.md)
+Open http://localhost:8000/docs (try it: register, **Authorize**, `POST /v1/chat`) or
+http://localhost:8000/demo (a minimal page that shows the live stream). Full setup, including how
+to generate `JWT_SECRET`: [docs/SETUP.md](docs/SETUP.md)
+
+## API
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /v1/auth/register`, `POST /v1/auth/login`, `GET /v1/auth/me` | demo accounts (username + password only), JWT |
+| `POST /v1/chat` | send a message; streams `step`, `token`, `confirmation`, `message`, `done` over SSE (`?stream=false` for JSON) |
+| `POST /v1/chat/{id}/resume` | answer a pending booking/cancellation confirmation |
+| `GET /v1/chat/{id}`, `GET /v1/limits` | history + pending confirmation; your daily allowance |
+| `GET /v1/appointments`, `DELETE /v1/appointments/{id}` | your own appointments |
+| `GET /health`, `GET /ready` | liveness, readiness |
+
+The patient being booked always comes from your login token, never from the chat. The demo is
+protected against cost abuse (rate limits, 50 messages per user per day, and a global daily budget).
+Details: [ADR 0008](docs/adr/0008-api-auth-streaming-and-demo-protection.md).
 
 ## Development
 

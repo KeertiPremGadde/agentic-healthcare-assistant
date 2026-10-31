@@ -1,5 +1,6 @@
 """Test doubles: a deterministic offline embedder and a scripted answer LLM."""
 
+import asyncio
 import hashlib
 import math
 import re
@@ -96,7 +97,12 @@ class FakeStructuredLLM:
     is how tests prove that e.g. an emergency never reaches the LLM. Exceptions in the queue are
     raised instead of returned (to simulate API failures)."""
 
-    def __init__(self, script: dict[type[BaseModel], list[BaseModel | Exception]] | None = None):
+    def __init__(
+        self,
+        script: dict[type[BaseModel], list[BaseModel | Exception]] | None = None,
+        delay: float = 0.0,
+    ):
+        self.delay = delay  # seconds each call takes (to simulate a slow model)
         self.script: dict[type[BaseModel], list[BaseModel | Exception]] = {
             k: list(v) for k, v in (script or {}).items()
         }
@@ -108,6 +114,8 @@ class FakeStructuredLLM:
 
     async def ainvoke(self, schema: type[T], system: str, messages: Sequence[BaseMessage]) -> T:
         self.calls.append((schema, system, list(messages)))
+        if self.delay:
+            await asyncio.sleep(self.delay)
         queue = self.script.get(schema)
         if not queue:
             raise AssertionError(f"unexpected LLM call for {schema.__name__}")

@@ -1,3 +1,4 @@
+from medagent.db.models.account import DailyUsage, User
 from medagent.db.models.appointment import Appointment, AppointmentStatus
 from medagent.db.models.cache import ExternalCache
 from medagent.db.models.doctor import Doctor
@@ -9,10 +10,12 @@ __all__ = [
     "EMBEDDING_DIM",
     "Appointment",
     "AppointmentStatus",
+    "DailyUsage",
     "Doctor",
     "DoctorSchedule",
     "ExternalCache",
     "KbChunk",
     "KbDocument",
     "Patient",
+    "User",
 ]

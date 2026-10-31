@@ -46,7 +46,7 @@ copy .env.example .env
 uv sync
 uv run pre-commit install
 uv run pytest
-uv run uvicorn medagent.main:app --reload     # http://localhost:8000/health and /docs
+uv run python scripts/serve.py                # API: http://localhost:8000/docs and /demo
 docker compose up -d                          # Postgres + pgvector on :5432
 uv run alembic upgrade head                   # create/upgrade the schema
 uv run python scripts/seed.py                 # synthetic doctors, schedules, patients (idempotent)
@@ -94,3 +94,52 @@ Booking works without it. To add appointments to one shared demo calendar via a 
 7. `.env`: `GOOGLE_SERVICE_ACCOUNT_FILE=secrets/google-calendar-sa.json` and
    `GOOGLE_CALENDAR_ID=<calendar id>` (not `primary`).
 8. Check: `uv run python scripts/check_calendar.py` (creates and deletes one test event).
+
+## The API (Phase 5)
+
+```powershell
+uv run python scripts/serve.py        # http://localhost:8000/docs   (and /demo in local mode)
+```
+
+On Windows use `scripts/serve.py`, not plain `uvicorn`: it starts the event loop the Postgres
+checkpointer needs. The server needs Docker Postgres running and `ANTHROPIC_API_KEY` in `.env`.
+
+### JWT_SECRET (required outside local mode)
+
+`JWT_SECRET` signs login tokens: anyone who knows it can forge a login for any user. Generate a
+strong one and put the output in `.env` (never commit it, never paste it into chat):
+
+```powershell
+uv run python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+```
+JWT_SECRET=<the 64-character output>
+```
+
+With `APP_ENV=local` the placeholder `change-me` is accepted so development works out of the box;
+any other `APP_ENV` refuses to start unless the secret is 32+ random characters. Changing the
+secret logs everyone out (existing tokens stop verifying).
+
+### Try it in the browser (/docs)
+
+1. Open http://localhost:8000/docs.
+2. `POST /v1/auth/register` -> *Try it out*: username e.g. `demo1`, password of 10+ characters.
+   Use fake data only.
+3. Click **Authorize** (top right), enter the same username and password, **Authorize**.
+4. `POST /v1/chat`: set `stream` to `false`, body `{"message": "I have an itchy rash, who should I
+   see?"}`. Copy `conversation_id` from the reply.
+5. `POST /v1/chat` again with `{"message": "Book number 1 tomorrow morning", "conversation_id":
+   "<id>"}`. The reply has `pending`: the assistant is waiting for your yes/no.
+6. `POST /v1/chat/{conversation_id}/resume` with `{"confirmed": true}`.
+7. `GET /v1/appointments` lists it; `DELETE /v1/appointments/{id}` cancels it.
+
+To watch the live stream, open http://localhost:8000/demo (local mode only), or:
+
+```powershell
+curl.exe -N -X POST http://localhost:8000/v1/chat -H "Authorization: Bearer <token>" -H "Content-Type: application/json" -d "{\"message\": \"Hi, what can you do?\"}"
+```
+
+Limits (all configurable in `.env`): 1,000 characters per message, 50 messages per user per day,
+and a global daily budget of `DAILY_BUDGET_USD` (default 1.00); past it, chat answers "demo limit
+reached" and makes no LLM calls (emergency messages still get the emergency answer).

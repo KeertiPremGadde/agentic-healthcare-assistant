@@ -11,3 +11,4 @@ One file per significant decision: `NNNN-short-title.md` with Context, Decision,
 | [0005](0005-rag-retrieval-and-corpus-licensing.md) | RAG: hybrid retrieval, local embeddings, corpus licensing (MedlinePlus yes, NHS no) |
 | [0006](0006-agent-safety-layers-and-checkpointer.md) | Agent graph: rules-first emergency safety, HITL booking, library-owned checkpointer |
 | [0007](0007-mcp-tools-calendar-and-osm.md) | Clinic tools behind MCP, async graph, optional calendar, OpenStreetMap lookups |
+| [0008](0008-api-auth-streaming-and-demo-protection.md) | API: JWT auth, SSE streaming, per-user isolation, demo cost protection |

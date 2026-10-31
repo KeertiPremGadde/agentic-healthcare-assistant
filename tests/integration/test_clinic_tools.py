@@ -51,6 +51,20 @@ def test_search_and_availability(service: ClinicService) -> None:
     assert service.check_slot(cardiologists[0].id, NOW).error == "in_the_past"
 
 
+def test_availability_says_whether_the_doctor_works_that_weekday(service: ClinicService) -> None:
+    johnson = service.search_doctors(name="Michael Johnson").doctors[0].id  # Mon-Fri
+    wilson = service.search_doctors(name="Sarah Wilson").doctors[0].id  # Mon/Wed/Fri am, Tue/Thu pm
+    sunday, tuesday = date(2026, 11, 8), date(2026, 11, 3)
+
+    assert not service.check_availability(johnson, sunday).works_on_from_day
+    assert service.check_availability(johnson, sunday, days=3).slots  # Monday has slots...
+    assert service.check_availability(johnson, tuesday).works_on_from_day
+    # A day off is different from a day that is merely fully booked or has no morning slot:
+    morning = service.check_availability(wilson, tuesday, time_of_day="morning")
+    assert morning.slots == []
+    assert morning.works_on_from_day  # she works Tuesday afternoons
+
+
 def test_book_list_and_cancel_rules(service: ClinicService, patients: tuple[int, int]) -> None:
     me, someone_else = patients
     doctor_id = service.search_doctors(specialty="Cardiologist", limit=1).doctors[0].id
@@ -101,6 +115,11 @@ async def test_mcp_tools_return_the_same_typed_results(
         )
         first = Availability.model_validate(slots.structuredContent).slots[0]
         assert first == TUESDAY_13
+
+        day_off = await client.call_tool(
+            "check_availability", {"doctor_id": doctor.id, "from_day": "2026-11-08"}
+        )
+        assert Availability.model_validate(day_off.structuredContent).works_on_from_day is False
 
         result = await client.call_tool(
             "book_appointment",

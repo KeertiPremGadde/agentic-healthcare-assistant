@@ -35,7 +35,7 @@ from medagent.api.schemas import (
     UsageOut,
 )
 from medagent.api.sse import KEEPALIVE_SECONDS, STEP_LABELS, chunk_text, keepalive, sse
-from medagent.guardrails.emergency import EMERGENCY_MESSAGE, detect_red_flag
+from medagent.guardrails.screen import screen_message
 from medagent.observability.cost import RunCost
 
 log = logging.getLogger(__name__)
@@ -264,10 +264,11 @@ async def chat(
         res.usage.check, user.id, settings.daily_message_limit, settings.daily_budget_usd
     )
     if not allowance.ok:
-        flag = detect_red_flag(body.message)
-        if flag is not None and not flag.informational:
-            # Safety first: the deterministic rules need no LLM, so they still answer.
-            return await _limit_response(res, conversation_id, stream, EMERGENCY_MESSAGE)
+        screen = screen_message(body.message)
+        if screen is not None:
+            # Safety first: the deterministic rules need no LLM, so they still answer
+            # (harmful-intent and emergency messages get their fixed reply, not "limit reached").
+            return await _limit_response(res, conversation_id, stream, screen.reply)
         status = 503 if allowance.reason == "daily_budget" else 429
         raise ApiError(
             status,

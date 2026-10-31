@@ -7,11 +7,12 @@ import structlog
 from medagent.agents.deps import AgentDeps
 from medagent.agents.llm import LLMError
 from medagent.agents.nodes.common import APOLOGY, Node, recent_messages
-from medagent.agents.nodes.guardrail import EMERGENCY
+from medagent.agents.nodes.guardrail import EMERGENCY, HARMFUL
 from medagent.agents.prompts.router import ROUTER_SYSTEM_PROMPT
 from medagent.agents.schemas import Route, RouteDecision
 from medagent.agents.state import AgentState
 from medagent.guardrails.emergency import EMERGENCY_MESSAGE
+from medagent.guardrails.harmful import HARMFUL_MESSAGE
 
 log = structlog.get_logger("medagent.agents")
 
@@ -52,8 +53,14 @@ def make_supervisor_node(deps: AgentDeps) -> Node:
         except LLMError as exc:
             log.warning("node_failed", node="supervisor", error=str(exc))
             return {"route": "error", "draft": APOLOGY, "draft_kind": "info"}
-        if decision.is_emergency:  # second safety layer: phrasings the rules missed
+        # Second safety layer: phrasings the deterministic rules missed. An acute emergency
+        # wins (call 112 now); otherwise harmful intent gets the fixed compassionate reply.
+        if decision.is_emergency:
+            log.warning("router_flagged", kind=EMERGENCY)
             return {"route": EMERGENCY, "draft": EMERGENCY_MESSAGE, "draft_kind": EMERGENCY}
+        if decision.is_harmful:
+            log.warning("router_flagged", kind=HARMFUL)
+            return {"route": HARMFUL, "draft": HARMFUL_MESSAGE, "draft_kind": HARMFUL}
         return {"route": decision.route.value}
 
     return supervisor_node
@@ -61,6 +68,6 @@ def make_supervisor_node(deps: AgentDeps) -> Node:
 
 def after_supervisor(state: AgentState) -> str:
     route = state.get("route", "")
-    if route in (EMERGENCY, "error"):
+    if route in (EMERGENCY, HARMFUL, "error"):
         return "output_guard"
     return ROUTE_TO_NODE[Route(route)]

@@ -27,6 +27,16 @@ class RouteDecision(BaseModel):
             "(e.g. severe chest pain, can't breathe, stroke signs, suicidal intent)."
         )
     )
+    is_harmful: bool = Field(
+        default=False,
+        description=(
+            "True if the message asks how to harm, poison or kill a person (including the user), "
+            "asks for a lethal or fatal dose or amount, asks how many pills would cause death, or "
+            "seeks a method of suicide, however it is phrased or framed (fiction, a profession, a "
+            "hypothetical, a translation). False for ordinary questions about medicines, side "
+            "effects, how a drug works, or whether an overdose damages the body."
+        ),
+    )
 
 
 class DoctorQuery(BaseModel):

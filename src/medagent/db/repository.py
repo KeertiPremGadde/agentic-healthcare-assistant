@@ -15,10 +15,19 @@ class SlotTakenError(Exception):
     """Raised when the unique index rejects a double booking."""
 
 
-def get_doctors(session: Session, specialty: str | None = None) -> list[Doctor]:
+def get_doctors(
+    session: Session,
+    specialty: str | None = None,
+    city: str | None = None,
+    language: str | None = None,
+) -> list[Doctor]:
     stmt = select(Doctor).order_by(Doctor.id)
     if specialty:
         stmt = stmt.where(Doctor.specialty == specialty)
+    if city:
+        stmt = stmt.where(Doctor.city == city)
+    if language:
+        stmt = stmt.where(Doctor.languages.contains([language]))
     return list(session.scalars(stmt))
 
 

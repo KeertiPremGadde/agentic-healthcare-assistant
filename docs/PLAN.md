@@ -99,18 +99,20 @@ redirected to emergency services. Only synthetic patient data is ever stored.
 - **Done when:** `uv run python -m medagent.rag.ingest medlineplus` loads the topics and `uv run python -m medagent.rag.ask "..."` returns a cited answer.
 - Later upgrades: local **cross-encoder** reranker (same interface); NHS content only if NHS England confirms AI use in writing *and* a 7-day refresh job exists; re-calibrate `RAG_MIN_SCORE` if the embedding model changes.
 
-## Phase 3 – Multi-agent graph (core of the project)
+## Phase 3 – Multi-agent graph (core of the project) ✅
 
-- [ ] Add deps: `langgraph`, `langgraph-checkpoint-postgres`
-- [ ] `agents/state.py`: typed state with `messages` (add_messages reducer) + booking slots
-- [ ] `guardrails/`: emergency detector (red-flag symptoms → stop + emergency number), scope check, PII masking for logs
-- [ ] `agents/nodes/supervisor.py`: structured-output router → `medical_rag | doctor_finder | booking | smalltalk`
-- [ ] `doctor_finder`: specialty as a Pydantic enum (no string matching), lists doctors via tool
-- [ ] `booking`: extracts doctor/date/time/patient from natural language, checks availability, **`interrupt()` for confirmation**, books in a transaction
-- [ ] Output guard: disclaimer + groundedness check for RAG answers
-- [ ] `agents/graph.py`: compile with Postgres checkpointer; export graph PNG to `docs/diagrams/`
-- [ ] Tests: router decisions with a fake LLM, booking happy path + conflict + past date
-- **Done when:** a CLI chat can answer a question, recommend a cardiologist and book a slot with confirmation, and memory survives restart.
+- [x] Add deps: `langgraph`, `langgraph-checkpoint-postgres`
+- [x] `agents/state.py`: typed state with `messages` (add_messages reducer) + booking slots (doctor options, proposal)
+- [x] `guardrails/`: deterministic emergency red-flag rules (English + German) before any LLM call, LLM `is_emergency` flag as second layer, general questions answered with a safety notice; PII masking + pseudonymised ids for logs. Scope check is a router route (`out_of_scope`)
+- [x] `agents/nodes/supervisor.py`: structured-output router → `medical_rag | doctor_finder | booking | respond` (`json_schema` method, works on Sonnet 5.5 too; low effort)
+- [x] `doctor_finder`: specialty as a Pydantic enum (`schemas/specialty.py`, shared with the seed), city/language filters relaxed if unmatched
+- [x] `booking`: extracts doctor/date/time from natural language, finds a valid slot, **`interrupt()` for confirmation**, re-validates and books (unique index decides races; a lost slot re-confirms the next one). Patient comes from config, never from the model
+- [x] Output guard: disclaimer, uncited medical text blocked, doctor-suggestion note, safety notice
+- [x] `agents/graph.py`: compile with Postgres checkpointer (`setup()` owns its tables, Alembic ignores them); graph exported to `docs/diagrams/agent_graph.md`
+- [x] Tests: router decisions with a fake LLM, booking happy path + conflict + past date + no + missing patient, restart-and-resume against Postgres, `alembic check` guard; `llm`-marked Haiku tests
+- [x] Per-run token usage + estimated cost logged (no PII); CLI chat `python -m medagent.agents.chat`
+- **Done when:** a CLI chat can answer a question, recommend a cardiologist and book a slot with confirmation, and memory survives restart. *(Verified with the real CLI in two separate processes.)*
+- Later: query rewriting for follow-ups, cancel/reschedule, negation handling + more languages in red-flag rules.
 
 ## Phase 4 – Tools & integrations (MCP)
 

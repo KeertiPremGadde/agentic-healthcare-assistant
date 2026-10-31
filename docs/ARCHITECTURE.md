@@ -26,28 +26,30 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    START((START)) --> GR[guardrail_node<br/>emergency + PII + scope check]
-    GR -->|emergency| EM[emergency_response<br/>call 112 / 911 · stop]
-    GR -->|out of scope| OOS[polite refusal]
-    GR -->|ok| SUP{supervisor<br/>structured-output router}
-    SUP -->|medical question| RAG[medical_rag_agent<br/>hybrid search · rerank · cite sources]
-    SUP -->|symptoms → which doctor| DF[doctor_finder_agent<br/>specialty enum · list doctors]
-    SUP -->|book / reschedule / cancel| BK[booking_agent<br/>collect slots: doctor, date, time, patient]
-    DF -->|user wants to book| BK
-    BK --> AV[check_availability tool]
-    AV --> HITL{{interrupt&#40;&#41;<br/>Confirm booking?}}
-    HITL -->|yes| BOOK[book_appointment tool<br/>+ calendar event + email]
-    HITL -->|no / change| BK
-    RAG --> OUT[output_guard<br/>disclaimer · grounding check]
+    START((START)) --> GR[guardrail<br/>deterministic red-flag rules EN/DE<br/>no LLM call]
+    GR -->|acute red flag| OUT
+    GR -->|ok, or general question<br/>+ safety notice| SUP{supervisor<br/>structured-output router<br/>+ is_emergency flag}
+    SUP -->|is_emergency| OUT
+    SUP -->|medical_question| RAG[medical_rag<br/>Phase 2 hybrid RAG · citations]
+    SUP -->|find_doctor| DF[doctor_finder<br/>Specialty enum · DB lookup]
+    SUP -->|book| BK[booking<br/>extract doctor/day/time · find a valid free slot]
+    SUP -->|smalltalk / out_of_scope| RS[respond<br/>fixed replies]
+    BK -->|proposal| HITL{{confirm<br/>interrupt&#40;&#41;: Book this slot?}}
+    BK -->|question / refusal| OUT
+    HITL -->|yes| BOOK[book_appointment<br/>re-validate · insert · unique index]
+    HITL -->|no| OUT
+    BOOK -->|slot lost| HITL
+    BOOK -->|booked| OUT
+    RAG --> OUT[output_guard<br/>disclaimer · citation check · safety notice]
     DF --> OUT
-    BOOK --> OUT
+    RS --> OUT
     OUT --> END((END))
-    EM --> END
-    OOS --> END
 ```
 
-State (`GraphState`) is persisted by the Postgres checkpointer per `thread_id`, so each conversation
-keeps its memory and a paused HITL step can resume after the user replies.
+The exact compiled graph is generated into [docs/diagrams/agent_graph.md](diagrams/agent_graph.md)
+by `scripts/export_graph.py`. State (`AgentState`) is persisted by the Postgres checkpointer per
+`thread_id`, so each conversation keeps its memory and a paused confirmation can be answered after a
+restart. The patient being booked comes from the run config (login), never from the conversation.
 
 ## 3. Booking flow (sequence)
 

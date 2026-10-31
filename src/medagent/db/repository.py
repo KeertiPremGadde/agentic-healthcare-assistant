@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from medagent.db.models import Appointment, AppointmentStatus, Doctor, DoctorSchedule
+from medagent.db.models import Appointment, AppointmentStatus, Doctor, DoctorSchedule, Patient
 from medagent.services.availability import WorkingWindow, clinic_day_bounds
 
 
@@ -61,3 +61,22 @@ def create_appointment(
             raise SlotTakenError from exc
         raise
     return appointment
+
+
+def get_doctor(session: Session, doctor_id: int) -> Doctor | None:
+    return session.get(Doctor, doctor_id)
+
+
+def find_doctors_by_name(session: Session, name: str, limit: int = 5) -> list[Doctor]:
+    """Case-insensitive match on the name without the "Dr." title; every word must appear."""
+    words = [w for w in name.replace("Dr.", " ").replace("dr.", " ").split() if len(w) > 1]
+    if not words:
+        return []
+    stmt = select(Doctor).order_by(Doctor.id).limit(limit)
+    for word in words:
+        stmt = stmt.where(Doctor.name.ilike(f"%{word}%"))
+    return list(session.scalars(stmt))
+
+
+def get_patient_by_email(session: Session, email: str) -> Patient | None:
+    return session.scalars(select(Patient).where(Patient.email == email)).one_or_none()

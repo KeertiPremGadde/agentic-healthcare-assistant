@@ -11,6 +11,17 @@ config = context.config
 config.set_main_option("sqlalchemy.url", get_settings().database_url.replace("%", "%%"))
 target_metadata = Base.metadata
 
+# Tables owned by other libraries (ADR 0006): LangGraph's PostgresSaver creates and migrates
+# `checkpoints`, `checkpoint_blobs`, `checkpoint_writes`, `checkpoint_migrations` itself.
+# Without this filter, autogenerate would propose dropping them (and every conversation).
+EXTERNALLY_MANAGED_PREFIXES = ("checkpoint",)
+
+
+def include_name(name: str | None, type_: str, parent_names: object) -> bool:
+    if type_ == "table" and name is not None:
+        return not name.startswith(EXTERNALLY_MANAGED_PREFIXES)
+    return True
+
 
 def run_migrations_offline() -> None:
     context.configure(
@@ -18,6 +29,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_name=include_name,
     )
     with context.begin_transaction():
         context.run_migrations()
@@ -30,7 +42,9 @@ def run_migrations_online() -> None:
         poolclass=pool.NullPool,
     )
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection, target_metadata=target_metadata, include_name=include_name
+        )
         with context.begin_transaction():
             context.run_migrations()
 

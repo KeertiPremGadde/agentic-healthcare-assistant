@@ -3,10 +3,19 @@
 import hashlib
 import math
 import re
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
+from contextlib import contextmanager
+from typing import TypeVar
+
+from langchain_core.messages import BaseMessage
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 from medagent.db.models import EMBEDDING_DIM
 from medagent.rag.answer import AnswerPayload
+from medagent.rag.types import Candidate
+
+T = TypeVar("T", bound=BaseModel)
 
 _WORD = re.compile(r"[a-z0-9]+")
 _STOPWORDS = frozenset(
@@ -79,3 +88,50 @@ class FakeAnswerLLM:
     def generate(self, question: str, system_prompt: str) -> AnswerPayload:
         self.calls.append((question, system_prompt))
         return self.payload
+
+
+class FakeStructuredLLM:
+    """Scripted structured outputs, queued per schema. An unscripted call fails the test, which
+    is how tests prove that e.g. an emergency never reaches the LLM. Exceptions in the queue are
+    raised instead of returned (to simulate API failures)."""
+
+    def __init__(self, script: dict[type[BaseModel], list[BaseModel | Exception]] | None = None):
+        self.script: dict[type[BaseModel], list[BaseModel | Exception]] = {
+            k: list(v) for k, v in (script or {}).items()
+        }
+        self.calls: list[tuple[type[BaseModel], str, list[BaseMessage]]] = []
+
+    def push(self, *outputs: BaseModel) -> None:
+        for output in outputs:
+            self.script.setdefault(type(output), []).append(output)
+
+    def invoke(self, schema: type[T], system: str, messages: Sequence[BaseMessage]) -> T:
+        self.calls.append((schema, system, list(messages)))
+        queue = self.script.get(schema)
+        if not queue:
+            raise AssertionError(f"unexpected LLM call for {schema.__name__}")
+        output = queue.pop(0)
+        if isinstance(output, Exception):
+            raise output
+        assert isinstance(output, schema)
+        return output
+
+    @property
+    def schemas_called(self) -> list[str]:
+        return [schema.__name__ for schema, _, _ in self.calls]
+
+
+class FakeRetriever:
+    def __init__(self, candidates: list[Candidate] | None = None) -> None:
+        self.candidates = candidates or []
+
+    def search(
+        self, session: Session, query: str, k: int = 5, public_only: bool = False
+    ) -> list[Candidate]:
+        return self.candidates[:k]
+
+
+@contextmanager
+def no_database() -> Iterator[Session]:
+    raise AssertionError("this test must not touch the database")
+    yield  # pragma: no cover

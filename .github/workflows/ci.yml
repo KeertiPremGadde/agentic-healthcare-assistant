@@ -29,12 +29,19 @@ jobs:
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       DATABASE_URL: postgresql+psycopg://medagent:medagent@localhost:5432/medagent
+      FASTEMBED_CACHE_PATH: ${{ github.workspace }}/.cache/fastembed
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
       - run: uv sync --frozen
+      - name: Cache FastEmbed model
+        uses: actions/cache@v4
+        with:
+          path: .cache/fastembed
+          # Bump the suffix (or change EMBEDDING_MODEL) to force a fresh download.
+          key: fastembed-bge-small-en-v1.5-v1
       - name: Ruff
         run: uv run ruff check . && uv run ruff format --check .
       - name: Mypy

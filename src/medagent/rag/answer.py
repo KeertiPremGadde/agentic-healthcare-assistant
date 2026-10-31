@@ -3,10 +3,10 @@
 from dataclasses import dataclass, field
 from typing import Protocol
 
-from langchain_anthropic import ChatAnthropic
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from medagent.agents.llm import make_chat_model
 from medagent.agents.prompts.rag import RAG_SYSTEM_PROMPT, format_context
 from medagent.core.config import Settings, get_settings
 from medagent.guardrails.disclaimer import DISCLAIMER
@@ -40,15 +40,10 @@ class AnswerLLM(Protocol):
 
 class AnthropicAnswerLLM:
     def __init__(self, settings: Settings | None = None) -> None:
-        settings = settings or get_settings()
-        key: SecretStr | None = settings.anthropic_api_key
-        if key is None:
-            raise RuntimeError("ANTHROPIC_API_KEY is not set (put it in .env)")
-        # No `temperature`: the API rejects it for current models (400 invalid_request_error).
-        model = ChatAnthropic(  # type: ignore[call-arg]
-            model_name=settings.llm_model, api_key=key, max_tokens=1024
-        )
-        self._chain = model.with_structured_output(AnswerPayload)
+        # Default effort (answers need some reasoning). json_schema structured output works on
+        # Sonnet 5.5 too, which rejects the forced tool call LangChain uses by default.
+        model = make_chat_model(settings or get_settings(), effort="medium")
+        self._chain = model.with_structured_output(AnswerPayload, method="json_schema")
 
     def generate(self, question: str, system_prompt: str) -> AnswerPayload:
         result = self._chain.invoke([("system", system_prompt), ("human", question)])

@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # ---------- Build stage ----------
-FROM python:3.12-slim AS builder
+FROM python:3.13-slim AS builder
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 WORKDIR /app
@@ -10,7 +10,7 @@ COPY src ./src
 RUN uv sync --frozen --no-dev
 
 # ---------- Runtime stage ----------
-FROM python:3.12-slim
+FROM python:3.13-slim
 RUN useradd --create-home appuser
 WORKDIR /app
 COPY --from=builder /app /app

@@ -74,12 +74,13 @@ redirected to emergency services. Only synthetic patient data is ever stored.
 
 ## Phase 1 – Data layer
 
-- [ ] Add deps: `sqlalchemy>=2`, `psycopg[binary]`, `alembic`, `pgvector`
-- [ ] `db/session.py` (engine + session dependency), port models with typed `Mapped[]` columns
-- [ ] Appointment: unique constraint on `(doctor_id, start_time)`, `status` enum, timestamps
-- [ ] Alembic init + first migration; `scripts/seed.py` (doctors, weekly schedules, synthetic patients)
-- [ ] Port `availability_service` + `validation_service` as pure functions (timezone-aware)
-- [ ] Unit tests for slot generation/validation; integration test against Docker Postgres
+- [x] Add deps: `sqlalchemy>=2`, `psycopg[binary]`, `alembic`, `pgvector`
+- [x] `db/session.py` (engine + session dependency), port models with typed `Mapped[]` columns
+- [x] Appointment: *partial* unique index on `(doctor_id, start_time) WHERE status='booked'` (cancelled slots can be rebooked), `status` enum + CHECK, timestamps
+- [x] `DoctorSchedule` model (weekday, start, end in clinic timezone, `Europe/Berlin` via settings); all stored times UTC
+- [x] Alembic init + first migration; `scripts/seed.py` (doctors, weekly schedules, synthetic patients)
+- [x] Port `availability_service` + `validation_service` as pure functions (timezone-aware)
+- [x] Unit tests for slot generation/validation; integration test against Docker Postgres
 - **Done when:** `docker compose up -d && uv run alembic upgrade head && uv run python scripts/seed.py` works and tests pass.
 
 ## Phase 2 – RAG knowledge base

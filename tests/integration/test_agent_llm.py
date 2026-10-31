@@ -26,6 +26,7 @@ from medagent.db.models import Appointment, Patient
 from medagent.db.seed import seed
 from medagent.rag.answer import AnswerPayload
 from medagent.schemas.specialty import Specialty
+from medagent.tools.clinic import ClinicService, LocalClinicTools
 from tests.fakes import FakeAnswerLLM, FakeRetriever
 
 pytestmark = [pytest.mark.integration, pytest.mark.llm]
@@ -47,14 +48,16 @@ def llm() -> AnthropicStructuredLLM:
         ("What causes migraines?", Route.MEDICAL_QUESTION),
         ("I've had an itchy rash on my arm for a week, who should I see?", Route.FIND_DOCTOR),
         ("I'd like to book an appointment with Dr. Wilson on Friday", Route.BOOK),
+        ("Please cancel my appointment next week", Route.CANCEL),
+        ("Which hospitals are there near Hamburg?", Route.NEARBY_CLINICS),
         ("Hi there, what can you do?", Route.SMALLTALK),
         ("Write me a poem about the sea", Route.OUT_OF_SCOPE),
     ],
 )
-def test_router_classifies_with_structured_output(
+async def test_router_classifies_with_structured_output(
     llm: AnthropicStructuredLLM, message: str, route: Route
 ) -> None:
-    decision = llm.invoke(
+    decision = await llm.ainvoke(
         RouteDecision, ROUTER_SYSTEM_PROMPT.format(context="None."), [HumanMessage(message)]
     )
     assert decision.route is route
@@ -68,14 +71,14 @@ def test_router_classifies_with_structured_output(
         ("My back tooth hurts when I drink something cold", Specialty.DENTIST),
     ],
 )
-def test_doctor_finder_picks_a_specialty_from_the_enum(
+async def test_doctor_finder_picks_a_specialty_from_the_enum(
     llm: AnthropicStructuredLLM, message: str, specialty: Specialty
 ) -> None:
-    query = llm.invoke(DoctorQuery, DOCTOR_FINDER_SYSTEM_PROMPT, [HumanMessage(message)])
+    query = await llm.ainvoke(DoctorQuery, DOCTOR_FINDER_SYSTEM_PROMPT, [HumanMessage(message)])
     assert query.specialty is specialty
 
 
-def test_booking_extraction_resolves_relative_dates(llm: AnthropicStructuredLLM) -> None:
+async def test_booking_extraction_resolves_relative_dates(llm: AnthropicStructuredLLM) -> None:
     prompt = BOOKING_SYSTEM_PROMPT.format(
         today="2026-11-02",
         today_weekday="Monday",
@@ -83,7 +86,7 @@ def test_booking_extraction_resolves_relative_dates(llm: AnthropicStructuredLLM)
         options="1. Dr. Michael Johnson (Cardiologist)\n2. Dr. Sarah Wilson (Cardiologist)",
         current_doctor="none",
     )
-    request = llm.invoke(
+    request = await llm.ainvoke(
         BookingRequest, prompt, [HumanMessage("Book number 2 on Thursday afternoon please")]
     )
     assert request.doctor_option == 2
@@ -92,28 +95,30 @@ def test_booking_extraction_resolves_relative_dates(llm: AnthropicStructuredLLM)
     assert request.exact_time is None
 
 
-def test_full_conversation_finds_a_doctor_and_books_with_confirmation(
+async def test_full_conversation_finds_a_doctor_and_books_with_confirmation(
     llm: AnthropicStructuredLLM, engine: Engine, session: Session
 ) -> None:
     seed(session)
     patient = session.scalars(select(Patient).order_by(Patient.id)).first()
     assert patient is not None
+    sessions = sessionmaker(bind=engine, expire_on_commit=False)
+    tools = LocalClinicTools(ClinicService(sessions, lambda: NOW, BERLIN, 30))
     deps = AgentDeps(
-        session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+        tools=tools,
         llm=llm,
         answer_llm=FakeAnswerLLM(
             AnswerPayload(answer="x", used_sources=[], context_sufficient=False)
         ),
         retriever=FakeRetriever(),
+        session_factory=sessions,
         clock=lambda: NOW,
         tz=BERLIN,
-        slot_minutes=30,
         public_only=True,
         rag_min_score=0.7,
     )
     graph, thread = build_graph(deps, InMemorySaver()), f"llm-{uuid.uuid4().hex[:8]}"
 
-    found = run_turn(
+    found = await run_turn(
         graph,
         thread,
         patient.id,
@@ -123,15 +128,14 @@ def test_full_conversation_finds_a_doctor_and_books_with_confirmation(
     assert "Dermatologist" in found.reply
     assert found.cost.usd < 0.01
 
-    paused = run_turn(graph, thread, patient.id, message="Book number 1 tomorrow morning please")
+    paused = await run_turn(graph, thread, patient.id, message="Book number 1 tomorrow morning")
     assert paused.pending is not None, paused.reply
     assert "Tue 3 Nov 2026" in paused.pending["question"]
     assert paused.cost.usd < 0.01
 
-    done = run_turn(graph, thread, patient.id, resume=True)
+    done = await run_turn(graph, thread, patient.id, resume=True)
     assert done.reply is not None
     assert done.reply.startswith("Booked:")
     session.expire_all()
     appointment = session.scalars(select(Appointment)).one()
     assert appointment.start_time.astimezone(BERLIN).hour < 12  # a morning slot
-    print(f"\nmeasured: find={found.cost} book={paused.cost} confirm={done.cost}")

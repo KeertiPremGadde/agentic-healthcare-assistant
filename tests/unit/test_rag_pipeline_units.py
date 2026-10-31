@@ -295,3 +295,38 @@ def test_prompt_numbers_passages_and_token_estimate_is_positive() -> None:
     assert "[1] (label: MedlinePlus: Diabetes)" in prompt
     assert "[2] (label: MedlinePlus: Diabetes)" in prompt
     assert estimate_tokens(prompt) > 50
+
+
+def test_a_dose_in_the_llm_answer_is_replaced_before_anything_reaches_the_caller() -> None:
+    """The dose guard lives in answer_question itself, so the CLI and any other caller get it
+    too, not only the graph's output guard."""
+    from medagent.guardrails.dose import DOSE_REFERRAL
+
+    llm = FakeAnswerLLM(
+        _payload(answer="The usual adult dose is 400 mg [MedlinePlus: Diabetes].", used_sources=[1])
+    )
+    result = answer_question(
+        None,
+        _FakeRetriever([_web_candidate()]),
+        llm,
+        "how much?",
+        min_score=0.3,  # type: ignore[arg-type]
+    )
+    assert result.answer == DOSE_REFERRAL
+    assert not result.grounded
+    assert result.sources == []  # nothing to cite: no medical content is being shown
+    assert "400" not in result.render()
+    assert len(llm.calls) == 1  # the model was asked; its answer was withheld
+
+
+def test_an_answer_without_a_dose_is_unchanged_by_the_dose_guard() -> None:
+    llm = FakeAnswerLLM(_payload())  # "Symptoms include thirst [MedlinePlus: Diabetes]."
+    result = answer_question(
+        None,
+        _FakeRetriever([_web_candidate()]),
+        llm,
+        "symptoms?",
+        min_score=0.3,  # type: ignore[arg-type]
+    )
+    assert result.grounded
+    assert result.answer.startswith("Symptoms include thirst")

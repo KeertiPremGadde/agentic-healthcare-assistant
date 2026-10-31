@@ -10,8 +10,13 @@ const API = "http://localhost:8765";
 const OUT = path.resolve(__dirname, "../../../docs/screenshots");
 
 const VARIANTS = [
-  { name: "desktop-light", scheme: "light", viewport: { width: 1280, height: 860 }, mobile: false },
-  { name: "desktop-dark", scheme: "dark", viewport: { width: 1280, height: 860 }, mobile: false },
+  {
+    name: "desktop-light",
+    scheme: "light",
+    viewport: { width: 1280, height: 1100 },
+    mobile: false,
+  },
+  { name: "desktop-dark", scheme: "dark", viewport: { width: 1280, height: 1100 }, mobile: false },
   { name: "mobile-light", scheme: "light", viewport: { width: 390, height: 844 }, mobile: true },
   { name: "mobile-dark", scheme: "dark", viewport: { width: 390, height: 844 }, mobile: true },
 ] as const;
@@ -62,8 +67,8 @@ for (const variant of VARIANTS) {
 
       await newConversation(page);
       await ask(page, "I have a rash, who should I see?");
-      await expect(page.getByRole("log")).toContainText("Dr. Anna Schmidt, Dermatology");
-      await ask(page, "book number 1");
+      await expect(page.getByRole("log")).toContainText("Doctors you can book");
+      await page.getByRole("button", { name: "Book Dr. Anna Schmidt" }).click();
       await expect(page.getByRole("region", { name: "Confirm booking" })).toBeVisible();
       await shot("confirm");
 

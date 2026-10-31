@@ -16,6 +16,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 - Tests: Vitest (SSE parser, event decoding, citations, `.ics`) and a Playwright smoke test against a
   mock API; a `frontend` CI job; an npm entry in `dependabot.yml`; `npm run screenshots` and
   `docs/screenshots/`.
+- Doctor suggestions as cards (name, specialty, city, languages) with a Book button that sends
+  "Book number N"; only the newest list is bookable. The `message` event and `ChatResponse` carry
+  `doctors` and `booking` (appointment id, doctor, time) as data, additive, with tests.
+- Safety cards: every known phone number is a `tel:` link; "Call 112" button on the emergency card;
+  TelefonSeelsorge, 112 and a Giftnotruf (poison control) section with regional numbers and the
+  official BfR list on the crisis card.
+- The booked card is structured like the confirmation card (doctor, time, confirmation number) with
+  "Add to calendar" below; a shorter one-line disclaimer strip; a fourth example prompt.
 - ADR 0011, `docs/learning/phase6.md`.
 
 ## [0.5.2] - 2026-10-31

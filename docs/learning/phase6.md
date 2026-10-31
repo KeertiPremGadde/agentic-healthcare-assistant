@@ -52,6 +52,19 @@ timezone block is needed, and a stable `UID` so importing twice updates the even
 with Dr. X" and the time. No patient data and no attendee: the clinic's shared calendar can't invite
 people (a service account can't), so this is the patient-side counterpart.
 
+### How do the doctor cards work without parsing text?
+The `message` event carries the options as data (`doctors`), in the same order the assistant numbers
+them. The Book button sends "Book number N", exactly what a user would type, so the booking flow,
+including the mandatory confirmation, is unchanged. The options are attached only to the turn that
+suggested them (the graph remembers them, but a later turn must not re-send them), and older cards
+are disabled because "number N" always means the newest list.
+
+### What did you do for the safety cards?
+Made them actionable without changing what the server says: `tel:` links on every known number, a
+"Call 112" button on the emergency card, and TelefonSeelsorge, 112 and a Giftnotruf section on the
+crisis card. Germany has no single poison-control number, so I list only the regional numbers I could
+verify and link the official BfR directory for the rest, rather than guess.
+
 ### How do you test a streaming UI for free?
 A tiny Node server speaks the real contract (CORS, SSE with delays, error envelopes, per-user
 state). Playwright drives the real frontend against it: register, ask, see the live step line, book,

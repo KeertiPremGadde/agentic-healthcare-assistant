@@ -33,6 +33,25 @@ Red is used for nothing else. The only text parsing is cosmetic: splitting the `
 the disclaimer from an answer to lay them out (`lib/citations.ts`); the disclaimer itself is still
 added server-side in code.
 
+### 3b. Structured data for cards: `doctors` and `booking`
+The same event carries the doctor options of the turn that suggested them (`doctors`: id, name,
+specialty, city, languages, in the order the assistant numbers them) and, after a booking,
+`booking` (appointment id, doctor, time as shown in the clinic's timezone). The doctor list is
+conversation memory in the graph, so it is attached only to the turn that suggested it
+(`draft_kind == "doctors"`), which a test pins. A Book button sends "Book number N", the exact
+sentence a user would type, so the booking flow is unchanged and the confirmation step is still
+mandatory. Cards of older lists are disabled because "number N" refers to the newest list. The
+numbered text lines the cards replace are hidden in the bubble by exact match on the known names.
+
+### 3c. Safety actions are one tap away
+The emergency and crisis texts are fixed on the server; the UI only makes them actionable: every
+known number in them is a `tel:` link (a fixed list, not a regex over arbitrary digits), the
+emergency card has a "Call 112" button, the crisis card has TelefonSeelsorge and 112 buttons and
+a Giftnotruf section. Poison centres have no single number in Germany; the UI lists five centres
+whose numbers were checked against published lists (Berlin, München, Bonn, Göttingen, Mainz) and
+links the official directory of the Federal Institute for Risk Assessment (BfR) for every other
+region, plus 112 for emergencies. The numbers live in `safety-cards.tsx` with that provenance.
+
 ### 4. Token storage: memory plus `sessionStorage`, not an httpOnly cookie
 A cookie is the safer place against XSS, but it would need cookie auth on the API, CSRF
 protection, `SameSite` handling and credentialed CORS, and the Vercel frontend and the AWS API

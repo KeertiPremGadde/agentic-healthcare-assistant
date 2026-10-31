@@ -17,6 +17,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from medagent.db.models import Doctor, DoctorSchedule, Patient
+from medagent.schemas.specialty import Specialty
 
 SEED_VALUE = 20261031  # fixed: change it and you change every generated doctor
 TOTAL_DOCTORS = 100
@@ -85,27 +86,7 @@ LEGACY_DOCTORS: list[tuple[str, str, tuple[Block, ...]]] = [
 ]
 
 # ---------------------------------------------------------------- generated doctors
-SPECIALTIES = [
-    "General Physician",
-    "ENT Specialist",
-    "Cardiologist",
-    "Dermatologist",
-    "Orthopedic",
-    "Neurologist",
-    "Dentist",
-    "Pediatrician",
-    "Gynecologist",
-    "Ophthalmologist",
-    "Urologist",
-    "Psychiatrist",
-    "Endocrinologist",
-    "Gastroenterologist",
-    "Pulmonologist",
-    "Oncologist",
-    "Rheumatologist",
-    "Nephrologist",
-    "Allergist",
-]
+SPECIALTIES = [s.value for s in Specialty]  # same order as before: keeps the seed identical
 CITIES = [
     "Berlin",
     "Hamburg",

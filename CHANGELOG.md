@@ -5,6 +5,28 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- Phase 5 HTTP API: `POST /v1/chat` (SSE with live `step` events, replayed `token` chunks,
+  `confirmation`, `done`; `?stream=false` for JSON), `POST /v1/chat/{id}/resume`,
+  `GET /v1/chat/{id}`, `GET /v1/limits`, `GET/DELETE /v1/appointments`, `/ready`.
+- JWT login (Argon2id passwords, HS256, pinned algorithm, required claims), username-only demo
+  accounts, `users` and `daily_usage` tables; the patient id comes from the token, conversation ids
+  are namespaced per user.
+- Demo cost protection: per-IP register/login limits, per-user chat rate, 1,000-character
+  messages, 50 messages/user/day, and a global daily budget (`DAILY_BUDGET_USD`, default $1.00)
+  with no LLM call once reached; confirmations and emergency answers still work at the limit.
+- Request IDs, a single error envelope (validation errors never echo input), security headers,
+  CORS without credentials, OpenAPI docs, `/demo` page (local mode), `scripts/serve.py`.
+- Runner: `stream_turn` yields live step events (LangGraph `tasks` mode) and meters cost exactly
+  once even when a run fails; `run_turn` consumes it. Pooled async Postgres checkpointer.
+- ADR 0008, `docs/learning/phase5.md`; settings `JWT_SECRET`, `JWT_EXPIRE_MINUTES`,
+  `MAX_MESSAGE_CHARS`, `DAILY_MESSAGE_LIMIT`, `DAILY_BUDGET_USD`, `*_RATE_*`.
+
+### Changed
+- The app refuses to start with the placeholder or a short `JWT_SECRET` unless `APP_ENV=local`.
+
+## [0.4.0] - 2026-10-31
+
+### Added
 - Phase 4 MCP clinic server (`python -m medagent.mcp_server`, FastMCP, 8 typed tools) and an MCP
   client (`langchain-mcp-adapters`, one persistent stdio session); `ClinicService` holds the logic
   once, `ClinicTools` interface with local and MCP implementations (`TOOLS_TRANSPORT`).

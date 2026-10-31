@@ -4,7 +4,7 @@
 booking, with RAG, MCP tools, human-in-the-loop confirmation, evaluations and a CI/CD pipeline
 that deploys to AWS.**
 
-![CI](https://github.com/YOUR_GITHUB_USERNAME/agentic-healthcare-assistant/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/KeertiPremGadde/agentic-healthcare-assistant/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![LangGraph](https://img.shields.io/badge/agents-LangGraph-green)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)

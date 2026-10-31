@@ -68,8 +68,9 @@ redirected to emergency services. Only synthetic patient data is ever stored.
 - [x] docker-compose (Postgres + pgvector), API Dockerfile
 - [x] GitHub Actions CI, Dependabot, PR/issue templates, CODEOWNERS
 - [x] Docs: README, PLAN, ARCHITECTURE (diagrams), SETUP, ADRs, CLAUDE.md
-- [ ] `uv sync`, `pre-commit install`, first commit, create GitHub repo, push
-- [ ] Put your GitHub username in `.github/CODEOWNERS`; enable branch protection on `main` (require CI)
+- [x] `uv sync`, `pre-commit install`, first commit, create GitHub repo, push
+- [x] Put your GitHub username in `.github/CODEOWNERS`
+- [ ] Enable branch protection on `main` (require CI) – in GitHub settings, after CI has run once
 
 ## Phase 1 – Data layer
 

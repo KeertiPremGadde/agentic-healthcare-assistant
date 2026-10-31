@@ -53,6 +53,7 @@ uv run python scripts/seed.py                 # synthetic doctors, schedules, pa
 uv run python scripts/fetch_medlineplus.py     # download MedlinePlus topics into data/raw/ (git-ignored)
 uv run python -m medagent.rag.ingest medlineplus   # embed locally (FastEmbed, no API key) into pgvector
 uv run python -m medagent.rag.ask "What are the symptoms of diabetes?"   # needs ANTHROPIC_API_KEY
+uv run python -m medagent.agents.chat --patient alex.example@example.com   # full agent (add --verbose for cost logs)
 ```
 
 ## Recommended VS Code extensions

@@ -84,14 +84,20 @@ redirected to emergency services. Only synthetic patient data is ever stored.
 - [x] Unit tests for slot generation/validation; integration test against Docker Postgres
 - **Done when:** `docker compose up -d && uv run alembic upgrade head && uv run python scripts/seed.py` works and tests pass.
 
-## Phase 2 – RAG knowledge base
+## Phase 2 – RAG knowledge base ✅
 
-- [ ] Add deps: `langchain-core`, `langchain-openai` (or `-anthropic`), `langchain-postgres`, `pypdf`, `langchain-text-splitters`
-- [ ] `rag/ingest.py`: load PDFs → chunk → metadata (source, page) → embed → pgvector (idempotent)
-- [ ] `rag/retriever.py`: hybrid search (vector + `tsvector`) with reciprocal-rank fusion, then reranker
-- [ ] Answers include citations `[source p.N]`; "I don't know" when context is weak
-- [ ] Tests with a tiny fixture corpus
-- **Done when:** `uv run python -m medagent.rag.ingest` loads the PDFs and a CLI query returns cited answers.
+- [x] Add deps: `langchain-core`, `langchain-anthropic`, `langchain-text-splitters`, `pypdf`, `fastembed`, `defusedxml`
+  (`langchain-postgres` dropped: hybrid search + RRF needs hand-written SQL; chat is Anthropic, embeddings are local)
+- [x] Embeddings behind an `Embedder` interface; local FastEmbed `BAAI/bge-small-en-v1.5` (384 dims),
+  `EMBEDDING_PROVIDER` setting, model cached in CI, fake embeddings in unit tests
+- [x] `kb_documents` / `kb_chunks` tables (HNSW index, generated `tsvector` + GIN, `vector(384)`), licence + attribution + `is_public` per document
+- [x] `rag/ingest.py`: source-agnostic loaders (PDF, MedlinePlus XML) → chunk (~1200 chars, bge-small's 512-token limit) → metadata (source, page) → embed → pgvector; idempotent by content hash
+- [x] `rag/retriever.py`: hybrid search (vector + `tsvector`, OR semantics) with reciprocal-rank fusion, then `ScoreReranker` behind a `Reranker` interface
+- [x] Answers include citations (`[source p.N]` / `[MedlinePlus: Topic]`), disclaimer, and "I don't know" when context is weak (no LLM call) or the LLM says it is insufficient
+- [x] Corpus: **MedlinePlus Health Topics** for the public demo (public domain, attributed); `Medical_book.pdf` local dev only (`is_public=false`, `KB_PUBLIC_ONLY`); third-party-copyright guard; **NHS Health A-Z not ingested** (ADR 0005)
+- [x] Tests with a tiny fixture corpus (fake embedder), real-model and real-LLM tests behind markers
+- **Done when:** `uv run python -m medagent.rag.ingest medlineplus` loads the topics and `uv run python -m medagent.rag.ask "..."` returns a cited answer.
+- Later upgrades: local **cross-encoder** reranker (same interface); NHS content only if NHS England confirms AI use in writing *and* a 7-day refresh job exists; re-calibrate `RAG_MIN_SCORE` if the embedding model changes.
 
 ## Phase 3 – Multi-agent graph (core of the project)
 

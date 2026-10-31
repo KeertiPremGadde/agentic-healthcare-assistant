@@ -5,6 +5,30 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- Phase 3 multi-agent graph (LangGraph): guardrail → supervisor → medical_rag / doctor_finder /
+  booking / respond → output_guard, compiled with a Postgres checkpointer (memory per `thread_id`
+  survives restarts, including a booking waiting for confirmation).
+- Human-in-the-loop booking: `interrupt()` confirmation, re-validation before insert, lost races
+  re-confirm the next free slot; patient id from config only.
+- Deterministic emergency red-flag rules (English + German) before any LLM call, router
+  `is_emergency` as second layer, safety notice for general questions about emergencies.
+- Per-run token usage and estimated USD cost logged as JSON (pseudonymised ids, no message text);
+  `observability/cost.py` price table.
+- CLI chat `python -m medagent.agents.chat --patient <email> [--thread ...] [--verbose]`;
+  `scripts/export_graph.py`; ADR 0006; `docs/learning/phase3.md`.
+- Shared `Specialty` enum used by the seed and the router.
+
+### Changed
+- Structured output uses `method="json_schema"` (Claude Sonnet 5.5 rejects forced tool calls); RAG
+  answer `max_tokens` raised to 4096 to leave room for thinking.
+
+### Fixed
+- Alembic autogenerate no longer proposes dropping LangGraph's checkpointer tables
+  (`include_name` filter + `alembic check` test).
+
+## [0.2.0] - 2026-10-31
+
+### Added
 - Phase 2 RAG knowledge base: `kb_documents` / `kb_chunks` tables (pgvector HNSW, generated
   `tsvector` + GIN, `vector(384)`) with a licence, attribution and `is_public` flag per document;
   `Embedder` interface with local FastEmbed (`BAAI/bge-small-en-v1.5`, no API key); source-agnostic,

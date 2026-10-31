@@ -25,6 +25,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ### Fixed
 - The LLM cost report no longer prints during `-m "not llm"` runs.
 
+## [0.3.0] - 2026-10-31
+
 ### Added
 - Phase 3 multi-agent graph (LangGraph): guardrail → supervisor → medical_rag / doctor_finder /
   booking / respond → output_guard, compiled with a Postgres checkpointer (memory per `thread_id`

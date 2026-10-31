@@ -15,12 +15,13 @@ from langchain_core.callbacks import get_usage_metadata_callback
 
 def pytest_asyncio_loop_factories(
     config: pytest.Config, item: pytest.Item
-) -> Mapping[str, Callable[[], asyncio.AbstractEventLoop]] | None:
+) -> Mapping[str, Callable[[], asyncio.AbstractEventLoop]]:
     """psycopg's async mode (the LangGraph checkpointer) needs a selector loop on Windows; the
-    MCP client brings its own loop for subprocesses (see medagent/core/aio.py)."""
+    MCP client brings its own loop for subprocesses (see medagent/core/aio.py). Elsewhere the
+    default loop does both. The hook must return a non-empty mapping on every platform."""
     if sys.platform == "win32":
         return {"selector": asyncio.SelectorEventLoop}
-    return None
+    return {"default": asyncio.new_event_loop}
 
 
 def _llm_selected(config: pytest.Config) -> bool:

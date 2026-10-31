@@ -11,17 +11,20 @@ import sys
 from collections.abc import Callable, Coroutine
 from typing import Any
 
-IS_WINDOWS = sys.platform == "win32"
+# Platform checks are written literally as `sys.platform == "win32"` so that mypy type-checks
+# only the branch for the platform it runs on: ProactorEventLoop exists on Windows only.
 
 
 def app_loop_factory() -> Callable[[], asyncio.AbstractEventLoop] | None:
     """Loop for the application (database, graph). None = asyncio's default."""
-    return asyncio.SelectorEventLoop if IS_WINDOWS else None
+    if sys.platform == "win32":
+        return asyncio.SelectorEventLoop
+    return None
 
 
 def new_subprocess_loop() -> asyncio.AbstractEventLoop:
     """A loop that can spawn subprocesses on every OS."""
-    if IS_WINDOWS:
+    if sys.platform == "win32":
         return asyncio.ProactorEventLoop()
     return asyncio.new_event_loop()
 

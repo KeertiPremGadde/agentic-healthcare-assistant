@@ -29,13 +29,22 @@ class Availability(BaseModel):
         description="Whether the doctor has working hours on the weekday of `from_day`. When "
         "false, no slot exists that day however free the diary is (a day off, not a full day).",
     )
+    holiday: str | None = Field(
+        default=None,
+        description="Name of the public holiday on `from_day` in the doctor's city (e.g. "
+        "'Reformation Day'), or null on an ordinary day. The practice is closed on a holiday.",
+    )
 
 
 class SlotCheck(BaseModel):
     ok: bool
     error: str | None = Field(
         default=None,
-        description="in_the_past | not_a_working_day | outside_working_hours | already_booked",
+        description="in_the_past | not_a_working_day | public_holiday | outside_working_hours "
+        "| already_booked",
+    )
+    detail: str | None = Field(
+        default=None, description="For public_holiday: the holiday's name, e.g. 'Reformation Day'."
     )
 
 
@@ -44,6 +53,9 @@ class BookingResult(BaseModel):
     appointment_id: int | None = None
     start: datetime | None = None
     error: str | None = Field(default=None, description="A SlotCheck error, or unknown_doctor.")
+    detail: str | None = Field(
+        default=None, description="For public_holiday: the holiday's name, e.g. 'Reformation Day'."
+    )
     calendar_event_id: str | None = Field(
         default=None, description="Set if the optional calendar step succeeded."
     )

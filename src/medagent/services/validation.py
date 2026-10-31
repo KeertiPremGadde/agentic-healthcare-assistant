@@ -6,12 +6,18 @@ from collections.abc import Collection
 from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
 
-from medagent.services.availability import WorkingWindow, ensure_aware, generate_slots
+from medagent.services.availability import (
+    HolidayLookup,
+    WorkingWindow,
+    ensure_aware,
+    generate_slots,
+)
 
 
 class BookingError(enum.StrEnum):
     IN_THE_PAST = "in_the_past"
-    NOT_A_WORKING_DAY = "not_a_working_day"
+    NOT_A_WORKING_DAY = "not_a_working_day"  # no working hours on that weekday
+    PUBLIC_HOLIDAY = "public_holiday"  # a working weekday, but the practice is closed
     OUTSIDE_WORKING_HOURS = "outside_working_hours"  # also: not aligned to the slot grid
     ALREADY_BOOKED = "already_booked"
 
@@ -23,6 +29,7 @@ def validate_slot(
     now: datetime,
     tz: ZoneInfo,
     slot_minutes: int,
+    holiday_on: HolidayLookup | None = None,
 ) -> BookingError | None:
     """Return why `start` cannot be booked, or None if it can."""
     ensure_aware(start, "start")
@@ -35,6 +42,10 @@ def validate_slot(
     local_day = start_utc.astimezone(tz).date()
     if not any(w.weekday == local_day.weekday() for w in windows):
         return BookingError.NOT_A_WORKING_DAY
+
+    # After the weekday check, so a Sunday that is also a holiday still says "not a working day".
+    if holiday_on is not None and holiday_on(local_day):
+        return BookingError.PUBLIC_HOLIDAY
 
     if start_utc not in generate_slots(local_day, windows, tz, slot_minutes):
         return BookingError.OUTSIDE_WORKING_HOURS

@@ -66,6 +66,8 @@ class Settings(BaseSettings):
     # Doctors' working hours are defined in this IANA timezone; all stored times are UTC.
     clinic_timezone: str = "Europe/Berlin"
     slot_minutes: int = Field(default=30, ge=5, le=240)
+    # Language of public-holiday names in replies ("Reformation Day" / "Reformationstag").
+    holiday_language: Literal["en_US", "de"] = "en_US"
 
     @model_validator(mode="after")
     def _require_a_real_jwt_secret_outside_local(self) -> "Settings":

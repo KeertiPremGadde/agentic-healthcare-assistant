@@ -20,8 +20,9 @@ from medagent.db import repository
 from medagent.db.models import AppointmentStatus, Doctor
 from medagent.integrations.calendar import Calendar, CalendarEvent, NullCalendar
 from medagent.integrations.osm import OSMClient
-from medagent.services.availability import free_slots
-from medagent.services.validation import validate_slot
+from medagent.services.availability import HolidayLookup, free_slots
+from medagent.services.public_holidays import lookup_for_city
+from medagent.services.validation import BookingError, validate_slot
 from medagent.tools.models import (
     AppointmentInfo,
     AppointmentList,
@@ -61,6 +62,7 @@ class ClinicService:
         slot_minutes: int,
         calendar: Calendar | None = None,
         osm: OSMClient | None = None,
+        holiday_language: str = "en_US",
     ) -> None:
         self.session_factory = session_factory
         self.clock = clock
@@ -68,6 +70,7 @@ class ClinicService:
         self.slot_minutes = slot_minutes
         self.calendar: Calendar = calendar or NullCalendar()
         self.osm = osm or OSMClient(session_factory)
+        self.holiday_language = holiday_language
 
     def _in_time_of_day(self, slot: datetime, tod: TimeOfDay | None) -> bool:
         hour = slot.astimezone(self.tz).hour
@@ -77,6 +80,11 @@ class ClinicService:
             "afternoon": 12 <= hour < 17,
             "evening": hour >= 17,
         }[tod]
+
+    def _holidays_for(self, session: Session, doctor_id: int) -> HolidayLookup:
+        """The public holidays of the doctor's city: a practice is closed on its own city's."""
+        doctor = repository.get_doctor(session, doctor_id)
+        return lookup_for_city(doctor.city if doctor else None, self.holiday_language)
 
     # -- doctors -------------------------------------------------------------------------
     def get_doctor(self, doctor_id: int) -> DoctorInfo | None:
@@ -114,29 +122,46 @@ class ClinicService:
         with self.session_factory() as session:
             windows = repository.get_working_windows(session, doctor_id)
             works = any(w.weekday == from_day.weekday() for w in windows)
+            holiday_on = self._holidays_for(session, doctor_id)
+            holiday = holiday_on(from_day)
             for offset in range(days):
                 day = from_day + timedelta(days=offset)
                 booked = repository.get_booked_starts(session, doctor_id, day, self.tz)
-                for slot in free_slots(day, windows, booked, earliest, self.tz, self.slot_minutes):
+                for slot in free_slots(
+                    day, windows, booked, earliest, self.tz, self.slot_minutes, holiday_on
+                ):
                     if self._in_time_of_day(slot, time_of_day):
                         found.append(slot)
                         if len(found) >= limit:
                             return Availability(
-                                doctor_id=doctor_id, slots=found, works_on_from_day=works
+                                doctor_id=doctor_id,
+                                slots=found,
+                                works_on_from_day=works,
+                                holiday=holiday,
                             )
-        return Availability(doctor_id=doctor_id, slots=found, works_on_from_day=works)
+        return Availability(
+            doctor_id=doctor_id, slots=found, works_on_from_day=works, holiday=holiday
+        )
 
     def check_slot(self, doctor_id: int, start: datetime) -> SlotCheck:
         with self.session_factory() as session:
-            error = self._validate(session, doctor_id, start)
-        return SlotCheck(ok=error is None, error=error)
+            error, detail = self._validate(session, doctor_id, start)
+        return SlotCheck(ok=error is None, error=error, detail=detail)
 
-    def _validate(self, session: Session, doctor_id: int, start: datetime) -> str | None:
+    def _validate(
+        self, session: Session, doctor_id: int, start: datetime
+    ) -> tuple[str | None, str | None]:
+        """(error code, detail): the detail is the holiday's name for `public_holiday`."""
         day = start.astimezone(self.tz).date()
         windows = repository.get_working_windows(session, doctor_id)
         booked = repository.get_booked_starts(session, doctor_id, day, self.tz)
-        error = validate_slot(start, windows, booked, self.clock(), self.tz, self.slot_minutes)
-        return error.value if error else None
+        holiday_on = self._holidays_for(session, doctor_id)
+        error = validate_slot(
+            start, windows, booked, self.clock(), self.tz, self.slot_minutes, holiday_on
+        )
+        if error is None:
+            return None, None
+        return error.value, holiday_on(day) if error is BookingError.PUBLIC_HOLIDAY else None
 
     # -- booking -------------------------------------------------------------------------
     def book_appointment(self, patient_id: int, doctor_id: int, start: datetime) -> BookingResult:
@@ -146,8 +171,9 @@ class ClinicService:
             doctor = repository.get_doctor(session, doctor_id)
             if doctor is None:
                 return BookingResult(ok=False, error="unknown_doctor")
-            if error := self._validate(session, doctor_id, start):
-                return BookingResult(ok=False, error=error)
+            error, detail = self._validate(session, doctor_id, start)
+            if error:
+                return BookingResult(ok=False, error=error, detail=detail)
             try:
                 appointment = repository.create_appointment(session, patient_id, doctor_id, start)
             except repository.SlotTakenError:

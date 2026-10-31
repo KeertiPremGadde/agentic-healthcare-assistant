@@ -5,10 +5,14 @@ timezone-aware UTC. Doing the arithmetic in local time and converting at the end
 the slots correct across daylight-saving changes.
 """
 
-from collections.abc import Collection
+from collections.abc import Callable, Collection
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
+
+# Maps a local calendar day to the name of the public holiday on it (None = ordinary day).
+# A plain function keeps these services pure: the caller decides which city's calendar to use.
+HolidayLookup = Callable[[date], str | None]
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,12 +38,19 @@ def clinic_day_bounds(day: date, tz: ZoneInfo) -> tuple[datetime, datetime]:
 
 
 def generate_slots(
-    day: date, windows: Collection[WorkingWindow], tz: ZoneInfo, slot_minutes: int
+    day: date,
+    windows: Collection[WorkingWindow],
+    tz: ZoneInfo,
+    slot_minutes: int,
+    holiday_on: HolidayLookup | None = None,
 ) -> list[datetime]:
     """All bookable slot starts (UTC) on a local calendar day, ignoring bookings and the clock.
 
-    A slot is only generated if it ends inside its working window.
+    A slot is only generated if it ends inside its working window. On a public holiday (per
+    `holiday_on`) the practice is closed, so there are none.
     """
+    if holiday_on is not None and holiday_on(day):
+        return []
     step = timedelta(minutes=slot_minutes)
     slots: set[datetime] = set()
     for window in windows:
@@ -64,12 +75,13 @@ def free_slots(
     now: datetime,
     tz: ZoneInfo,
     slot_minutes: int,
+    holiday_on: HolidayLookup | None = None,
 ) -> list[datetime]:
     """Slots on `day` that are in the future and not already booked."""
     ensure_aware(now, "now")
     taken = {ensure_aware(b, "booked").astimezone(UTC) for b in booked}
     return [
         slot
-        for slot in generate_slots(day, windows, tz, slot_minutes)
+        for slot in generate_slots(day, windows, tz, slot_minutes, holiday_on)
         if slot > now and slot not in taken
     ]

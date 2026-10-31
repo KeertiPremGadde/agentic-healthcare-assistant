@@ -269,7 +269,13 @@ def make_book_appointment_node(deps: AgentDeps) -> ConfigNode:
                 if result.calendar_event_id:
                     text += " It's in the clinic's calendar."
                 return Command(
-                    goto="output_guard", update={**done, "booking_doctor_id": None, "draft": text}
+                    goto="output_guard",
+                    update={
+                        **done,
+                        "booking_doctor_id": None,
+                        "appointment_id": result.appointment_id,
+                        "draft": text,
+                    },
                 )
             # Not booked (time passed, or someone was faster): offer the next slot after it.
             found = await deps.tools.check_availability(

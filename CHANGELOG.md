@@ -4,6 +4,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-10-31
+
 ### Added
 - Public holidays: doctors are not bookable on the German public holidays of their own city
   (31 Oct closes Leipzig but not Berlin; München also observes Assumption Day, Nürnberg does not).

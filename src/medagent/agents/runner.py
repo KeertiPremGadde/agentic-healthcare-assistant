@@ -29,6 +29,14 @@ class TurnResult:
     pending: dict[str, Any] | None  # the interrupt payload (e.g. the booking proposal)
     route: str
     cost: RunCost
+    appointment_id: int | None = None  # set when this turn booked an appointment
+
+    @property
+    def kind(self) -> str:
+        """How a client should present the reply: emergency | harmful_intent | booked | normal."""
+        if self.route in ("emergency", "harmful_intent"):
+            return self.route
+        return "booked" if self.appointment_id is not None else "normal"
 
 
 @dataclass(frozen=True)
@@ -108,7 +116,16 @@ async def stream_turn(
         unpriced_models=list(cost.unpriced_models) or None,
         latency_ms=latency_ms,
     )
-    yield FinalEvent(TurnResult(reply=reply, pending=pending, route=route, cost=cost))
+    appointment_id = snapshot.values.get("appointment_id")
+    yield FinalEvent(
+        TurnResult(
+            reply=reply,
+            pending=pending,
+            route=route,
+            cost=cost,
+            appointment_id=appointment_id if reply is not None else None,
+        )
+    )
 
 
 async def run_turn(

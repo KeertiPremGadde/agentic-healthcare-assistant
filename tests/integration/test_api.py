@@ -325,6 +325,8 @@ async def test_chat_json_returns_reply_conversation_id_and_usage(make_api: ApiFa
     assert len(body["conversation_id"]) == 32
     assert "I'm MedAgent" in body["reply"]
     assert body["pending"] is None
+    assert body["kind"] == "normal"
+    assert body["appointment_id"] is None
     assert {"input_tokens", "output_tokens", "est_cost_usd"} <= body["usage"].keys()
     assert response.headers["X-Request-ID"]
 
@@ -424,7 +426,13 @@ async def test_sse_confirmation_event_and_resume_stream(make_api: ApiFactory) ->
         api, f"/v1/chat/{conversation}/resume", headers, {"confirmed": True}
     )
     assert [d["node"] for n, d in resumed if n == "step"] == ["book_appointment"]
-    assert next(d["text"] for n, d in resumed if n == "message").startswith("Booked:")
+    final = next(d for n, d in resumed if n == "message")
+    assert final["text"].startswith("Booked:")
+    assert final["kind"] == "booked"  # lets the UI show the green card and the .ics button
+    assert (
+        final["appointment_id"]
+        == (await api.client.get("/v1/appointments", headers=headers)).json()[0]["id"]
+    )
 
 
 async def test_declining_a_confirmation_books_nothing(
@@ -675,6 +683,7 @@ async def test_emergency_messages_are_still_answered_when_a_limit_is_reached(
     response = await chat_json(api, headers, "I have crushing chest pain and can't breathe")
     assert response.status_code == 200  # not a limit error
     assert response.json()["reply"] == EMERGENCY_MESSAGE
+    assert response.json()["kind"] == "emergency"
     streamed = await api.client.post(
         "/v1/chat", headers=headers, json={"message": "Mein Vater ist bewusstlos"}
     )
@@ -710,6 +719,7 @@ async def test_harmful_messages_get_the_fixed_reply_not_a_limit_error_when_a_lim
     events = parse_sse(streamed.text)
     assert [n for n, _ in events] == ["message", "done"]
     assert events[0][1]["text"] == HARMFUL_MESSAGE
+    assert events[0][1]["kind"] == "harmful_intent"  # shown as a crisis card, not a red alarm
     german = await chat_json(api, headers, "Was ist die tödliche Dosis von Paracetamol?")
     assert german.json()["reply"] == HARMFUL_MESSAGE
     assert api.llm.calls == []  # still no LLM call

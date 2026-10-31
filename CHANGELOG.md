@@ -4,6 +4,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-31
+
 ### Added
 - Phase 2 RAG knowledge base: `kb_documents` / `kb_chunks` tables (pgvector HNSW, generated
   `tsvector` + GIN, `vector(384)`) with a licence, attribution and `is_public` flag per document;

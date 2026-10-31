@@ -16,7 +16,7 @@ from medagent import __version__
 from medagent.api.errors import DEMO_NOTICE, register_error_handlers
 from medagent.api.middleware import RequestIdMiddleware
 from medagent.api.resources import Resources, open_resources
-from medagent.api.routes import appointments, auth, chat, demo, health
+from medagent.api.routes import appointments, auth, chat, demo, health, root
 from medagent.core.config import Settings, get_settings
 from medagent.core.logging import configure_logging
 
@@ -68,7 +68,7 @@ def create_app(resources: Resources | None = None, settings: Settings | None = N
         allow_credentials=False,  # auth is a Bearer header, not a cookie: no CSRF surface
     )
     app.add_middleware(RequestIdMiddleware)  # outermost: ids on every response, even errors
-    for router in (health.router, auth.router, chat.router, appointments.router):
+    for router in (root.router, health.router, auth.router, chat.router, appointments.router):
         app.include_router(router)
     if settings.app_env == "local":
         app.include_router(demo.router)

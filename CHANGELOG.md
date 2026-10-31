@@ -18,6 +18,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
   CORS without credentials, OpenAPI docs, `/demo` page (local mode), `scripts/serve.py`.
 - Runner: `stream_turn` yields live step events (LangGraph `tasks` mode) and meters cost exactly
   once even when a run fails; `run_turn` consumes it. Pooled async Postgres checkpointer.
+- `GET /` redirects to `/docs` and `GET /favicon.ico` returns 204, so the bare URL shows no 404.
 - ADR 0008, `docs/learning/phase5.md`; settings `JWT_SECRET`, `JWT_EXPIRE_MINUTES`,
   `MAX_MESSAGE_CHARS`, `DAILY_MESSAGE_LIMIT`, `DAILY_BUDGET_USD`, `*_RATE_*`.
 

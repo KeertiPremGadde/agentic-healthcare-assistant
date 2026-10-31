@@ -110,6 +110,8 @@ _Filled in during Phase 7 (RAGAS faithfulness, answer relevancy, routing accurac
 - **Nearby clinics:** real places from [OpenStreetMap](https://www.openstreetmap.org/copyright),
   © OpenStreetMap contributors, available under the ODbL. Shown with attribution, cached for 24 h
   in line with the Nominatim/Overpass usage policies, and never bookable.
+- **Public holidays:** from the open-source [`holidays`](https://github.com/vacanza/holidays)
+  library (MIT), per doctor's city. Community data, not an official calendar.
 - **People and appointments:** all doctors and patients are synthetic (Faker), not real people.
 
 > Informational only. MedAgent does not give medical advice or diagnoses. In an emergency, call

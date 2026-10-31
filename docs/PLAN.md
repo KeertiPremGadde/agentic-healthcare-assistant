@@ -19,12 +19,11 @@ Done in order, each on its own branch and PR.
 
 - [x] `fix/guardrails-harmful-intent`: deterministic harmful-intent screen, fixed compassionate
   reply, router `is_harmful` flag, dose guard, red-team set (ADR 0009).
-- [ ] `feat/public-holidays`: doctors are not bookable on German public holidays. Use the
-  `holidays` library: national + state holidays of **each doctor's city** (Berlin=BE, Leipzig=SN,
-  München=BY, Hamburg=HH, ...), inside the pure availability/validation services, with a new
-  validation reason `public_holiday` and the message "Dr. X's practice is closed on <date>
-  (<holiday name>). The next free slot is ...". Weekends stay closed via the schedules. Tests:
-  Christmas, New Year, 31 October (Leipzig closed, Berlin open), Easter Monday.
+- [x] `feat/public-holidays`: doctors are not bookable on German public holidays of **their city**
+  (`holidays` library; static city table with a completeness test; München also observes Assumption
+  Day via the library's `catholic` category, switched on per city only). Pure services take an
+  optional `holiday_on` lookup, new reason `public_holiday`, message "Dr. X's practice is closed on
+  <date> (<holiday>)." plus the next free slot, names in `HOLIDAY_LANGUAGE`. ADR 0010.
 - [ ] **Phase 6:** an "Add to calendar" (.ics) download after booking (the patient-side
   counterpart of the demo clinic calendar; a service account cannot invite attendees).
 - [ ] **Phase 8:** SES confirmation email, sent to the maintainer's own verified address only.

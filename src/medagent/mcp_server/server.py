@@ -53,6 +53,7 @@ def default_service() -> ClinicService:
         slot_minutes=settings.slot_minutes,
         calendar=calendar_from_settings(settings),
         osm=OSMClient(get_sessionmaker(), overpass_url=settings.overpass_url),
+        holiday_language=settings.holiday_language,
     )
 
 
@@ -87,7 +88,9 @@ def create_server(service: Callable[[], ClinicService] = default_service) -> Fas
         limit: int = 5,
     ) -> Availability:
         """Free appointment slots for a doctor, starting on `from_day` (YYYY-MM-DD) and looking
-        `days` days ahead. Optionally only morning/afternoon/evening, or only after a time."""
+        `days` days ahead. Optionally only morning/afternoon/evening, or only after a time.
+        Practices are closed on the public holidays of their city (`holiday` names the one on
+        `from_day`, if any) and on days without working hours (`works_on_from_day`)."""
         return service().check_availability(doctor_id, from_day, days, time_of_day, after, limit)
 
     @server.tool()

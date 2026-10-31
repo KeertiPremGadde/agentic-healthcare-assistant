@@ -25,6 +25,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ### Changed
 - The app refuses to start with the placeholder or a short `JWT_SECRET` unless `APP_ENV=local`.
 
+### Fixed
+- Booking on a day the doctor doesn't work (e.g. "tomorrow morning" = Sunday) said "no free morning
+  slot on that day"; it now says the doctor doesn't work on that weekday. `check_availability`
+  reports `works_on_from_day`.
+
 ## [0.4.0] - 2026-10-31
 
 ### Added

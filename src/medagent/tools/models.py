@@ -24,6 +24,11 @@ class DoctorList(BaseModel):
 class Availability(BaseModel):
     doctor_id: int
     slots: list[datetime] = Field(description="Free slot start times, timezone-aware (UTC).")
+    works_on_from_day: bool = Field(
+        default=True,
+        description="Whether the doctor has working hours on the weekday of `from_day`. When "
+        "false, no slot exists that day however free the diary is (a day off, not a full day).",
+    )
 
 
 class SlotCheck(BaseModel):

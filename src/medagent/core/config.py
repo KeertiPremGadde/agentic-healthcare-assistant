@@ -20,6 +20,10 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+psycopg://medagent:medagent@localhost:5432/medagent"
 
+    # Doctors' working hours are defined in this IANA timezone; all stored times are UTC.
+    clinic_timezone: str = "Europe/Berlin"
+    slot_minutes: int = Field(default=30, ge=5, le=240)
+
 
 @lru_cache
 def get_settings() -> Settings:

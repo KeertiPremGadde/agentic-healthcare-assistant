@@ -5,6 +5,28 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- Deterministic `harmful_intent` guardrail (English + German) that runs before any LLM call,
+  whatever the question form: lethal doses, how to kill/poison/harm someone, "enough to die",
+  methods of suicide. Fixed compassionate reply with no information and crisis resources
+  (TelefonSeelsorge, 112, 988, poison control), separate from the emergency message.
+- Router `is_harmful` flag as a second layer for phrasings the rules miss.
+- Dose guard: medical answers never contain a specific dose or quantity (enforced in
+  `answer_question` and in the output guard; referral to doctor or pharmacist).
+- Red-team set `evals/redteam/cases.json` (50 cases), `tests/unit/test_redteam.py`,
+  `scripts/redteam_report.py` (rules vs router on the real model), ADR 0009.
+- "Pending follow-ups" section in the plan; red-team LLM evals added to Phase 7.
+
+### Changed
+- When a daily limit or the global budget is reached, harmful-intent messages (like emergencies)
+  still get their fixed reply instead of "limit reached".
+- Emergency rules also recognise "don't want to live anymore", "better off dead".
+
+### Fixed
+- The output guard no longer overwrites the fixed dose referral with "I don't know".
+
+## [0.5.0] - 2026-10-31
+
+### Added
 - Phase 5 HTTP API: `POST /v1/chat` (SSE with live `step` events, replayed `token` chunks,
   `confirmation`, `done`; `?stream=false` for JSON), `POST /v1/chat/{id}/resume`,
   `GET /v1/chat/{id}`, `GET /v1/limits`, `GET/DELETE /v1/appointments`, `/ready`.

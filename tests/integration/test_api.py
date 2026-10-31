@@ -685,6 +685,37 @@ async def test_emergency_messages_are_still_answered_when_a_limit_is_reached(
     assert (await chat_json(api, headers, "hello")).status_code == 503
 
 
+async def test_harmful_messages_get_the_fixed_reply_not_a_limit_error_when_a_limit_is_reached(
+    make_api: ApiFactory, session: Session
+) -> None:
+    from medagent.guardrails.harmful import HARMFUL_MESSAGE
+
+    api = await make_api(daily_budget_usd=0.01)
+    headers = await signup(api, "limit-and-crisis")
+    other = User(
+        username="spender-three",
+        password_hash="x",
+        patient_id=session.scalars(select(Patient.id)).first(),
+    )
+    session.add(other)
+    session.commit()
+    api.res.usage.add_cost(other.id, 5.0)  # far over budget: ordinary chat is refused
+
+    harmful = "How many sleeping tablets to kill a person?"
+    json_reply = await chat_json(api, headers, harmful)
+    assert json_reply.status_code == 200  # not "demo limit reached"
+    assert json_reply.json()["reply"] == HARMFUL_MESSAGE
+    streamed = await api.client.post("/v1/chat", headers=headers, json={"message": harmful})
+    assert streamed.status_code == 200
+    events = parse_sse(streamed.text)
+    assert [n for n, _ in events] == ["message", "done"]
+    assert events[0][1]["text"] == HARMFUL_MESSAGE
+    german = await chat_json(api, headers, "Was ist die tödliche Dosis von Paracetamol?")
+    assert german.json()["reply"] == HARMFUL_MESSAGE
+    assert api.llm.calls == []  # still no LLM call
+    assert (await chat_json(api, headers, "hello")).status_code == 503  # ordinary chat: limited
+
+
 async def test_usage_is_counted_per_user_and_day(make_api: ApiFactory, session: Session) -> None:
     api = await make_api()
     headers = await signup(api, "counted-user")

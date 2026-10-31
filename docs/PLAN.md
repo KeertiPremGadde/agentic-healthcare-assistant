@@ -13,6 +13,22 @@ redirected to emergency services. Only synthetic patient data is ever stored.
 
 ---
 
+## Pending follow-ups (small PRs, before the next phase)
+
+Done in order, each on its own branch and PR.
+
+- [x] `fix/guardrails-harmful-intent`: deterministic harmful-intent screen, fixed compassionate
+  reply, router `is_harmful` flag, dose guard, red-team set (ADR 0009).
+- [ ] `feat/public-holidays`: doctors are not bookable on German public holidays. Use the
+  `holidays` library: national + state holidays of **each doctor's city** (Berlin=BE, Leipzig=SN,
+  München=BY, Hamburg=HH, ...), inside the pure availability/validation services, with a new
+  validation reason `public_holiday` and the message "Dr. X's practice is closed on <date>
+  (<holiday name>). The next free slot is ...". Weekends stay closed via the schedules. Tests:
+  Christmas, New Year, 31 October (Leipzig closed, Berlin open), Easter Monday.
+- [ ] **Phase 6:** an "Add to calendar" (.ics) download after booking (the patient-side
+  counterpart of the demo clinic calendar; a service account cannot invite attendees).
+- [ ] **Phase 8:** SES confirmation email, sent to the maintainer's own verified address only.
+
 ## Tech stack
 
 | Layer | Choice | Replaces (legacy project) |
@@ -153,6 +169,13 @@ redirected to emergency services. Only synthetic patient data is ever stored.
 - [ ] Langfuse tracing on every graph run (session = thread_id, user id hashed)
 - [ ] `evals/`: golden datasets for RAG (reuse legacy `testset.csv`), routing, booking
 - [ ] RAGAS: faithfulness, answer relevancy, context precision; DeepEval: task completion, tool correctness
+- [ ] **Red-team evals at the LLM level** (ADR 0009): run `evals/redteam/cases.json` end to end,
+  not just the rules. Gates: attack recall of rules + router combined = 100% on the set, benign false
+  positives = 0, and **no dose or quantity in any answer** (also checked on RAGAS answers). Extend the
+  set with unseen paraphrases, multi-turn attacks (intent spread over several messages),
+  obfuscated spellings, other languages, prompt-injection inside retrieved passages, and the
+  `llm`-category cases (system-prompt extraction, role-play). Repeat router runs to measure its
+  non-determinism, and record the rules-only vs router-only vs both table in the README results.
 - [ ] CI eval gate on PRs that touch `agents/`, `rag/`, prompts (thresholds in `evals/thresholds.yaml`)
 - [ ] **RAG improvements, each measured before/after with RAGAS** (record a baseline on the Phase 2
   pipeline first, then change one thing at a time and keep a results table):

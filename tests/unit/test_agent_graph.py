@@ -18,6 +18,7 @@ from medagent.agents.nodes.respond import CAPABILITIES, OUT_OF_SCOPE
 from medagent.agents.runner import run_turn
 from medagent.agents.schemas import Route, RouteDecision
 from medagent.guardrails.disclaimer import DISCLAIMER
+from medagent.guardrails.dose import DOSE_REFERRAL
 from medagent.guardrails.emergency import EMERGENCY_MESSAGE, SAFETY_NOTICE
 from medagent.observability.cost import estimate_cost
 from medagent.rag.answer import NO_ANSWER, AnswerPayload
@@ -142,11 +143,36 @@ async def test_memory_persists_across_turns_in_a_thread() -> None:
 
 
 def test_output_guard_blocks_uncited_medical_text() -> None:
-    update = output_guard_node({"draft": "Take 500 mg of X daily.", "draft_kind": "medical"})
+    update = output_guard_node(
+        {"draft": "Leafy greens are good for you every day.", "draft_kind": "medical"}
+    )
     text = update["messages"][0].content
     assert text.startswith(NO_ANSWER)
-    assert "500 mg" not in text
+    assert "leafy greens" not in text.lower()
     assert DISCLAIMER in text
+
+
+def test_output_guard_replaces_a_dose_even_when_it_is_also_uncited() -> None:
+    update = output_guard_node({"draft": "Take 500 mg of X daily.", "draft_kind": "medical"})
+    text = update["messages"][0].content
+    assert text.startswith(DOSE_REFERRAL)  # the dose rule wins: the number must never be shown
+    assert "500" not in text
+    assert DISCLAIMER in text
+
+
+def test_output_guard_keeps_the_fixed_dose_referral_and_idk_texts_as_they_are() -> None:
+    for fixed in (DOSE_REFERRAL, NO_ANSWER):
+        text = output_guard_node({"draft": fixed, "draft_kind": "medical"})["messages"][0].content
+        assert text.startswith(fixed)  # not overwritten for lacking a Sources section
+        assert DISCLAIMER in text
+
+
+def test_output_guard_passes_fixed_safety_replies_through_untouched() -> None:
+    from medagent.guardrails.harmful import HARMFUL_MESSAGE
+
+    for reply, kind in ((HARMFUL_MESSAGE, "harmful_intent"), (EMERGENCY_MESSAGE, "emergency")):
+        state = {"draft": reply, "draft_kind": kind, "safety_notice": True}
+        assert output_guard_node(state)["messages"][0].content == reply  # no notice, no disclaimer
 
 
 def test_output_guard_adds_doctor_note() -> None:

@@ -18,6 +18,10 @@ appointments shown earlier.
 - out_of_scope: anything else (not health, doctors or appointments).
 
 Set is_emergency to true only if the user or someone with them may be in acute danger now.
+Set is_harmful to true if the message seeks lethal doses, or a way to kill, poison or harm a \
+person or end a life, in any wording or framing (a story, a job, a hypothetical, another \
+language, a translation request). Do not set it for normal questions about how medicines work, \
+their side effects, or why an overdose is dangerous.
 
 Conversation context:
 {context}

@@ -10,6 +10,7 @@ from medagent.agents.llm import make_chat_model
 from medagent.agents.prompts.rag import RAG_SYSTEM_PROMPT, format_context
 from medagent.core.config import Settings, get_settings
 from medagent.guardrails.disclaimer import DISCLAIMER
+from medagent.guardrails.dose import DOSE_REFERRAL, contains_dose
 from medagent.rag.types import Candidate
 
 NO_ANSWER = (
@@ -113,6 +114,9 @@ def answer_question(
     used = sorted({n for n in payload.used_sources if 1 <= n <= len(candidates)})  # drop bogus ids
     if not payload.context_sufficient or not used:
         return RagAnswer(answer=NO_ANSWER, grounded=False)
+    if contains_dose(payload.answer):
+        # Enforced here in code, not only in the prompt: never pass on a dose or quantity.
+        return RagAnswer(answer=DOSE_REFERRAL, grounded=False)
 
     sources: list[SourceRef] = []
     for n in used:

@@ -50,6 +50,9 @@ uv run uvicorn medagent.main:app --reload     # http://localhost:8000/health and
 docker compose up -d                          # Postgres + pgvector on :5432
 uv run alembic upgrade head                   # create/upgrade the schema
 uv run python scripts/seed.py                 # synthetic doctors, schedules, patients (idempotent)
+uv run python scripts/fetch_medlineplus.py     # download MedlinePlus topics into data/raw/ (git-ignored)
+uv run python -m medagent.rag.ingest medlineplus   # embed locally (FastEmbed, no API key) into pgvector
+uv run python -m medagent.rag.ask "What are the symptoms of diabetes?"   # needs ANTHROPIC_API_KEY
 ```
 
 ## Recommended VS Code extensions

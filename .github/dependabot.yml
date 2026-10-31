@@ -11,4 +11,8 @@ updates:
   - package-ecosystem: "docker"
     directory: "/infra/docker"
     schedule: { interval: "weekly" }
+    ignore:
+      # The project supports Python >=3.12,<3.14 (pyproject.toml); don't bump the image past it.
+      - dependency-name: "python"
+        versions: [">=3.14"]
   # Phase 6: add an "npm" entry for /frontend once package.json exists

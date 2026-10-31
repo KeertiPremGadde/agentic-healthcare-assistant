@@ -8,3 +8,4 @@ One file per significant decision: `NNNN-short-title.md` with Context, Decision,
 | [0002](0002-postgres-pgvector-single-datastore.md) | PostgreSQL + pgvector as the single datastore |
 | [0003](0003-fastapi-sse-api.md) | FastAPI with SSE streaming |
 | [0004](0004-utc-storage-and-slot-integrity.md) | UTC storage, clinic-local schedules, DB-enforced slot uniqueness |
+| [0005](0005-rag-retrieval-and-corpus-licensing.md) | RAG: hybrid retrieval, local embeddings, corpus licensing (MedlinePlus yes, NHS no) |

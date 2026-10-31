@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Index, func, text
+from sqlalchemy import DateTime, Enum, ForeignKey, Index, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from medagent.db.base import Base
@@ -48,6 +48,8 @@ class Appointment(Base):
         ),
         default=AppointmentStatus.BOOKED,
     )
+    # Set when the optional calendar step succeeded (Google event id, derived from our id).
+    calendar_event_id: Mapped[str | None] = mapped_column(String(1024))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), default=_utcnow
     )

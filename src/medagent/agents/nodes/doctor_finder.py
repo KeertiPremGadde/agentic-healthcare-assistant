@@ -1,4 +1,4 @@
-"""Symptoms -> specialty (an enum, chosen by the LLM) -> doctors from the database."""
+"""Symptoms -> specialty (an enum, chosen by the LLM) -> doctors via the clinic tools."""
 
 from typing import Any
 
@@ -10,40 +10,41 @@ from medagent.agents.nodes.common import APOLOGY, Node, recent_messages
 from medagent.agents.prompts.booking import DOCTOR_FINDER_SYSTEM_PROMPT
 from medagent.agents.schemas import DoctorQuery
 from medagent.agents.state import AgentState, DoctorOption
-from medagent.db import repository
+from medagent.tools.clinic import ToolError
 
 log = structlog.get_logger("medagent.agents")
+
 MAX_OPTIONS = 5
 
 
 def make_doctor_finder_node(deps: AgentDeps) -> Node:
-    def doctor_finder_node(state: AgentState) -> dict[str, Any]:
+    async def doctor_finder_node(state: AgentState) -> dict[str, Any]:
         try:
-            query = deps.llm.invoke(
+            query = await deps.llm.ainvoke(
                 DoctorQuery, DOCTOR_FINDER_SYSTEM_PROMPT, recent_messages(state)
             )
-        except LLMError as exc:
+            specialty = query.specialty.value
+            relaxed: list[str] = []
+            found = await deps.tools.search_doctors(
+                specialty, query.city, query.language, limit=MAX_OPTIONS
+            )
+            # Relax the optional filters one at a time rather than returning nothing.
+            if not found.doctors and query.language:
+                relaxed.append(f"speaking {query.language}")
+                found = await deps.tools.search_doctors(specialty, query.city, limit=MAX_OPTIONS)
+            if not found.doctors and query.city:
+                relaxed.append(f"in {query.city}")
+                found = await deps.tools.search_doctors(specialty, limit=MAX_OPTIONS)
+        except (LLMError, ToolError) as exc:
             log.warning("node_failed", node="doctor_finder", error=str(exc))
             return {"draft": APOLOGY, "draft_kind": "info"}
 
-        specialty = query.specialty.value
-        relaxed: list[str] = []
-        with deps.session_factory() as session:
-            doctors = repository.get_doctors(session, specialty, query.city, query.language)
-            # Relax the optional filters one at a time rather than returning nothing.
-            if not doctors and query.language:
-                relaxed.append(f"speaking {query.language}")
-                doctors = repository.get_doctors(session, specialty, query.city)
-            if not doctors and query.city:
-                relaxed.append(f"in {query.city}")
-                doctors = repository.get_doctors(session, specialty)
-            options = [
-                DoctorOption(
-                    id=d.id, name=d.name, specialty=d.specialty, city=d.city, languages=d.languages
-                )
-                for d in doctors[:MAX_OPTIONS]
-            ]
-
+        options = [
+            DoctorOption(
+                id=d.id, name=d.name, specialty=d.specialty, city=d.city, languages=d.languages
+            )
+            for d in found.doctors
+        ]
         if not options:
             text = f"I couldn't find a {specialty} at the clinic right now."
             return {"doctor_options": [], "draft": text, "draft_kind": "doctors"}

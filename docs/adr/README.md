@@ -10,3 +10,4 @@ One file per significant decision: `NNNN-short-title.md` with Context, Decision,
 | [0004](0004-utc-storage-and-slot-integrity.md) | UTC storage, clinic-local schedules, DB-enforced slot uniqueness |
 | [0005](0005-rag-retrieval-and-corpus-licensing.md) | RAG: hybrid retrieval, local embeddings, corpus licensing (MedlinePlus yes, NHS no) |
 | [0006](0006-agent-safety-layers-and-checkpointer.md) | Agent graph: rules-first emergency safety, HITL booking, library-owned checkpointer |
+| [0007](0007-mcp-tools-calendar-and-osm.md) | Clinic tools behind MCP, async graph, optional calendar, OpenStreetMap lookups |

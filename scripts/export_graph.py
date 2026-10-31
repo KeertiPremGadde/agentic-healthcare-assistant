@@ -23,13 +23,13 @@ class _Unused:
 
 def main() -> None:
     deps = AgentDeps(
-        session_factory=lambda: nullcontext(None),  # type: ignore[arg-type,return-value]
+        tools=_Unused(),  # type: ignore[arg-type]
         llm=_Unused(),  # type: ignore[arg-type]
         answer_llm=_Unused(),  # type: ignore[arg-type]
         retriever=_Unused(),  # type: ignore[arg-type]
+        session_factory=lambda: nullcontext(None),  # type: ignore[arg-type,return-value]
         clock=lambda: datetime.now(UTC),
         tz=ZoneInfo("Europe/Berlin"),
-        slot_minutes=30,
         public_only=True,
         rag_min_score=0.7,
     )

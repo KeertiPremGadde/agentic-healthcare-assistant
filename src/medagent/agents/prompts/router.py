@@ -11,6 +11,9 @@ what a condition is).
 asks for a list of doctors (optionally by city or language).
 - book: wants to book, reschedule or pick an appointment, chooses a doctor from a list shown \
 earlier, or gives a day or time while a booking is in progress.
+- cancel: wants to cancel one of their appointments, or picks one from a list of their \
+appointments shown earlier.
+- nearby_clinics: asks for real clinics, hospitals or practices near a place (not for booking).
 - smalltalk: greetings, thanks, or questions about what you can do.
 - out_of_scope: anything else (not health, doctors or appointments).
 

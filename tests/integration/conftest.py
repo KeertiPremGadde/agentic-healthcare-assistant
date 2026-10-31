@@ -44,7 +44,7 @@ def session(engine: Engine) -> Iterator[Session]:
     with engine.begin() as conn:
         conn.execute(
             text(
-                "TRUNCATE kb_chunks, kb_documents, appointments, doctor_schedules, "
+                "TRUNCATE external_cache, kb_chunks, kb_documents, appointments, doctor_schedules, "
                 "patients, doctors "
                 "RESTART IDENTITY CASCADE"
             )

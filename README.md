@@ -88,6 +88,9 @@ _Filled in during Phase 7 (RAGAS faithfulness, answer relevancy, routing accurac
   address AI use, see [ADR 0005](docs/adr/0005-rag-retrieval-and-corpus-licensing.md)) and any book
   or PDF we do not hold a licence to republish. Such files may be ingested locally for development
   and are flagged non-public, so `KB_PUBLIC_ONLY=true` keeps them out of retrieval.
+- **Nearby clinics:** real places from [OpenStreetMap](https://www.openstreetmap.org/copyright),
+  © OpenStreetMap contributors, available under the ODbL. Shown with attribution, cached for 24 h
+  in line with the Nominatim/Overpass usage policies, and never bookable.
 - **People and appointments:** all doctors and patients are synthetic (Faker), not real people.
 
 > Informational only. MedAgent does not give medical advice or diagnoses. In an emergency, call

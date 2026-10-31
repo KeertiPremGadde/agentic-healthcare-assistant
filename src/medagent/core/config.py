@@ -33,6 +33,17 @@ class Settings(BaseSettings):
     # in-scope questions scored 0.74-0.87, off-topic 0.43-0.65 (re-measure if the model changes).
     rag_min_score: float = Field(default=0.70, ge=0, le=1)
 
+    # Tools: "mcp" = nodes call the MCP server over stdio (real boundary); "local" = in-process.
+    tools_transport: Literal["mcp", "local"] = "mcp"
+
+    # Google Calendar (optional). Both set => booked appointments are added to one shared demo
+    # calendar via a service account; otherwise the calendar step is skipped.
+    google_service_account_file: str | None = None
+    google_calendar_id: str | None = None
+
+    # OpenStreetMap Overpass endpoint (public by default; set a mirror or self-hosted instance)
+    overpass_url: str = "https://overpass-api.de/api/interpreter"
+
     database_url: str = "postgresql+psycopg://medagent:medagent@localhost:5432/medagent"
 
     # Doctors' working hours are defined in this IANA timezone; all stored times are UTC.

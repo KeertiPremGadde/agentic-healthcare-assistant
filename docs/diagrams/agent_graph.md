@@ -14,10 +14,14 @@ graph TD;
 	supervisor(supervisor)
 	medical_rag(medical_rag)
 	doctor_finder(doctor_finder)
+	nearby_clinics(nearby_clinics)
 	respond(respond)
 	booking(booking)
 	confirm(confirm)
 	book_appointment(book_appointment)
+	cancel(cancel)
+	confirm_cancel(confirm_cancel)
+	cancel_appointment(cancel_appointment)
 	output_guard(output_guard)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> guardrail;
@@ -25,16 +29,24 @@ graph TD;
 	book_appointment -.-> output_guard;
 	booking -.-> confirm;
 	booking -.-> output_guard;
+	cancel -.-> confirm_cancel;
+	cancel -.-> output_guard;
+	cancel_appointment --> output_guard;
 	confirm -.-> book_appointment;
 	confirm -.-> output_guard;
+	confirm_cancel -.-> cancel_appointment;
+	confirm_cancel -.-> output_guard;
 	doctor_finder --> output_guard;
 	guardrail -.-> output_guard;
 	guardrail -.-> supervisor;
 	medical_rag --> output_guard;
+	nearby_clinics --> output_guard;
 	respond --> output_guard;
 	supervisor -.-> booking;
+	supervisor -.-> cancel;
 	supervisor -.-> doctor_finder;
 	supervisor -.-> medical_rag;
+	supervisor -.-> nearby_clinics;
 	supervisor -.-> output_guard;
 	supervisor -.-> respond;
 	output_guard --> __end__;

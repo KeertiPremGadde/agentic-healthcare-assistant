@@ -13,7 +13,7 @@ from medagent.agents.deps import AgentDeps
 from medagent.agents.graph import AgentGraph, build_graph
 from medagent.agents.llm import LLMError
 from medagent.agents.nodes.common import APOLOGY
-from medagent.agents.nodes.output_guard import DOCTOR_NOTE, output_guard_node
+from medagent.agents.nodes.output_guard import DOCTOR_NOTE, OSM_ATTRIBUTION, output_guard_node
 from medagent.agents.nodes.respond import CAPABILITIES, OUT_OF_SCOPE
 from medagent.agents.runner import run_turn
 from medagent.agents.schemas import Route, RouteDecision
@@ -22,7 +22,7 @@ from medagent.guardrails.emergency import EMERGENCY_MESSAGE, SAFETY_NOTICE
 from medagent.observability.cost import estimate_cost
 from medagent.rag.answer import NO_ANSWER, AnswerPayload
 from medagent.rag.types import Candidate
-from tests.fakes import FakeAnswerLLM, FakeRetriever, FakeStructuredLLM, no_database
+from tests.fakes import FakeAnswerLLM, FakeRetriever, FakeStructuredLLM, NoTools, no_database
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -44,8 +44,7 @@ def _graph(
     llm: FakeStructuredLLM, answer: AnswerPayload | None = None, *, db: bool = True
 ) -> AgentGraph:
     deps = AgentDeps(
-        # The RAG node opens a session for the retriever; the fake retriever ignores it.
-        session_factory=(lambda: nullcontext(None)) if db else no_database,  # type: ignore[arg-type,return-value]
+        tools=NoTools(),  # type: ignore[arg-type]  (these tests never schedule anything)
         llm=llm,
         answer_llm=FakeAnswerLLM(
             answer
@@ -56,9 +55,10 @@ def _graph(
             )
         ),
         retriever=FakeRetriever([_candidate()]),
+        # The RAG node opens a session for the retriever; the fake retriever ignores it.
+        session_factory=(lambda: nullcontext(None)) if db else no_database,  # type: ignore[arg-type,return-value]
         clock=lambda: datetime(2026, 11, 2, 8, 0, tzinfo=UTC),
         tz=BERLIN,
-        slot_minutes=30,
         public_only=True,
         rag_min_score=0.7,
     )
@@ -77,25 +77,27 @@ def _thread() -> str:
     "message",
     ["I have crushing chest pain and can't breathe", "Mein Vater ist bewusstlos"],
 )
-def test_emergency_short_circuits_without_any_llm_call(message: str) -> None:
+async def test_emergency_short_circuits_without_any_llm_call(message: str) -> None:
     llm = FakeStructuredLLM()  # no script: any LLM call would fail the test
-    result = run_turn(_graph(llm, db=False), _thread(), 1, message=message)
+    result = await run_turn(_graph(llm, db=False), _thread(), 1, message=message)
     assert result.reply == EMERGENCY_MESSAGE
     assert result.route == "emergency"
     assert llm.calls == []
     assert result.cost.usd == 0
 
 
-def test_router_emergency_flag_is_the_second_safety_layer() -> None:
+async def test_router_emergency_flag_is_the_second_safety_layer() -> None:
     llm = FakeStructuredLLM({RouteDecision: [_route(Route.MEDICAL_QUESTION, emergency=True)]})
-    result = run_turn(_graph(llm), _thread(), 1, message="my husband looks very grey and sweaty")
+    result = await run_turn(_graph(llm), _thread(), 1, message="my husband looks grey and sweaty")
     assert result.reply == EMERGENCY_MESSAGE
     assert llm.schemas_called == ["RouteDecision"]
 
 
-def test_general_question_about_an_emergency_is_answered_with_a_safety_notice() -> None:
+async def test_general_question_about_an_emergency_is_answered_with_a_safety_notice() -> None:
     llm = FakeStructuredLLM({RouteDecision: [_route(Route.MEDICAL_QUESTION)]})
-    result = run_turn(_graph(llm), _thread(), 1, message="What are the warning signs of a stroke?")
+    result = await run_turn(
+        _graph(llm), _thread(), 1, message="What are the warning signs of a stroke?"
+    )
     assert result.reply is not None
     assert result.reply.startswith(SAFETY_NOTICE)
     assert "[MedlinePlus: Stroke]" in result.reply
@@ -103,10 +105,10 @@ def test_general_question_about_an_emergency_is_answered_with_a_safety_notice() 
     assert DISCLAIMER in result.reply
 
 
-def test_medical_answer_without_evidence_says_dont_know() -> None:
+async def test_medical_answer_without_evidence_says_dont_know() -> None:
     llm = FakeStructuredLLM({RouteDecision: [_route(Route.MEDICAL_QUESTION)]})
     weak = AnswerPayload(answer="x", used_sources=[1], context_sufficient=False)
-    result = run_turn(_graph(llm, weak), _thread(), 1, message="What is a rare thing?")
+    result = await run_turn(_graph(llm, weak), _thread(), 1, message="What is a rare thing?")
     assert result.reply is not None
     assert result.reply.startswith(NO_ANSWER)
     assert DISCLAIMER in result.reply
@@ -116,28 +118,27 @@ def test_medical_answer_without_evidence_says_dont_know() -> None:
     ("route", "expected"),
     [(Route.SMALLTALK, CAPABILITIES), (Route.OUT_OF_SCOPE, OUT_OF_SCOPE)],
 )
-def test_smalltalk_and_out_of_scope_use_fixed_replies(route: Route, expected: str) -> None:
+async def test_smalltalk_and_out_of_scope_use_fixed_replies(route: Route, expected: str) -> None:
     llm = FakeStructuredLLM({RouteDecision: [_route(route)]})
-    result = run_turn(_graph(llm), _thread(), 1, message="hello")
+    result = await run_turn(_graph(llm), _thread(), 1, message="hello")
     assert result.reply == expected
     assert llm.schemas_called == ["RouteDecision"]  # one cheap call, no second LLM call
 
 
-def test_llm_failure_gives_an_apology_not_a_crash() -> None:
+async def test_llm_failure_gives_an_apology_not_a_crash() -> None:
     llm = FakeStructuredLLM({RouteDecision: [LLMError("APIConnectionError")]})
-    result = run_turn(_graph(llm), _thread(), 1, message="hello")
+    result = await run_turn(_graph(llm), _thread(), 1, message="hello")
     assert result.reply == APOLOGY
 
 
-def test_memory_persists_across_turns_in_a_thread() -> None:
+async def test_memory_persists_across_turns_in_a_thread() -> None:
     llm = FakeStructuredLLM({RouteDecision: [_route(Route.SMALLTALK), _route(Route.OUT_OF_SCOPE)]})
     graph, thread = _graph(llm), _thread()
-    run_turn(graph, thread, 1, message="hi")
-    run_turn(graph, thread, 1, message="what's the weather?")
-    messages = graph.get_state({"configurable": {"thread_id": thread}}).values["messages"]
-    assert [m.type for m in messages] == ["human", "ai", "human", "ai"]
-    # the router saw the earlier turn as context on the second call
-    assert len(llm.calls[1][2]) == 3
+    await run_turn(graph, thread, 1, message="hi")
+    await run_turn(graph, thread, 1, message="what's the weather?")
+    snapshot = await graph.aget_state({"configurable": {"thread_id": thread}})
+    assert [m.type for m in snapshot.values["messages"]] == ["human", "ai", "human", "ai"]
+    assert len(llm.calls[1][2]) == 3  # the router saw the earlier turn as context
 
 
 def test_output_guard_blocks_uncited_medical_text() -> None:
@@ -153,19 +154,24 @@ def test_output_guard_adds_doctor_note() -> None:
     assert update["messages"][0].content.endswith(DOCTOR_NOTE)
 
 
-def test_run_turn_requires_exactly_one_input() -> None:
+def test_output_guard_enforces_openstreetmap_attribution() -> None:
+    update = output_guard_node({"draft": "1. Some Hospital", "draft_kind": "nearby"})
+    assert update["messages"][0].content.endswith(OSM_ATTRIBUTION)
+
+
+async def test_run_turn_requires_exactly_one_input() -> None:
     graph = _graph(FakeStructuredLLM())
     with pytest.raises(ValueError, match="exactly one"):
-        run_turn(graph, _thread(), 1)
+        await run_turn(graph, _thread(), 1)
     with pytest.raises(ValueError, match="exactly one"):
-        run_turn(graph, _thread(), 1, message="x", resume=True)
+        await run_turn(graph, _thread(), 1, message="x", resume=True)
 
 
-def test_run_log_has_cost_fields_and_no_message_text_or_raw_ids() -> None:
+async def test_run_log_has_cost_fields_and_no_message_text_or_raw_ids() -> None:
     llm = FakeStructuredLLM({RouteDecision: [_route(Route.SMALLTALK)]})
     secret_text = "my email is alex.example@example.com"
     with capture_logs() as logs:
-        run_turn(_graph(llm), "thread-123", 42, message=secret_text)
+        await run_turn(_graph(llm), "thread-123", 42, message=secret_text)
     (entry,) = [e for e in logs if e["event"] == "graph_run"]
     assert {"est_cost_usd", "input_tokens", "output_tokens", "latency_ms"} <= entry.keys()
     flat = " ".join(str(v) for v in entry.values())

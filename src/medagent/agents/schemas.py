@@ -13,6 +13,8 @@ class Route(enum.StrEnum):
     MEDICAL_QUESTION = "medical_question"  # health information -> RAG
     FIND_DOCTOR = "find_doctor"  # symptoms -> which specialist / list doctors
     BOOK = "book"  # book, or continue booking, an appointment
+    CANCEL = "cancel"  # cancel one of the user's appointments
+    NEARBY_CLINICS = "nearby_clinics"  # real clinics/hospitals near a place (OpenStreetMap)
     SMALLTALK = "smalltalk"  # greetings, thanks, "what can you do?"
     OUT_OF_SCOPE = "out_of_scope"  # anything else
 
@@ -45,3 +47,16 @@ class BookingRequest(BaseModel):
     )
     time_of_day: Literal["morning", "afternoon", "evening"] | None = None
     exact_time: str | None = Field(default=None, description="Exact time as HH:MM (24-hour).")
+
+
+class CancelRequest(BaseModel):
+    appointment_option: int | None = Field(
+        default=None,
+        description="1-based number of the appointment from the list shown, if chosen.",
+    )
+
+
+class NearbyQuery(BaseModel):
+    city: str | None = Field(
+        default=None, description="The city or place the user named, as written (e.g. 'Hamburg')."
+    )

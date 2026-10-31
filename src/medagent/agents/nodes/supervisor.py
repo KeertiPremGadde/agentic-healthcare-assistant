@@ -19,6 +19,8 @@ ROUTE_TO_NODE = {
     Route.MEDICAL_QUESTION: "medical_rag",
     Route.FIND_DOCTOR: "doctor_finder",
     Route.BOOK: "booking",
+    Route.CANCEL: "cancel",
+    Route.NEARBY_CLINICS: "nearby_clinics",
     Route.SMALLTALK: "respond",
     Route.OUT_OF_SCOPE: "respond",
 }
@@ -31,13 +33,18 @@ def _context(state: AgentState) -> str:
         lines.append(f"Doctors suggested earlier: {names}")
     if state.get("booking_doctor_id"):
         lines.append("A booking is in progress.")
+    if appointments := state.get("appointment_options"):
+        listed = ", ".join(
+            f"{i}. {a['doctor_name']} {a['start_local']}" for i, a in enumerate(appointments, 1)
+        )
+        lines.append(f"The user's appointments listed earlier: {listed}")
     return "\n".join(lines) or "None."
 
 
 def make_supervisor_node(deps: AgentDeps) -> Node:
-    def supervisor_node(state: AgentState) -> dict[str, Any]:
+    async def supervisor_node(state: AgentState) -> dict[str, Any]:
         try:
-            decision = deps.llm.invoke(
+            decision = await deps.llm.ainvoke(
                 RouteDecision,
                 ROUTER_SYSTEM_PROMPT.format(context=_context(state)),
                 recent_messages(state),

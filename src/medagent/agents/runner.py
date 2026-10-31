@@ -32,7 +32,7 @@ def turn_config(thread_id: str, patient_id: int | None) -> RunnableConfig:
     return {"configurable": {"thread_id": thread_id, "patient_id": patient_id}}
 
 
-def run_turn(
+async def run_turn(
     graph: AgentGraph,
     thread_id: str,
     patient_id: int | None,
@@ -49,10 +49,10 @@ def run_turn(
 
     started = time.perf_counter()
     with get_usage_metadata_callback() as usage:
-        values = graph.invoke(payload, config)
+        values = await graph.ainvoke(payload, config)
     latency_ms = round((time.perf_counter() - started) * 1000)
 
-    snapshot = graph.get_state(config)
+    snapshot = await graph.aget_state(config)
     pending = snapshot.interrupts[0].value if snapshot.interrupts else None
     last = (values.get("messages") or [None])[-1]
     reply = str(last.content) if pending is None and isinstance(last, AIMessage) else None

@@ -5,6 +5,27 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- Phase 4 MCP clinic server (`python -m medagent.mcp_server`, FastMCP, 8 typed tools) and an MCP
+  client (`langchain-mcp-adapters`, one persistent stdio session); `ClinicService` holds the logic
+  once, `ClinicTools` interface with local and MCP implementations (`TOOLS_TRANSPORT`).
+- Cancellation flow with `interrupt()` confirmation (own, future, booked appointments only).
+- Optional Google Calendar integration: service account + one shared demo calendar, best-effort
+  after commit, idempotent event ids, no patient data; `scripts/check_calendar.py`;
+  `appointments.calendar_event_id`.
+- `find_nearby_clinics` from OpenStreetMap (Nominatim + Overpass), 24 h Postgres cache
+  (`external_cache`), ODbL attribution, never bookable; router routes `cancel` and `nearby_clinics`.
+- ADR 0007, `docs/learning/phase4.md`; settings `TOOLS_TRANSPORT`, `GOOGLE_SERVICE_ACCOUNT_FILE`,
+  `GOOGLE_CALENDAR_ID`, `OVERPASS_URL`; `pytest -m llm` prints total tokens and cost.
+
+### Changed
+- The graph, runner and checkpointer are async (`AsyncPostgresSaver`); on Windows the MCP client
+  runs on its own proactor loop (`core/aio.py`).
+- Dependabot ignores `mcp>=2` until `langchain-mcp-adapters` supports it.
+
+### Fixed
+- The LLM cost report no longer prints during `-m "not llm"` runs.
+
+### Added
 - Phase 3 multi-agent graph (LangGraph): guardrail → supervisor → medical_rag / doctor_finder /
   booking / respond → output_guard, compiled with a Postgres checkpointer (memory per `thread_id`
   survives restarts, including a booking waiting for confirmation).

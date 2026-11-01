@@ -192,7 +192,10 @@ uv run python scripts/run_evals.py retrieval        # free, no LLM (also prints 
 uv run python scripts/run_evals.py retrieval --dataset threshold_dev   # free: the threshold tuning set
 uv run python scripts/run_evals.py retrieval-de --repeats 3            # German via the router (a few cents)
 uv run python scripts/run_evals.py routing --repeats 3 --max-usd 0.5
-uv run python scripts/run_evals.py gate --results evals/results/baseline-deterministic evals/results/baseline-judged
+uv run python scripts/run_evals.py redteam --pilot --repeats 1     # about $0.02: 2 cases per group
+uv run python scripts/run_evals.py redteam --max-usd 0.60          # full red-team run, about $0.23
+uv run python scripts/run_evals.py redteam-rescore --source <file> # free: re-score a saved run
+uv run python scripts/run_evals.py gate --results evals/results/baseline-deterministic evals/results/baseline-judged evals/results/redteam-baseline
 ```
 
 The LLM-judged metrics (ragas, DeepEval) live in their own environment with its own lock file

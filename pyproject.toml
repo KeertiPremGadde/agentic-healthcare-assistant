@@ -50,6 +50,10 @@ dev = [
     "pre-commit>=4.0",
     "types-defusedxml>=0.7.0.20260504",
 ]
+evals = [
+    "deepeval==4.3.2",
+    "ragas==0.4.3",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -84,6 +88,13 @@ mypy_path = "src"
 # google-api-python-client ships no type information
 module = ["googleapiclient.*"]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Optional `evals` dependency group (large, untyped): treated as Any whether installed or not,
+# so mypy gives the same answer locally and in CI, where the group is not installed.
+module = ["ragas.*", "deepeval.*"]
+ignore_missing_imports = true
+follow_imports = "skip"
 
 # ---------------- Pytest ----------------
 [tool.pytest.ini_options]

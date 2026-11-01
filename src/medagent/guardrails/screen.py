@@ -40,6 +40,13 @@ def screen_message(text: str) -> Screen | None:
         )
     flag = detect_red_flag(text)
     if flag is not None and not flag.informational:
+        if flag.category == "self_injury":  # habitual: support, not "call 112 now"
+            return Screen(
+                "self_harm_support",
+                flag.category,
+                texts_for(flag.language).self_harm_message,
+                flag.language,
+            )
         return Screen(
             "emergency", flag.category, emergency_reply(flag.language, flag.category), flag.language
         )

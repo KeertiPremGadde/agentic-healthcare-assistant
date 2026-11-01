@@ -1,0 +1,14 @@
+{
+  "booking_scenarios": {
+    "sha256": "a6c65206b1f4d29efadf3bdcd76e6a6a7d2a6dab1a0fdbb658324c7353abc3f8",
+    "version": "1.0"
+  },
+  "rag_golden": {
+    "sha256": "e503a14d90a895f9905059522e96965c46fbff5b64f62cf3884a7bf75784345b",
+    "version": "1.0"
+  },
+  "routing_golden": {
+    "sha256": "48d9a6b1bd43acca7abbc1c842b425045c05931690e4661f72b5f43417c07557",
+    "version": "1.0"
+  }
+}

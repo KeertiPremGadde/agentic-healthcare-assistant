@@ -23,8 +23,10 @@ uv sync                                  # install deps (add deps with: uv add <
 uv run ruff check . ; uv run ruff format .
 uv run mypy src
 uv run pytest                            # -m "not llm" to skip real LLM calls
-uv run uvicorn medagent.main:app --reload
+uv run python scripts/serve.py           # API; not plain uvicorn: on Windows psycopg async needs a SelectorEventLoop
 docker compose up -d                     # Postgres + pgvector (Docker Desktop must be running)
+uv run python scripts/run_evals.py gate --results evals/results/baseline-deterministic evals/results/baseline-judged
+uv run --project evals python scripts/run_evals.py judge-rag --source <file>   # ragas/deepeval: isolated env
 ```
 
 ## Conventions

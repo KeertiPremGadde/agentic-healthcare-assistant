@@ -13,6 +13,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
   export-stage scrubber that also covers exception text (LangGraph's pause for a confirmation put
   the proposal into a status message; found by reading real traces back). Only the SDK's own spans
   are exported. `LANGFUSE_SAMPLE_RATE` limits the share of turns traced.
+- Evaluation harness (Phase 7, `src/medagent/evals/`, `scripts/run_evals.py`): frozen golden sets v1.0
+  with a hash lock (65 RAG questions incl. 5 German, 100 routing messages, 27 booking scenarios incl.
+  isolation and patient-injection cases), pure scorers, a booking judge that decides from database
+  state, suites for retrieval, routing, RAG answers and booking, a per-run spend cap, and result files
+  with dataset hashes. LLM-judged layer: ragas 0.4.3 and DeepEval 4.3.2 (optional `evals` dependency
+  group) with a Haiku judge, one retry and a missing-score gate. `evals/thresholds.yaml` +
+  `run_evals.py gate`: exact hard gates for safety (flag recall 100%, false positives 0, dose leaks 0,
+  booking hard violations 0) and baseline-minus-margin gates for quality. The Phase 2 baseline is
+  committed under `evals/results/baseline-*`. ADR 0013.
 - `scripts/check_langfuse.py`, ADR 0012 and the first section of `docs/learning/phase7.md`.
 
 ### Changed

@@ -184,3 +184,26 @@ By default **no message text, passages or ids are sent** (see ADR 0012).
 
 The free tier allows 50k units a month (traces, observations and scores). A turn costs about 17 to
 19 units. Lower `LANGFUSE_SAMPLE_RATE` if you expect more.
+
+## Running the evaluations (Phase 7)
+
+```powershell
+uv run python scripts/run_evals.py retrieval        # free, no LLM
+uv run python scripts/run_evals.py routing --repeats 3 --max-usd 0.5
+uv run python scripts/run_evals.py gate --results evals/results/baseline-deterministic evals/results/baseline-judged
+```
+
+The LLM-judged metrics (ragas, DeepEval) live in their own environment with its own lock file
+(`evals/pyproject.toml`), because those libraries pin older `click`, `rich`, `jiter` and `fsspec`
+than the app uses:
+
+```powershell
+uv sync --project evals                                # once; large (about 1 GB)
+uv run --project evals python scripts/run_evals.py judge-rag --source evals/results/runs/rag-<id>.json
+uv run --project evals python scripts/run_evals.py judge-booking --source evals/results/runs/booking-<id>.json
+```
+
+Every LLM suite takes `--max-usd` and stops starting calls at the cap. The telemetry of both
+libraries is switched off in code (`src/medagent/evals/telemetry.py`) and a test pins it.
+Windows note: close the VS Code mypy/Python language server before `uv sync` in the main
+environment, or it holds `.pyd` files open ("Access is denied").

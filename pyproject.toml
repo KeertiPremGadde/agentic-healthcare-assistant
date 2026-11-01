@@ -37,6 +37,7 @@ dependencies = [
     "python-multipart>=0.0.33",
     "holidays>=0.107",
     "langfuse>=5.1.0,<6",
+    "pyyaml>=6.0.3",
 ]
 
 [dependency-groups]
@@ -49,6 +50,7 @@ dev = [
     "httpx>=0.28",
     "pre-commit>=4.0",
     "types-defusedxml>=0.7.0.20260504",
+    "types-pyyaml>=6.0.12.20261030",
 ]
 
 [build-system]
@@ -85,12 +87,21 @@ mypy_path = "src"
 module = ["googleapiclient.*"]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+# Optional `evals` dependency group (large, untyped): treated as Any whether installed or not,
+# so mypy gives the same answer locally and in CI, where the group is not installed.
+module = ["ragas.*", "deepeval.*"]
+ignore_missing_imports = true
+follow_imports = "skip"
+
 # ---------------- Pytest ----------------
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-addopts = "-ra --strict-markers"
+# deepeval (optional `evals` group) ships a pytest plugin that loads .env into the process
+# environment, which would put real API keys into unit tests; keep it off.
+addopts = "-ra --strict-markers -p no:deepeval"
 markers = [
     "integration: needs Docker services (Postgres)",
     "llm: calls a real LLM API (skipped in CI by default)",

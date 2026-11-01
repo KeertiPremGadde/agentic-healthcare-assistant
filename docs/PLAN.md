@@ -85,7 +85,7 @@ Done in order, each on its own branch and PR.
 - [x] Docs: README, PLAN, ARCHITECTURE (diagrams), SETUP, ADRs, CLAUDE.md
 - [x] `uv sync`, `pre-commit install`, first commit, create GitHub repo, push
 - [x] Put your GitHub username in `.github/CODEOWNERS`
-- [ ] Enable branch protection on `main` (require CI) – in GitHub settings, after CI has run once
+- [x] Enable branch protection on `main`: on, with 3 required checks (Secret scan; Lint · Type-check · Test; Frontend · Lint · Type-check · Test · Build · E2E)
 
 ## Phase 1 – Data layer ✅
 
@@ -168,8 +168,8 @@ Done in order, each on its own branch and PR.
 
 - [x] Langfuse tracing on every graph run (session = conversation id, user id hashed, content redacted
   by default; two redaction layers, verified against real traces; ADR 0012)
-- [ ] `evals/`: golden datasets for RAG (reuse legacy `testset.csv`), routing, booking
-- [ ] RAGAS: faithfulness, answer relevancy, context precision; DeepEval: task completion, tool correctness
+- [x] `evals/`: golden datasets for RAG (reuse legacy `testset.csv`), routing, booking (frozen v1.0: 65 RAG incl. 5 German, 100 routing, 27 booking scenarios; runner, deterministic metrics, baseline and `evals/thresholds.yaml` done; ADR 0013)
+- [x] RAGAS: faithfulness, answer relevancy, context precision (+ recall); DeepEval: task completion, tool correctness (baseline: three runs each; task completion is informational until its input is fixed, ADR 0013)
 - [ ] **Red-team evals at the LLM level** (ADR 0009): run `evals/redteam/cases.json` end to end,
   not just the rules. Gates: attack recall of rules + router combined = 100% on the set, benign false
   positives = 0, and **no dose or quantity in any answer** (also checked on RAGAS answers). Extend the
@@ -187,6 +187,11 @@ Done in order, each on its own branch and PR.
     can stay clean.
   - **Cross-encoder reranker:** a local cross-encoder behind the existing `Reranker` interface
     (compare against `ScoreReranker`: quality, latency, install size).
+  - **German queries on the English-only embedding model** (baseline: 2 of 5 German questions find the
+    right topic, 3 of 5 would be refused at the threshold). Add a `search_query_en` field to the router's
+    structured output: the model translates the query to English as part of the call it already makes,
+    so there is no extra LLM call; retrieval uses it. Measure on the German set only (reported separately,
+    never in the main score). A multilingual embedding model is the fallback idea if this is not enough.
   - **Re-measure `RAG_MIN_SCORE`** on a larger labelled question set (in-scope, near-miss and off-topic;
     Phase 2 used only 18 questions with a narrow 0.65-0.74 gap). Re-do it after each change above,
     because the threshold is specific to the embedding model, chunk text and corpus.

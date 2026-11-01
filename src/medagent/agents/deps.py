@@ -52,14 +52,14 @@ def default_deps(tools: ClinicTools, settings: Settings | None = None) -> AgentD
     from medagent.db.session import get_sessionmaker
     from medagent.rag.answer import AnthropicAnswerLLM
     from medagent.rag.embeddings import get_embedder
-    from medagent.rag.retriever import HybridRetriever
+    from medagent.rag.retriever import HybridRetriever, get_reranker
 
     settings = settings or get_settings()
     return AgentDeps(
         tools=tools,
         llm=AnthropicStructuredLLM(settings),
         answer_llm=AnthropicAnswerLLM(settings),
-        retriever=HybridRetriever(get_embedder(settings)),
+        retriever=HybridRetriever(get_embedder(settings), get_reranker(settings)),
         session_factory=get_sessionmaker(),
         clock=lambda: datetime.now(UTC),
         tz=ZoneInfo(settings.clinic_timezone),

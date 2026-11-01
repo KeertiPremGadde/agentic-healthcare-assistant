@@ -10,7 +10,7 @@ from medagent.core.config import get_settings
 from medagent.db.session import get_sessionmaker
 from medagent.rag.answer import AnthropicAnswerLLM, answer_question, build_prompt, estimate_tokens
 from medagent.rag.embeddings import get_embedder
-from medagent.rag.retriever import HybridRetriever
+from medagent.rag.retriever import HybridRetriever, get_reranker
 
 
 def main() -> None:
@@ -24,7 +24,7 @@ def main() -> None:
     args = parser.parse_args()
 
     settings = get_settings()
-    retriever = HybridRetriever(get_embedder())
+    retriever = HybridRetriever(get_embedder(), get_reranker())
     with get_sessionmaker()() as session:
         if args.show_context or args.retrieval_only:
             hits = retriever.search(

@@ -31,6 +31,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
   moved up, none down; German unchanged); judged, mean of three runs: context precision 0.867 ->
   0.909 (beats the baseline spread 0.030), faithfulness 0.851 -> 0.879 and context recall 0.956 ->
   0.971 (up, within noise). Safety gates unchanged. Results in `evals/results/headers/`.
+- Cross-encoder reranker (Phase 7, RAG improvement 2, kept as the default): `Xenova/ms-marco-MiniLM-L-6-v2`
+  via fastembed reorders the top 10 candidates (`RERANKER`, `RERANKER_MODEL`, `RERANKER_TOP_N`;
+  `RERANKER=score` restores the old blend). EN hit@1 0.925 -> 0.975, MRR 0.956 -> 0.9875; judged
+  context precision 0.909 -> 0.929 (every run above every previous run), faithfulness unchanged.
+  Cost: 88 MB on disk, 218 MB resident (416 MB peak), +0.65-0.74 s per question on a laptop CPU.
+  German is unchanged (the right topic is not in the candidate pool). Four models compared with
+  `scripts/compare_rerankers.py`. ADR 0014, including the Phase 8 notes (bake the model into the
+  image, memory per request).
 
 ### Changed
 - Dependabot: ignore minor and major bumps of the Python base image (we run 3.12 everywhere) and

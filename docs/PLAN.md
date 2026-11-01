@@ -190,6 +190,11 @@ Done in order, each on its own branch and PR.
     German unchanged. `evals/results/headers/`.
   - **Cross-encoder reranker:** a local cross-encoder behind the existing `Reranker` interface
     (compare against `ScoreReranker`: quality, latency, install size).
+    **Result (kept as the default):** MiniLM-L-6 via fastembed on the top 10 candidates. EN hit@1
+    0.925 -> 0.975, MRR 0.956 -> 0.9875; context precision 0.909 -> 0.929 (no overlap between runs),
+    faithfulness unchanged; cost +0.65-0.74 s, 88 MB on disk, ~420 MB peak. A multilingual model
+    (561 MB, 37 s) does not help German: the topic is not in the candidate pool. ADR 0014,
+    `evals/results/reranker/`.
   - **German queries on the English-only embedding model** (baseline: 2 of 5 German questions find the
     right topic, 3 of 5 would be refused at the threshold). Add a `search_query_en` field to the router's
     structured output: the model translates the query to English as part of the call it already makes,

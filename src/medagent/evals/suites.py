@@ -17,7 +17,7 @@ from langchain_core.messages import HumanMessage
 from medagent.agents.llm import AnthropicStructuredLLM
 from medagent.agents.prompts.router import ROUTER_SYSTEM_PROMPT
 from medagent.agents.schemas import RouteDecision
-from medagent.core.config import get_settings
+from medagent.core.config import Settings, get_settings
 from medagent.db.session import get_sessionmaker
 from medagent.evals import datasets, metrics
 from medagent.evals.results import EvalResult, Spend, git_sha, new_run_id
@@ -25,11 +25,22 @@ from medagent.guardrails.dose import contains_dose
 from medagent.observability.cost import estimate_cost
 from medagent.rag.answer import AnthropicAnswerLLM, Retriever, answer_question
 from medagent.rag.embeddings import get_embedder
-from medagent.rag.retriever import HybridRetriever
+from medagent.rag.retriever import HybridRetriever, get_reranker
 from medagent.rag.types import Candidate
 
 CONCURRENCY = 4
 SWEEP = (0.5, 0.55, 0.6, 0.65, 0.7, 0.72, 0.74, 0.76, 0.78, 0.8)
+
+
+def _reranker_params(settings: Settings) -> dict[str, Any]:
+    """Which reranker produced a result file (the default changed from `score` in Phase 7)."""
+    if settings.reranker == "score":
+        return {"reranker": "score"}
+    return {
+        "reranker": settings.reranker,
+        "reranker_model": settings.reranker_model,
+        "reranker_top_n": settings.reranker_top_n,
+    }
 
 
 def _base(
@@ -54,7 +65,7 @@ def _base(
 def run_retrieval(k: int = 5) -> EvalResult:
     settings = get_settings()
     questions = datasets.load_rag().items
-    retriever = HybridRetriever(get_embedder(settings))
+    retriever = HybridRetriever(get_embedder(settings), get_reranker(settings))
     records: list[metrics.RetrievalRecord] = []
     with get_sessionmaker()() as session:
         for q in questions:
@@ -70,7 +81,10 @@ def run_retrieval(k: int = 5) -> EvalResult:
                 )
             )
     result = _base(
-        "retrieval", None, ("rag_golden",), {"k": k, "min_score": settings.rag_min_score}
+        "retrieval",
+        None,
+        ("rag_golden",),
+        {"k": k, "min_score": settings.rag_min_score, **_reranker_params(settings)},
     )
     result.metrics = dict(metrics.retrieval_metrics(records, settings.rag_min_score))
     result.metrics["threshold_sweep"] = metrics.threshold_sweep(records, SWEEP)
@@ -159,7 +173,7 @@ async def run_rag(
                 seen[q.kind] += 1
         questions = picked
     questions = questions[:limit]
-    inner = HybridRetriever(get_embedder(settings))
+    inner = HybridRetriever(get_embedder(settings), get_reranker(settings))
     answer_llm = AnthropicAnswerLLM(settings)
     router = AnthropicStructuredLLM(settings)
     records: list[metrics.RagRecord] = []
@@ -210,7 +224,10 @@ async def run_rag(
         )
 
     result = _base(
-        "rag", settings.llm_model, ("rag_golden",), {"k": 5, "min_score": settings.rag_min_score}
+        "rag",
+        settings.llm_model,
+        ("rag_golden",),
+        {"k": 5, "min_score": settings.rag_min_score, **_reranker_params(settings)},
     )
     await _gather_limited([one(q) for q in questions])
     result.aborted = spend.abort_reason()

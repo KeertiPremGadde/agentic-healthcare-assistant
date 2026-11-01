@@ -17,3 +17,4 @@ One file per significant decision: `NNNN-short-title.md` with Context, Decision,
 | [0011](0011-frontend.md) | Frontend: custom stream reader, token storage, one user per tab |
 | [0012](0012-langfuse-tracing-and-privacy.md) | Langfuse tracing with content redacted by default |
 | [0013](0013-evaluation-harness-and-gates.md) | Evaluation harness: frozen golden sets, DB-state judging, exact safety gates |
+| [0014](0014-rag-improvements.md) | RAG improvements measured against the frozen baseline (headers, reranker, ...) |

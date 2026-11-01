@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy.orm import Session
 
+from medagent.core.config import Settings
 from medagent.rag.answer import (
     NO_ANSWER,
     AnswerPayload,
@@ -13,7 +14,12 @@ from medagent.rag.answer import (
 from medagent.rag.chunking import CHUNK_SIZE, chunk_pages, context_header
 from medagent.rag.ingest import document_hash
 from medagent.rag.loaders import MedlinePlusLoader, PdfLoader, html_to_text
-from medagent.rag.retriever import ScoreReranker, reciprocal_rank_fusion
+from medagent.rag.retriever import (
+    CrossEncoderReranker,
+    ScoreReranker,
+    get_reranker,
+    reciprocal_rank_fusion,
+)
 from medagent.rag.types import Candidate, PageText, RawDocument
 from tests.fakes import FakeAnswerLLM
 
@@ -213,6 +219,58 @@ def test_document_hash_changes_with_the_header() -> None:
     assert document_hash(plain) != document_hash(
         _doc(pages=(PageText("body", None),), synonyms=("X",))
     )
+
+
+# ------------------------------------------------------------------ cross-encoder reranker
+class _FakeEncoder:
+    """Scores a passage by the number of times 'diabetes' occurs: stands in for the ONNX model."""
+
+    def __init__(self) -> None:
+        self.seen: list[list[str]] = []
+
+    def rerank(self, query: str, docs: list[str]) -> list[float]:
+        self.seen.append(docs)
+        return [float(d.count("diabetes")) for d in docs]
+
+
+def _rr_cand(i: int, content: str, fused: float) -> Candidate:
+    return Candidate(
+        chunk_id=i,
+        content=content,
+        document_title="T",
+        source_key="s",
+        url=None,
+        attribution="A",
+        page=None,
+        vector_sim=0.5,
+        fused_score=fused,
+    )
+
+
+def test_cross_encoder_orders_by_its_own_score_not_the_fused_rank() -> None:
+    reranker = CrossEncoderReranker("fake", top_n=10, encoder=_FakeEncoder())
+    cands = [_rr_cand(1, "risk factors", 0.03), _rr_cand(2, "diabetes diabetes symptoms", 0.01)]
+    assert [c.chunk_id for c in reranker.rerank("q", cands)] == [2, 1]
+
+
+def test_cross_encoder_scores_only_top_n_and_sinks_the_rest() -> None:
+    encoder = _FakeEncoder()
+    reranker = CrossEncoderReranker("fake", top_n=2, encoder=encoder)
+    cands = [
+        _rr_cand(1, "a", 0.04),
+        _rr_cand(2, "b", 0.03),
+        _rr_cand(3, "diabetes diabetes diabetes", 0.01),
+    ]
+    ranked = reranker.rerank("q", cands)
+    assert encoder.seen == [["a", "b"]]  # the lowest-fused candidate was never read
+    assert ranked[-1].chunk_id == 3  # ...and cannot outrank the scored ones
+
+
+def test_cross_encoder_handles_no_candidates_and_the_setting_picks_the_reranker() -> None:
+    assert CrossEncoderReranker("fake", encoder=_FakeEncoder()).rerank("q", []) == []
+    assert isinstance(get_reranker(Settings(_env_file=None)), CrossEncoderReranker)  # the default
+    off = Settings(_env_file=None, reranker="score")
+    assert isinstance(get_reranker(off), ScoreReranker)
 
 
 # ------------------------------------------------------------------ answering

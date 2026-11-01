@@ -264,12 +264,53 @@ _PERSON = re.compile(
     r"ich|mir|mich|mein\w*|wir|uns|er|ihm|jemand|kind|mutter|vater|mann|frau)\b",
     re.IGNORECASE,
 )
-# A general question: starts with a question word, "tell me" or "explain".
-_QUESTION_START = re.compile(
-    r"^(?:what|how|why|which|when|is|are|can|does|do|tell me|explain|define|"
-    r"was|wie|warum|welche\w*|wann|ist|sind|erklär\w*)\b",
+# Politeness in front of a question changes nothing: "Hello! How can I ...", "Hallo, wie ...".
+_GREETING_PREFIX = re.compile(
+    r"^(?:(?:hi|hello|hey|hallo|moin|guten (?:tag|morgen|abend)|excuse me|entschuldigung"
+    r"|please|bitte)[\s,!.:-]*)*",
     re.IGNORECASE,
 )
+# A general question: starts with a question word, "tell me" or "explain".
+_QUESTION_START = re.compile(
+    r"^(?:what|how|why|which|when|who|whose|whom|should|could|would|will|did|is|are|can|does|do"
+    r"|tell me|explain|define|was|wie|warum|welche\w*|wann|wer|woran|wodurch|wof(?:ü|ue)r"
+    r"|weshalb|wieso|ist|sind|erkl(?:ä|ae)r\w*)\b",
+    re.IGNORECASE,
+)
+# A question about KNOWING something (recognise, prevent, understand ...), as opposed to one
+# about what to do about something that is happening. Only these let a first-person pronoun
+# stay generic: "How can I recognise a stroke?" but not "How do I know if I'm having one?".
+_KNOWLEDGE_QUESTION = re.compile(
+    r"^(?:(?:how|where|what)\s+(?:can|could|should|do|does|would)\s+(?:i|we|you|one|people)\s+"
+    r"(?:recogni[sz]e|identify|spot|detect|prevent|avoid|reduce|lower|lessen|learn|understand"
+    r"|diagnose|tell|protect|prepare|find(?:\s+(?:out|information|help))?|read|know\s+about)\b"
+    r"|(?:wie|woran|wodurch)\b.{0,60}\b(?:erkenne|erkennt|erkennen|unterscheide|unterscheidet"
+    r"|unterscheiden|vorbeug\w*|verhindere|verhindert|verhindern|vermeide|vermeiden|senke|senken"
+    r"|reduziere|reduzieren|sch(?:ü|ue)tze|sch(?:ü|ue)tzt|sch(?:ü|ue)tzen)\b(?:\s+(?:ich|man|wir)\b)?"
+    r"|wo\s+(?:finde|bekomme)\s+(?:ich\s+)?informationen\b)",
+    re.IGNORECASE,
+)
+# After the knowledge question itself, a NEW subject means a second clause that says what is
+# going on, even without punctuation: "how can I recognise a stroke my husband slurs his words",
+# "... he cannot move his arm", "wie erkenne ich einen Schlaganfall mein Mann lallt". A pronoun,
+# or "my/his/her X" followed by anything that is not a preposition, is such a subject. This is
+# structural on purpose: a list of verbs would miss the verb nobody listed.
+_NEW_SUBJECT = re.compile(
+    r"\b(?:i|he|she|they|we|er|sie|ich|wir)\b"
+    r"|\b(?:my|his|her|our|their|mein\w*|sein\w*|ihr\w*|unser\w*)\s+\w+\s+"
+    r"(?!(?:from|of|in|for|against|at|before|after|during|with|to|on|by|and|or"
+    r"|vor|von|bei|f(?:ü|ue)r|gegen|mit|nach|und|oder|zu)\b)\w",
+    re.IGNORECASE,
+)
+# Signs that it is happening now or to a specific person, even inside a knowledge question.
+_HAPPENING_NOW = re.compile(
+    r"\b(?:right now|just now|currently|at the moment|this morning|tonight|today"
+    r"|gerade|jetzt|eben|soeben|akut)\b",
+    re.IGNORECASE,
+)
+# More than one sentence or a clause joined by a comma: the first words may be a question, the
+# rest says what is going on ("How do I know if it is a stroke? My face is drooping").
+_MORE_THAN_A_QUESTION = re.compile(r"[,;:]|[.!?]\s*\S")
 
 # English texts live in texts.py (with the German ones); re-exported so imports keep working.
 EMERGENCY_MESSAGE = EN.emergency_message
@@ -292,7 +333,22 @@ def _normalise(text: str) -> str:
 
 
 def _is_informational(text: str) -> bool:
-    return bool(_QUESTION_START.search(text)) and not _PERSON.search(text)
+    """Is this a general question (answer it, with a safety notice) rather than a live emergency?
+
+    A question counts as general if it has no person in it, or if it asks to KNOW something
+    ("how can I recognise ...", "wie erkenne ich ...") and nothing says it is happening now or to
+    someone in particular. When in doubt this stays False: a missed emergency costs more than an
+    extra safety notice."""
+    body = text[_GREETING_PREFIX.match(text).end() :]  # type: ignore[union-attr]
+    if _QUESTION_START.search(body) and not _PERSON.search(body):
+        return True
+    knowledge = _KNOWLEDGE_QUESTION.search(body)
+    return (
+        knowledge is not None
+        and not _HAPPENING_NOW.search(body)
+        and not _MORE_THAN_A_QUESTION.search(body)
+        and not _NEW_SUBJECT.search(body[knowledge.end() :])
+    )
 
 
 def detect_red_flag(text: str) -> RedFlag | None:

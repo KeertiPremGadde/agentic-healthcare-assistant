@@ -42,6 +42,7 @@ class AgentState(TypedDict, total=False):
     # Per-turn values (reset by the guardrail at the start of every turn)
     route: str
     search_query_en: str  # English retrieval query for a non-English medical question, else ""
+    reply_language: str  # "en" | "de": language of the fixed texts this turn (set by the router)
     safety_notice: bool
     booking: BookingInfo | None  # set only by the turn that booked an appointment
     draft: str  # the reply a node produced; output_guard checks it and turns it into a message

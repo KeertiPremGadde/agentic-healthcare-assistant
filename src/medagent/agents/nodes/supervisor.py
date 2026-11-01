@@ -13,6 +13,7 @@ from medagent.agents.schemas import Route, RouteDecision
 from medagent.agents.state import AgentState
 from medagent.guardrails.emergency import EMERGENCY_MESSAGE
 from medagent.guardrails.harmful import HARMFUL_MESSAGE
+from medagent.guardrails.texts import reply_language
 
 log = structlog.get_logger("medagent.agents")
 
@@ -66,7 +67,11 @@ def make_supervisor_node(deps: AgentDeps) -> Node:
         query = (
             decision.english_search_query() if decision.route is Route.MEDICAL_QUESTION else None
         )
-        return {"route": decision.route.value, "search_query_en": query or ""}
+        return {
+            "route": decision.route.value,
+            "search_query_en": query or "",
+            "reply_language": reply_language(decision.language),
+        }
 
     return supervisor_node
 

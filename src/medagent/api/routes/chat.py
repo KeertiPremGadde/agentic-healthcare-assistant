@@ -37,8 +37,10 @@ from medagent.api.schemas import (
     UsageOut,
 )
 from medagent.api.sse import KEEPALIVE_SECONDS, STEP_LABELS, chunk_text, keepalive, sse
+from medagent.guardrails.pii import pseudonymise
 from medagent.guardrails.screen import screen_message
 from medagent.observability.cost import RunCost
+from medagent.observability.tracing import TraceContext
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/v1", tags=["chat"])
@@ -65,6 +67,11 @@ LIMIT_MESSAGES = {
 
 def thread_id_for(user: CurrentUser, conversation_id: str) -> str:
     return f"u{user.id}:{conversation_id}"
+
+
+def _trace_context(user: CurrentUser, conversation_id: str) -> TraceContext:
+    """Session = the conversation; the user only ever appears as a hash."""
+    return TraceContext(session_id=conversation_id, user_id=pseudonymise(user.id), tags=("api",))
 
 
 def _usage(cost: RunCost) -> UsageOut:
@@ -109,6 +116,8 @@ async def _stream(
                 message=message,
                 resume=resume,
                 on_cost=record,
+                tracer=res.tracer,
+                trace=_trace_context(user, conversation_id),
             ):
                 if isinstance(event, StepEvent):
                     if label := STEP_LABELS.get(event.node):
@@ -203,6 +212,8 @@ async def _respond(
             message=message,
             resume=resume,
             on_cost=lambda cost: res.usage.add_cost(user.id, cost.usd) if cost.usd else None,
+            tracer=res.tracer,
+            trace=_trace_context(user, conversation_id),
         ):
             if isinstance(event, FinalEvent):
                 result = event.result

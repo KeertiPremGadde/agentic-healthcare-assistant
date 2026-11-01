@@ -166,7 +166,8 @@ Done in order, each on its own branch and PR.
 
 ## Phase 7 – Quality: observability & evaluation
 
-- [ ] Langfuse tracing on every graph run (session = thread_id, user id hashed)
+- [x] Langfuse tracing on every graph run (session = conversation id, user id hashed, content redacted
+  by default; two redaction layers, verified against real traces; ADR 0012)
 - [ ] `evals/`: golden datasets for RAG (reuse legacy `testset.csv`), routing, booking
 - [ ] RAGAS: faithfulness, answer relevancy, context precision; DeepEval: task completion, tool correctness
 - [ ] **Red-team evals at the LLM level** (ADR 0009): run `evals/redteam/cases.json` end to end,

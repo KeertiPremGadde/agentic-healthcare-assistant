@@ -61,6 +61,16 @@ class Settings(BaseSettings):
     # OpenStreetMap Overpass endpoint (public by default; set a mirror or self-hosted instance)
     overpass_url: str = "https://overpass-api.de/api/interpreter"
 
+    # ---- Tracing (Phase 7, optional): Langfuse. Both keys set => every graph run is traced. ----
+    langfuse_enabled: bool = True  # switch off without removing the keys
+    langfuse_public_key: str | None = None
+    langfuse_secret_key: SecretStr | None = None
+    langfuse_base_url: str = "https://cloud.langfuse.com"  # EU; US: https://us.cloud.langfuse.com
+    # False (default): message text, passages and ids are redacted before they leave the process.
+    # True is for local development and eval runs on synthetic questions only (ADR 0012).
+    langfuse_capture_content: bool = False
+    langfuse_sample_rate: float = Field(default=1.0, ge=0, le=1)  # share of turns traced
+
     database_url: str = "postgresql+psycopg://medagent:medagent@localhost:5432/medagent"
 
     # Doctors' working hours are defined in this IANA timezone; all stored times are UTC.

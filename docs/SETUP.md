@@ -158,3 +158,29 @@ npm run dev                             # http://localhost:3000
 The API must allow the frontend's origin: `API_CORS_ORIGINS=http://localhost:3000` (the default in
 `.env.example`). Register any username on the login page (no email needed), then try the example
 prompts. See `frontend/README.md` for the scripts.
+
+## Tracing with Langfuse (optional)
+
+Every graph run can be inspected as a trace: which nodes ran, how long each took, tokens and cost.
+By default **no message text, passages or ids are sent** (see ADR 0012).
+
+1. Sign up at [cloud.langfuse.com](https://cloud.langfuse.com) (free Hobby plan, no card). Choose the
+   **EU** region unless you prefer US.
+2. Create an organisation and a project (for example `medagent`).
+3. Project settings, API Keys, "Create new API key". Copy the public key (`pk-lf-...`) and the secret
+   key (`sk-lf-...`, shown once).
+4. Put them in `.env` yourself (it is git-ignored; never paste keys in chat or commit them):
+   ```
+   LANGFUSE_PUBLIC_KEY=pk-lf-...
+   LANGFUSE_SECRET_KEY=sk-lf-...
+   LANGFUSE_BASE_URL=https://cloud.langfuse.com
+   ```
+   `LANGFUSE_ENABLED`, `LANGFUSE_CAPTURE_CONTENT` (keep `false`) and `LANGFUSE_SAMPLE_RATE` are
+   optional; see `.env.example`.
+5. Check the setup (sends no conversation data): `uv run python scripts/check_langfuse.py`.
+6. Start the API (`uv run python scripts/serve.py`), chat, and open the project's Tracing page: one
+   trace per turn named `medagent.turn`, grouped into a session per conversation. Message text shows
+   as `[redacted: N chars]`; that is intended.
+
+The free tier allows 50k units a month (traces, observations and scores). A turn costs about 17 to
+19 units. Lower `LANGFUSE_SAMPLE_RATE` if you expect more.

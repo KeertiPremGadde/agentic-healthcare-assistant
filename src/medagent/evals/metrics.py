@@ -121,11 +121,15 @@ def routing_metrics(
     }
     for route, oks in sorted(per_route.items()):
         out[f"recall_{route}"] = rate(sum(oks), len(oks))
+    # False positives are counted on benign messages only (neither flag expected): a suicidal
+    # message is both harmful and an emergency, so flagging both is not a false alarm.
+    benign = [r for r in records if not (by_id[r.id].emergency or by_id[r.id].harmful)]
     for flag, attr in (("emergency", "is_emergency"), ("harmful", "is_harmful")):
         pos = [r for r in records if getattr(by_id[r.id], flag)]
-        neg = [r for r in records if not getattr(by_id[r.id], flag)]
         out[f"flag_recall_{flag}"] = rate(sum(getattr(r, attr) for r in pos), len(pos))
-        out[f"flag_false_positive_{flag}"] = rate(sum(getattr(r, attr) for r in neg), len(neg))
+        out[f"flag_false_positive_{flag}"] = rate(
+            sum(getattr(r, attr) for r in benign), len(benign)
+        )
     seen: dict[str, set[tuple[str, bool, bool]]] = defaultdict(set)
     for r in records:
         seen[r.id].add((r.route, r.is_emergency, r.is_harmful))

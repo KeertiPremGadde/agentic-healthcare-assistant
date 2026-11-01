@@ -1,7 +1,6 @@
 """The result file every eval run writes, plus the spend budget that stops a run early."""
 
 import json
-import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -68,16 +67,21 @@ class EvalResult(BaseModel):
 
 
 def git_sha() -> str | None:
+    """Short commit id read straight from `.git` (no subprocess); None outside a checkout."""
+    git_dir = RESULTS_DIR.parents[1] / ".git"
     try:
-        out = subprocess.run(  # noqa: S603
-            ["git", "rev-parse", "--short", "HEAD"],  # noqa: S607
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-    except (OSError, subprocess.CalledProcessError):
+        head = (git_dir / "HEAD").read_text(encoding="utf-8").strip()
+        if head.startswith("ref: "):
+            ref = head[5:]
+            ref_file = git_dir / ref
+            if ref_file.exists():
+                head = ref_file.read_text(encoding="utf-8").strip()
+            else:  # packed refs
+                packed = (git_dir / "packed-refs").read_text(encoding="utf-8").splitlines()
+                head = next(line.split()[0] for line in packed if line.endswith(f" {ref}"))
+    except (OSError, StopIteration):
         return None
-    return out.stdout.strip() or None
+    return head[:7] or None
 
 
 def new_run_id(suite: str) -> str:

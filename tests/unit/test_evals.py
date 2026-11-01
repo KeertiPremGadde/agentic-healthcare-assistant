@@ -109,6 +109,7 @@ def test_routing_strict_vs_lenient_and_flags() -> None:
     assert m["route_accuracy_strict"] == round(2 / 3, 4)
     assert m["route_accuracy_lenient"] == 1.0
     assert m["flag_recall_emergency"] == 0.0
+    # two benign rows (a, n), one flagged; the emergency row itself is not a benign row
     assert m["flag_false_positive_emergency"] == 0.5
 
 
@@ -267,6 +268,9 @@ def test_cancel_expectations_and_pending() -> None:
 def test_reply_is_question_check() -> None:
     sc = _scenario({"reply_is_question": True})
     assert bj.judge(sc, _obs(last_reply="Which day would you like?"), TZ).passed
+    # found by the first real run: the question mark need not end the reply
+    two = "Which doctor would you like to book with? If you tell me your symptoms, I can help."
+    assert bj.judge(sc, _obs(last_reply=two), TZ).passed
     assert not bj.judge(sc, _obs(last_reply="Booked."), TZ).passed
 
 

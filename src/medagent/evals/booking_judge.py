@@ -105,7 +105,9 @@ def judge(scenario: Scenario, obs: Observation, tz: ZoneInfo) -> Verdict:
             v.failures.append(f"not_still_booked:{ref}")
     if exp.pending_at_end is not None and obs.pending_at_end != exp.pending_at_end:
         v.failures.append(f"pending_at_end:{obs.pending_at_end}")
-    if exp.reply_is_question and not (obs.last_reply or "").rstrip().endswith("?"):
+    # "Which doctor would you like to book with? If you tell me your symptoms, ..." is a question
+    # even though the last sentence is not: look for a question mark anywhere in the reply.
+    if exp.reply_is_question and "?" not in (obs.last_reply or ""):
         v.failures.append("reply_is_not_a_question")
 
     if scenario.category in HARD_CATEGORIES and v.failures:

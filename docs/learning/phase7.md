@@ -300,3 +300,35 @@ A worse failure than silence: "Ich will meinen Nachbarn vergiften" got the *pois
 because the word "vergift-" matched the emergency rule while the harm rule missed "Nachbarn". And a
 language bug: the English anaphylaxis rule matched the stem that German shares, so a German sentence
 got the English reply. Both are fixed and pinned.
+
+---
+
+## Suicidal statements and missing concepts
+
+### Why did you pay for a router measurement if the rules are the fix?
+To find out what the rules are for. The router flags nearly everything (53 of 57 phrases in 3 of 3
+calls), so a reader could conclude the rules do not matter. The three it flagged only 1 time in 3 were
+all non-acute self-harm statements ("I've been cutting myself"), because its flag means "acute danger
+right now". That is the evidence for the design rule: a phrase is covered only if the deterministic
+rules catch it, and the router is the second layer. The measurement cost $0.034.
+
+### What is the difference between precision and recall when you widen a safety rule?
+Every new pattern can miss less (recall) or flag more by mistake (precision). Both directions were in
+this change: the new rules catch 47 more phrases, and two old English patterns got narrower because
+they flagged "I don't want to live in Berlin anymore" and "I hurt myself playing football" as a crisis.
+For a safety message the cheaper mistake is the extra warning, so ambiguous cases lean towards
+warning ("a bare 'I hurt myself' still counts"), but an obviously ordinary sentence should not.
+
+### What did the mutation check find this time?
+Four guards that looked tested and were not. I had written a benign phrase for each, but several never
+reached the guard they were meant to test: a "Kind reagiert nicht auf das Medikament" test used the word
+"Patient", which is not in the pattern's list; a swollen-glands test had two words between "Hals" and
+"schwillt" where the pattern allows one. The mutation (remove the guard) changed nothing, which is how
+I knew. A guard without a test that fails when it is removed is decoration.
+
+### What does it mean that a test file pins known false alarms?
+Two general questions ("How can I recognise self-harm in teenagers?", "Woran erkennt man
+Selbstverletzung bei Jugendlichen?") are still read as a live crisis, for reasons that belong to the next
+change. They are in a list that a test asserts is *still flagged*. The day someone fixes them, that test
+fails and tells them to move the phrases to the benign list, so a known problem cannot be forgotten or
+silently re-introduced.

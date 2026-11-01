@@ -6,13 +6,13 @@ import structlog
 
 from medagent.agents.deps import AgentDeps
 from medagent.agents.llm import LLMError
-from medagent.agents.nodes.common import APOLOGY, Node, recent_messages
+from medagent.agents.nodes.common import Node, recent_messages
 from medagent.agents.nodes.guardrail import EMERGENCY, HARMFUL
 from medagent.agents.prompts.router import ROUTER_SYSTEM_PROMPT
 from medagent.agents.schemas import Route, RouteDecision
 from medagent.agents.state import AgentState
 from medagent.guardrails.emergency import emergency_reply
-from medagent.guardrails.texts import reply_language, texts_for
+from medagent.guardrails.texts import ROUTER_FAILURE_MESSAGE, reply_language, texts_for
 
 log = structlog.get_logger("medagent.agents")
 
@@ -51,8 +51,11 @@ def make_supervisor_node(deps: AgentDeps) -> Node:
                 recent_messages(state),
             )
         except LLMError as exc:
-            log.warning("node_failed", node="supervisor", error=str(exc))
-            return {"route": "error", "draft": APOLOGY, "draft_kind": "info"}
+            log.warning("node_failed", node="supervisor", error=str(exc), kind=exc.kind)
+            # Without a routing decision nobody has checked this message for danger: the reply
+            # is neutral (the user may be a benign one hit by an outage) and always carries the
+            # emergency and crisis lines. Language unknown (no rule matched), so both.
+            return {"route": "error", "draft": ROUTER_FAILURE_MESSAGE, "draft_kind": "info"}
         # Second safety layer: phrasings the deterministic rules missed. An acute emergency
         # wins (call 112 now); otherwise harmful intent gets the fixed compassionate reply.
         if decision.is_emergency:

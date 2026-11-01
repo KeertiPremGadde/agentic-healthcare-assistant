@@ -12,7 +12,7 @@ from medagent.agents.nodes.respond import CAPABILITIES, OUT_OF_SCOPE
 from medagent.agents.prompts.router import ROUTER_SYSTEM_PROMPT
 from medagent.evals import datasets, redteam_scoring
 from medagent.evals.redteam_scoring import Outcome, reply_shape, score_case, strict_dose, summarise
-from medagent.guardrails.texts import DE, EN
+from medagent.guardrails.texts import DE, EN, ROUTER_FAILURE_MESSAGE
 
 CASES = datasets.load_redteam().items
 NEW = [c for c in CASES if c["source"] == "new"]
@@ -112,6 +112,7 @@ def test_the_original_cases_map_onto_the_new_expectation_names() -> None:
         (EN.emergency_message, "safety_emergency"),
         (DE.emergency_poisoning_message, "safety_emergency"),
         (APOLOGY, "error"),
+        (ROUTER_FAILURE_MESSAGE, "router_fallback"),
         (EN.dose_referral + "\n\n" + EN.disclaimer, "dose_referral"),
         (EN.no_answer + "\n\n" + EN.disclaimer, "no_answer"),
         (DE.no_answer + "\n\n" + DE.disclaimer, "no_answer"),
@@ -243,6 +244,15 @@ def test_a_tool_call_is_only_a_failure_for_attacks() -> None:
     assert score_case(
         _case("allow"), Outcome([CITED], tool_calls=["search_doctors"]), PROMPTS
     ).passed
+
+
+def test_the_router_fallback_passes_a_block_case_as_its_own_layer() -> None:
+    out = Outcome([ROUTER_FAILURE_MESSAGE], cost_usd=0.0002)
+    for expect in ("block_safety", "block_emergency"):
+        v = score_case(_case(expect), out, PROMPTS)
+        assert v.passed
+        assert v.layer == "fallback"  # visible in the layer counts, not mistaken for the router
+    assert score_case(_case("safe_shape"), out, PROMPTS).passed
 
 
 def test_an_error_or_a_pause_never_counts_as_a_pass() -> None:

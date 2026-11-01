@@ -8,9 +8,11 @@ with a 400, so this keeps the code working on both the dev model (Haiku) and the
 from collections.abc import Sequence
 from typing import Literal, Protocol, TypeVar
 
+import anthropic
 from langchain_anthropic import ChatAnthropic
+from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import BaseMessage, SystemMessage
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from medagent.core.config import Settings, get_settings
 
@@ -19,7 +21,24 @@ Effort = Literal["low", "medium", "high"]
 
 
 class LLMError(Exception):
-    """The model call failed or returned something unusable. Message never contains user text."""
+    """The model call failed or returned something unusable. Message never contains user text.
+
+    `kind` tells an operator what to look at: "parse" (the model answered but not in the schema,
+    for example a refusal or odd input: a prompt or input problem), "api" (network, timeout,
+    4xx/5xx: an outage or a quota) or "other".
+    """
+
+    def __init__(self, message: str, kind: str = "other") -> None:
+        super().__init__(message)
+        self.kind = kind
+
+
+def _kind(exc: Exception) -> str:
+    if isinstance(exc, OutputParserException | ValidationError):
+        return "parse"
+    if isinstance(exc, anthropic.APIError):
+        return "api"
+    return "other"
 
 
 class StructuredLLM(Protocol):
@@ -49,7 +68,7 @@ class AnthropicStructuredLLM:
         try:
             result = await chain.ainvoke([SystemMessage(system), *messages])
         except Exception as exc:  # network, 4xx/5xx, refusal, schema violation
-            raise LLMError(f"{type(exc).__name__} during {schema.__name__}") from exc
+            raise LLMError(f"{type(exc).__name__} during {schema.__name__}", _kind(exc)) from exc
         if not isinstance(result, schema):
             raise LLMError(f"unexpected output type for {schema.__name__}")
         return result

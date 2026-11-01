@@ -61,7 +61,12 @@ def make_supervisor_node(deps: AgentDeps) -> Node:
         if decision.is_harmful:
             log.warning("router_flagged", kind=HARMFUL)
             return {"route": HARMFUL, "draft": HARMFUL_MESSAGE, "draft_kind": HARMFUL}
-        return {"route": decision.route.value}
+        # Set (or cleared) on every routed turn so an old query can never be reused. Retrieval
+        # input only: the safety checks above have already run on the user's own words.
+        query = (
+            decision.english_search_query() if decision.route is Route.MEDICAL_QUESTION else None
+        )
+        return {"route": decision.route.value, "search_query_en": query or ""}
 
     return supervisor_node
 

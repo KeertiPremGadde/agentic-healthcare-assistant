@@ -38,6 +38,34 @@ class RouteDecision(BaseModel):
         ),
     )
 
+    language: str = Field(
+        default="en",
+        description=(
+            "ISO 639-1 code of the language the user's latest message is written in, "
+            "e.g. 'en' or 'de'."
+        ),
+    )
+    search_query_en: str | None = Field(
+        default=None,
+        description=(
+            "Only when the latest message is NOT in English and asks for health information: "
+            "a short English search query with the key medical terms of the question, to look it "
+            "up in an English knowledge base. Null for English messages."
+        ),
+    )
+
+    def english_search_query(self) -> str | None:
+        """The query to retrieve with, or None meaning "use the user's own words".
+
+        Only a non-English message gets a translated query: for English, retrieval always uses the
+        original text, never a paraphrase the model happened to fill in. Used for retrieval only;
+        the safety checks (rules and the flags above) never see it.
+        """
+        if self.language.strip().lower().split("-")[0] in ("", "en"):
+            return None
+        query = (self.search_query_en or "").strip()
+        return query or None
+
 
 class DoctorQuery(BaseModel):
     specialty: Specialty = Field(description="The most appropriate specialty for the symptoms.")

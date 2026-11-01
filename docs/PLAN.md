@@ -200,6 +200,10 @@ Done in order, each on its own branch and PR.
     structured output: the model translates the query to English as part of the call it already makes,
     so there is no extra LLM call; retrieval uses it. Measure on the German set only (reported separately,
     never in the main score). A multilingual embedding model is the fallback idea if this is not enough.
+    **Result (kept):** German hit@5 0.4 -> 1.0, answered 1 of 5 -> 5 of 5 in German with English
+    citations; English and all hard safety gates unchanged; the safety checks never see the translated
+    query (tests). No multilingual embedding model needed. Known gap, separate PR: German "I don't
+    know", labels and disclaimer. ADR 0014, `evals/results/query_translation/`.
   - **Re-measure `RAG_MIN_SCORE`** on a larger labelled question set (in-scope, near-miss and off-topic;
     Phase 2 used only 18 questions with a narrow 0.65-0.74 gap). Re-do it after each change above,
     because the threshold is specific to the embedding model, chunk text and corpus.

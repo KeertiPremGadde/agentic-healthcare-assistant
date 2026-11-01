@@ -39,6 +39,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
   German is unchanged (the right topic is not in the candidate pool). Four models compared with
   `scripts/compare_rerankers.py`. ADR 0014, including the Phase 8 notes (bake the model into the
   image, memory per request).
+- English search query for German questions (Phase 7, RAG improvement 3, kept): the router also
+  returns `language` and `search_query_en` (same call, no extra LLM call); a non-English medical
+  question is retrieved with the English query and answered in the user's language with the English
+  citation labels. The safety rules and router flags only ever see the user's own text, and English
+  messages are always retrieved with their original text (tests, mutation-checked). German in-scope
+  set: hit@5 0.4 -> 1.0, answered 1 of 5 -> 5 of 5, English metrics and all hard safety gates
+  unchanged. Known gap: the German "I don't know", labels and disclaimer are still English (separate
+  PR). New `retrieval-de` eval suite, `de_translation_rate`, `de_answered_in_german_rate`. Pre-commit
+  ruff pinned to the locked version (a test keeps them equal). Results in
+  `evals/results/query_translation/`.
 
 ### Changed
 - Dependabot: ignore minor and major bumps of the Python base image (we run 3.12 everywhere) and

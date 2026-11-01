@@ -142,6 +142,85 @@ async def run_routing(spend: Spend, repeats: int = 3, limit: int | None = None) 
     return result
 
 
+async def _english_query(
+    router: AnthropicStructuredLLM, spend: Spend, question: str
+) -> tuple[str | None, str]:
+    """What the app's router does for one message: (English search query or None, route)."""
+    with get_usage_metadata_callback() as usage:
+        try:
+            d = await router.ainvoke(
+                RouteDecision,
+                ROUTER_SYSTEM_PROMPT.format(context="None."),
+                [HumanMessage(question)],
+            )
+        finally:
+            spend.add(estimate_cost(usage.usage_metadata))
+    query = d.english_search_query() if d.route.value == "medical_question" else None
+    return query, d.route.value
+
+
+async def run_retrieval_de(spend: Spend, repeats: int = 3) -> EvalResult:
+    """German in-scope questions retrieved through the router's English query (change 3).
+    Repeated, because the translation comes from an LLM and may differ between calls."""
+    settings = get_settings()
+    questions = [q for q in datasets.load_rag().items if q.kind == "in_scope_de"]
+    retriever = HybridRetriever(get_embedder(settings), get_reranker(settings))
+    router = AnthropicStructuredLLM(settings)
+    records: list[metrics.RetrievalRecord] = []
+    items: list[dict[str, Any]] = []
+
+    def search(query: str) -> list[Candidate]:
+        with get_sessionmaker()() as session:
+            return retriever.search(session, query, k=5, public_only=settings.kb_public_only)
+
+    async def one(q: datasets.RagQuestion, repeat: int) -> None:
+        if spend.exhausted:
+            return
+        query, route = await _english_query(router, spend, q.question)
+        found = await asyncio.to_thread(search, query or q.question)
+        titles = tuple(c.document_title for c in found)
+        rank = metrics.rank_of(titles, q.expected_topics)
+        sim = round(max((c.vector_sim for c in found), default=0.0), 4)
+        records.append(metrics.RetrievalRecord(q.id, q.kind, rank, sim, titles[:3]))
+        items.append(
+            {
+                "id": q.id,
+                "repeat": repeat,
+                "route": route,
+                "query": query,
+                "rank": rank,
+                "max_sim": sim,
+                "top_titles": list(titles[:3]),
+            }
+        )
+
+    result = _base(
+        "retrieval_de",
+        settings.llm_model,
+        ("rag_golden",),
+        {"repeats": repeats, "min_score": settings.rag_min_score, **_reranker_params(settings)},
+    )
+    await _gather_limited([one(q, r) for q in questions for r in range(repeats)])
+    result.aborted = spend.abort_reason()
+    m = metrics.retrieval_metrics(records, settings.rag_min_score)
+    result.metrics = {k: v for k, v in m.items() if k.startswith("de_")}
+    result.metrics["translated_rate"] = metrics.rate(
+        sum(1 for i in items if i["query"]), len(items)
+    )
+    result.metrics["threshold_sweep_de"] = [
+        {
+            "threshold": t,
+            "de_false_abstain": metrics.rate(
+                sum(1 for r in records if r.max_sim < t), len(records)
+            ),
+        }
+        for t in SWEEP
+    ]
+    result.items = sorted(items, key=lambda i: (i["id"], i["repeat"]))
+    result.cost = spend.as_dict()
+    return result
+
+
 # -- RAG answers (LLM): the real pipeline, deterministic checks on the result ---------------
 
 
@@ -179,11 +258,15 @@ async def run_rag(
     records: list[metrics.RagRecord] = []
     items: list[dict[str, Any]] = []
 
-    def answer_sync(q: datasets.RagQuestion) -> tuple[Any, list[Candidate], Any]:
+    def answer_sync(
+        q: datasets.RagQuestion, search_query: str | None
+    ) -> tuple[Any, list[Candidate], Any]:
         rec = _RecordingRetriever(inner)
         with get_usage_metadata_callback() as usage, get_sessionmaker()() as session:
             try:
-                ans = answer_question(session, rec, answer_llm, q.question)
+                ans = answer_question(
+                    session, rec, answer_llm, q.question, search_query=search_query
+                )
             finally:
                 cost = estimate_cost(usage.usage_metadata)
         return ans, rec.last, cost
@@ -204,17 +287,31 @@ async def run_rag(
             records.append(metrics.RagRecord(q.id, q.kind, False, (), False, route=d.route.value))
             items.append({"id": q.id, "kind": q.kind, "route": d.route.value})
             return
-        ans, contexts, cost = await asyncio.to_thread(answer_sync, q)
+        search_query: str | None = None
+        route = None
+        if q.kind == "in_scope_de":  # as in the app: the router's English query, retrieval only
+            search_query, route = await _english_query(router, spend, q.question)
+        ans, contexts, cost = await asyncio.to_thread(answer_sync, q, search_query)
         spend.add(cost)
         cited = tuple(s.label.split(": ", 1)[-1] for s in ans.sources)
         records.append(
-            metrics.RagRecord(q.id, q.kind, ans.grounded, cited, contains_dose(ans.answer))
+            metrics.RagRecord(
+                q.id,
+                q.kind,
+                ans.grounded,
+                cited,
+                contains_dose(ans.answer),
+                translated=bool(search_query),
+                answered_in_german=metrics.answer_is_german(ans.answer),
+            )
         )
         items.append(
             {
                 "id": q.id,
                 "kind": q.kind,
                 "question": q.question,
+                "search_query": search_query,
+                "route": route,
                 "answer": ans.answer,
                 "grounded": ans.grounded,
                 "cited": list(cited),

@@ -1,7 +1,6 @@
 # 0014 – RAG improvements, each measured against the frozen baseline
 
-Status: in progress (Phase 7). Changes 1 and 2 are decided; 3 (query translation for German) and
-4 (threshold) are added to this record when they are measured.
+Status: in progress (Phase 7). Changes 1-3 are decided; 4 (threshold) is added when it is measured.
 
 ## Context
 ADR 0013 froze the golden sets and recorded a Phase 2 baseline with its run-to-run spread. The rule
@@ -77,3 +76,54 @@ Models compared (`scripts/compare_rerankers.py`, `evals/results/reranker/`), on 
   quality on the golden set) or set `RERANKER=score`.
 - **CI** caches only the bge-small model (`ci.yml`, key `fastembed-bge-small-en-v1.5-v1`). No unit
   test loads the reranker (they use a fake encoder); add its folder to that cache if one ever does.
+
+## 3. English search query for non-English questions: kept
+The router's structured output gained two fields, `language` and `search_query_en`, filled in the
+call it already makes (no extra LLM call). Retrieval uses the English query for a non-English
+medical question; the answer model still receives the user's own question, and the RAG prompt now
+says to answer in the user's language and keep citation labels exactly as shown (English).
+
+Three rules, each with a test (`tests/unit/test_query_translation.py`, mutation-checked):
+- **The safety checks only see the user's words.** The deterministic rules run before any router
+  call (no query exists yet); the router's flags come from the same call and the original messages;
+  an alarming phrase placed in `search_query_en` triggers nothing and a harmless one cannot hide a
+  flag; a spy shows the guardrail receives only the original text; a source tripwire fails if a
+  safety module ever mentions the query. The state key is set (or cleared) by the supervisor on
+  every routed turn, so an old query is never reused.
+- **English is retrieved with the original text, never a paraphrase.** One rule,
+  `RouteDecision.english_search_query()`: a query exists only if `language` is not English and the
+  model gave one; even if the model fills in a paraphrase for an English message, it is ignored.
+- **The eval applies the same rule** (`_english_query`), so it measures the app's path.
+
+| German in-scope set (n=5) | Before | After |
+|---|---|---|
+| hit@1 / hit@5 / MRR (5 questions x 3 router calls) | 0.4 / 0.4 / 0.4 | 1.0 / 1.0 / 1.0 |
+| false abstain at 0.70 | 0.8 | 0.0 (also 0.0 at 0.76) |
+| answered end to end (3 runs) | 1 of 5 | 5 of 5 each run |
+| right source cited / answered in German | 0.2 / n/a | 1.0 / 1.0 |
+
+The queries were stable (14 of 15 calls identical, the other differed in wording only). n=5 is low
+power, but the effect is large and the same in every repeat; the answers were read, not only
+scored by the language heuristic. German judged metrics (faithfulness 0.873, context precision
+0.879) are reported only: five answers, spread up to 0.1.
+
+Checks that the change did not hurt anything else (3 runs each unless noted):
+- Flags: emergency and harmful recall 100%, false positives 0. Red-team router: 28 of 28 attacks
+  caught by rules and router combined, 0 false positives (two cases flipped a router flag between
+  runs in opposite directions: router non-determinism). Booking: 27 of 27, 0 hard violations.
+- Routing strict accuracy 0.963 -> 0.953 (gate min 0.93), lenient 0.98 -> 1.0. All of the strict
+  change is in emergency and harmful rows (r090-r098), whose route is irrelevant once the flag
+  fires and all of which are in `accept`; no ordinary medical question changed route.
+- English: answer rate and citation hit 1.0, near-miss / hard-negative / off-topic 1.0, dose leaks
+  0. Judged, against the reranker run: faithfulness 0.870 -> 0.884, context precision 0.929 ->
+  0.932, recall 0.976 -> 0.982 (all within noise); NaN rate 0. Gate: 24 of 24.
+- Cost: $0.155 for retrieval, routing, red-team, booking and RAG runs, plus $0.522 for the three
+  judged runs.
+
+### Known gap: German replies still carry English fixed text
+The answer body is German with English MedlinePlus labels, as intended, but the "I don't know"
+reply, the `Sources:` and `Content:` labels and the disclaimer are English, and the output guard
+looks for the English disclaimer. A German user therefore sees an English refusal and an English
+disclaimer. Planned as a small separate PR: localised fixed texts chosen from the router's
+`language`, with the output guard accepting both the English and the German disclaimer. Not part of
+this change because it does not affect retrieval quality and needs its own tests.

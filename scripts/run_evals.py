@@ -1,6 +1,7 @@
 """Run an evaluation suite and write a result file to evals/results/runs/.
 
     uv run python scripts/run_evals.py retrieval                      # free (no LLM)
+    uv run python scripts/run_evals.py retrieval-de --repeats 3       # German via the router (LLM)
     uv run python scripts/run_evals.py routing --repeats 3 --max-usd 0.5
     uv run python scripts/run_evals.py rag --per-kind 2 --max-usd 0.2   # a small pilot sample
     uv run python scripts/run_evals.py booking --only b01,b11,b23 --max-usd 0.3
@@ -67,7 +68,16 @@ async def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     p.add_argument(
         "suite",
-        choices=["retrieval", "routing", "rag", "booking", "judge-rag", "judge-booking", "gate"],
+        choices=[
+            "retrieval",
+            "retrieval-de",
+            "routing",
+            "rag",
+            "booking",
+            "judge-rag",
+            "judge-booking",
+            "gate",
+        ],
     )
     p.add_argument("--results", nargs="*", default=[], help="gate: directories of result files")
     p.add_argument("--source", default=None, help="judge-*: the result file to judge")
@@ -96,6 +106,8 @@ async def main() -> None:
     spend = Spend(args.max_usd)
     if args.suite == "retrieval":
         result = suites.run_retrieval()
+    elif args.suite == "retrieval-de":
+        result = await suites.run_retrieval_de(spend, args.repeats)
     elif args.suite == "routing":
         result = await suites.run_routing(spend, args.repeats, args.limit)
     elif args.suite == "rag":

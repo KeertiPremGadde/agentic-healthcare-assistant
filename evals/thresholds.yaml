@@ -70,6 +70,7 @@ suites:
 informational:
   - task_completion        # 0.855 (spread 0.008) with the full conversation; b24 still asks the judge to
                            # verify database state, see ADR 0013
-  - de_*                   # German: 1 of 5 answered; the target of the query-translation change
+  - de_*                   # German (n=5): 5 of 5 answered since the query-translation change (ADR 0014);
+                           # still informational, too few items to gate
   - recall_*               # per-route recall (small n per route)
   - threshold_sweep

@@ -458,3 +458,86 @@ def test_assert_off_raises_when_a_library_would_still_report(
     monkeypatch.setitem(sys.modules, "ragas._analytics", fake)
     with pytest.raises(RuntimeError, match="ragas telemetry is on"):
         telemetry.assert_off()
+
+
+# -- German answers and the translated query (change 3) -------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("answer", "expected"),
+    [
+        ("Typische Symptome sind starker Durst und Müdigkeit [MedlinePlus: Diabetes].", True),
+        (
+            "Die Symptome können bei Kindern und Erwachsenen sehr verschieden sein, auch "
+            "nicht immer eindeutig [MedlinePlus: Diabetes].",
+            True,
+        ),
+        (
+            "Symptoms include thirst and tiredness, and they can be mild [MedlinePlus: Diabetes].",
+            False,
+        ),
+        # the citation label alone must not decide: an English answer with a German-looking title
+        ("The page [MedlinePlus: Der die das und ist] says it is common and may recur.", False),
+        ("I don't know: the knowledge base doesn't contain enough relevant information.", False),
+        ("", False),
+    ],
+)
+def test_answer_is_german(answer: str, expected: bool) -> None:
+    assert metrics.answer_is_german(answer) is expected
+
+
+def test_rag_metrics_report_translation_and_answer_language_for_german() -> None:
+    qs = [q for q in datasets.load_rag().items if q.kind == "in_scope_de"][:3]
+    recs = [
+        metrics.RagRecord(
+            qs[0].id,
+            "in_scope_de",
+            True,
+            ("Diabetes",),
+            False,
+            translated=True,
+            answered_in_german=True,
+        ),
+        metrics.RagRecord(
+            qs[1].id,
+            "in_scope_de",
+            True,
+            ("Gout",),
+            False,
+            translated=True,
+            answered_in_german=False,
+        ),
+        metrics.RagRecord(qs[2].id, "in_scope_de", False, (), False, translated=False),
+    ]
+    m = metrics.rag_metrics(qs, recs)
+    assert m["de_translation_rate"] == pytest.approx(0.6667, abs=1e-4)
+    assert m["de_answered_in_german_rate"] == 0.5  # of the two answered; the refusal is not counted
+    assert m["de_answer_rate"] == pytest.approx(0.6667, abs=1e-4)
+
+
+@pytest.mark.parametrize(
+    ("decision", "expected"),
+    [
+        (
+            dict(route=Route.MEDICAL_QUESTION, language="de", search_query_en="gout symptoms"),
+            ("gout symptoms", "medical_question"),
+        ),
+        (
+            dict(route=Route.MEDICAL_QUESTION, language="en", search_query_en="paraphrase"),
+            (None, "medical_question"),
+        ),
+        (
+            dict(route=Route.FIND_DOCTOR, language="de", search_query_en="gout symptoms"),
+            (None, "find_doctor"),
+        ),  # the app only translates for the medical route
+    ],
+)
+async def test_the_eval_applies_the_apps_translation_rule(
+    decision: dict[str, object], expected: tuple[str | None, str]
+) -> None:
+    from medagent.agents.schemas import RouteDecision
+    from medagent.evals.suites import _english_query
+    from tests.fakes import FakeStructuredLLM
+
+    llm = FakeStructuredLLM({RouteDecision: [RouteDecision(is_emergency=False, **decision)]})  # type: ignore[arg-type]
+    assert await _english_query(llm, Spend(1.0), "Was ist Gicht?") == expected  # type: ignore[arg-type]

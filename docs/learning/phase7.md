@@ -332,3 +332,35 @@ Selbstverletzung bei Jugendlichen?") are still read as a live crisis, for reason
 change. They are in a list that a test asserts is *still flagged*. The day someone fixes them, that test
 fails and tells them to move the phrases to the benign list, so a known problem cannot be forgotten or
 silently re-introduced.
+
+---
+
+## General question or live emergency?
+
+### What was wrong with "How can I recognise a stroke?"
+The rule said a message is a general question only if it starts with a question word and has no person
+in it. "I" counts as a person, so a perfectly general question was treated as "something is happening
+to me" and got the emergency reply. 27 of 28 realistic general questions failed. A golden RAG question
+had been affected all along, because the evals call the answer pipeline directly and never pass through
+that screen.
+
+### How do you loosen a safety rule without losing an emergency?
+By changing the question, not the threshold. A first-person pronoun alone no longer decides. The
+exception is narrow: the question must be about knowing something (recognise, prevent, understand), and
+nothing may say it is happening. "How do I know if I'm having a stroke?" has the same words and the
+opposite meaning, so the verb matters: "know", "worry", "do" and "call" stay emergencies. When in doubt,
+the safety reply stays.
+
+### What did your own test find?
+That my first guard was a list, and a list never contains the verb nobody listed. I tried seven
+unpunctuated messages such as "how can I recognise a stroke my husband slurs his words": six slipped
+through as general questions. The fix was structural: after the question itself, a new subject (a
+pronoun, or "my husband" followed by anything that is not a preposition) means a second clause, whatever
+the verb. The old verb lists then turned out to be redundant: the mutation check showed they changed no
+result, so I removed them.
+
+### How did you show nothing was lost?
+Before and after, on every set: red-team, routing, RAG, tuning, booking, and every phrase list from the
+last four changes, counting what each message gets (emergency reply, harmful reply, answer with notice,
+nothing). Only the intended 28 general questions moved, plus one golden RAG question. All 42 genuine
+emergencies and 10 deliberately ambiguous questions kept the emergency reply.

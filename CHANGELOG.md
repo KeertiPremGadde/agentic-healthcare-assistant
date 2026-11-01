@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- General questions about a red-flag topic are answered with the safety notice instead of getting
+  the emergency reply (Phase 7 follow-up): "How can I recognise a stroke?", "Wie erkenne ich einen
+  Schlaganfall?", "Woran erkennt man Selbstverletzung bei Jugendlichen?" (27 of 28 realistic general
+  questions got the emergency reply before). A question about recognising, preventing or understanding
+  something no longer turns into an emergency because of "I"/"ich"; anything that says it is happening
+  (right now, a second sentence, a new subject such as "my husband slurs his words") and every question
+  about what to do ("how do I know if I'm having a stroke?") keeps the emergency reply: 42 genuine and 10
+  ambiguous phrases, none lost in any set. Greetings and the question words woran/wodurch/wer/... are
+  understood. ADR 0019.
 - Safety rules for concepts they did not have (Phase 7 follow-up): suicidal and self-harm statements
   ("ich möchte sterben", "ich ritze mich", "I want to end it", "I've been cutting myself", ...), cardiac
   arrest, chest pressure, collapse, unstoppable bleeding, a closing throat, swallowed pills or cleaning

@@ -23,7 +23,6 @@ from tests.unit.gap_phrases import (
     EMERGENCY_EN,
     HARMFUL_DE,
     HARMFUL_EN,
-    KNOWN_FALSE_ALARMS,
     SUICIDAL_DE,
     SUICIDAL_EN,
 )
@@ -64,13 +63,6 @@ def test_the_rules_catch_the_phrase_in_its_own_language(
 @pytest.mark.parametrize("phrase", BENIGN_DE + BENIGN_EN)
 def test_benign_look_alikes_trigger_nothing(phrase: str) -> None:
     assert screen_message(phrase) is None
-
-
-@pytest.mark.parametrize("phrase", KNOWN_FALSE_ALARMS)
-def test_known_false_alarms_are_still_pinned(phrase: str) -> None:
-    """General questions the informational check still reads as a live crisis. When one stops
-    being flagged this fails: move it to BENIGN_* (that is the fix, not a regression)."""
-    assert screen_message(phrase) is not None
 
 
 # -- the two English false alarms that existed before ----------------------------------------

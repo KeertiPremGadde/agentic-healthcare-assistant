@@ -22,3 +22,4 @@ One file per significant decision: `NNNN-short-title.md` with Context, Decision,
 | [0016](0016-german-safety-replies.md) | German emergency and harmful-intent replies, chosen by the rule that matched |
 | [0017](0017-german-rule-inflections.md) | German emergency and harmful-intent rules: inflected forms |
 | [0018](0018-safety-rule-vocabulary.md) | Safety rules: suicidal statements and other concepts the rules did not have |
+| [0019](0019-informational-emergency-questions.md) | General questions about a red-flag topic are answered, not treated as an emergency |

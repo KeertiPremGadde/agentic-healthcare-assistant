@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- A wish not to wake up gets the support reply, never the refusal (Phase 7 follow-up to ADR 0023):
+  "Ich wünschte, ich würde morgen nicht mehr aufwachen" used to get "I can't help with that" and "I wish I
+  could just go to sleep and not wake up" the emergency reply. Method questions ("damit ich nicht mehr
+  aufwache", "um nicht mehr aufzuwachen") stay harmful, a person who will not wake up and any acute word
+  keep the emergency reply; "I hope I won't wake up the baby" is no longer an emergency. Measured on all
+  749 known texts: 17 change, 732 do not; the 12 wishes all get the support reply (before 0). ADR 0024.
 - Habitual self-harm statements now get the support reply instead of "call 112 now" (Phase 7
   follow-up to ADR 0021): "ich ritze mich", "ich verletze mich selbst", "I've been cutting myself",
   "I cut myself on purpose", "my daughter hurts herself on purpose". A bare, ambiguous "I hurt myself"

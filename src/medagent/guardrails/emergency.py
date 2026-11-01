@@ -107,24 +107,18 @@ _PATTERNS: dict[str, list[str]] = {
         r"|holiday|vacation)\b)",
         r"better off dead",
         r"(?:wish|wished) i (?:was|were) dead",
-        r"self[- ]?harm",
         # not an accident: "I hurt myself playing football", but a bare "I hurt myself" still counts
+        # (ambiguous: the emergency reply). "I've been hurting myself" is habitual: "self_injury".
+        r"(?<!been )(?<!keep )(?<!keeps )(?<!kept )(?<!started )(?<!always )(?<!often )(?<!stop )"
         r"hurt(?:ing)? myself(?!\s+(?:playing|while|during|at\b|in the|on the|doing|lifting"
         r"|running|training|today|yesterday|last\b|badly|a little|a bit|slightly|falling"
         r"|cooking|skiing|cycling|biking|jogging|exercising|shaving))",
         r"(?:want|going|ready|need|plan(?:ning)?) to end it\b"
         r"(?!\s+(?:with|for|between|after|before|by|when|if)\b)",
         r"(?:don'?t|do not) want to be (?:here|around|alive) (?:any ?more|any longer)",
-        r"(?:harm|harms|harming) (?:myself|himself|herself|themselves?)\b",
-        r"hurt(?:s|ing)? (?:himself|herself|themselves?) (?:on purpose|deliberately|intentionally)",
-        r"(?:been|keep|kept|started) cutting (?:myself|himself|herself|themselves?)\b"
-        r"(?!\s+(?:some\s+)?slack)",
-        r"cut(?:s|ting)? (?:myself|himself|herself|themselves?) "
-        r"(?:on purpose|deliberately|intentionally)",
         r"(?:no|not any) (?:point|reason|sense) (?:in|to) (?:living|live|going on|life)",
         r"life (?:is not|isn'?t|is no longer) worth living",
         _de(r"suizid\w*"),
-        _de(r"selbstverletz\w*"),
         _de(
             r"(?:will|m(?:ö|oe)chte|m(?:ö|oe)chten|wollte|w(?:ü|ue)rde gerne?) "
             r"(?:(?!nicht\b)\w+ ){0,2}(?:sterben|tot sein)\b"
@@ -133,13 +127,6 @@ _PATTERNS: dict[str, list[str]] = {
         _de(r"keine lust mehr (?:zu leben|auf das leben|weiterzuleben)"),
         _de(r"lebensm(?:ü|ue)de\w*"),
         _de(r"nicht (?:mehr )?weiterleben"),
-        _de(r"ritz\w* (?:mich|sich)\b|(?:mich|sich) (?:selbst )?(?:ritz\w*|geritzt)"),
-        _de(r"verletz\w* (?:mich|sich) selbst|(?:mich|sich) selbst (?:verletz\w*|geschnitten)"),
-        _de(r"schneid\w* (?:mich|sich) (?:absichtlich|selbst|mit absicht)"),
-        _de(
-            r"(?:mir|sich) (?:absichtlich|selbst|mit absicht) "
-            r"(?:weh\s?getan|weh\s?tun|wehzutun|schmerzen zugef(?:ü|ue)gt)"
-        ),
         _de(r"selbstmord\w*"),
         _de(r"(?:mich|sich)\s+(?:selbst\s+)?(?:umzubringen|umbringen|t(?:ö|oe)ten)"),
         # "mir das Leben nehmen", "sich das Leben genommen", "sich das Leben zu nehmen"
@@ -242,6 +229,28 @@ _PATTERNS: dict[str, list[str]] = {
         _de(r"krampfanf(?:a|ä)ll\w*"),  # Krampfanfall, Krampfanfälle
         _de(r"epileptisch\w*\s+anfall\w*"),  # epileptischer / epileptischen Anfall
         _de(r"fieberkr(?:a|ä)mpf\w*"),
+    ],
+    # Habitual or deliberate self-injury, said as a fact about a life: the supportive reply, not
+    # the emergency reply (ADR 0021, follow-up). LAST in this dict on purpose: the first category
+    # found decides, so when another one also matches ("I cut myself on purpose and want to die")
+    # that one wins. A bare "I hurt myself" is ambiguous and stays in "self_harm".
+    "self_injury": [
+        r"self[- ]?harm",
+        r"(?:harm|harms|harming) (?:myself|himself|herself|themselves?)\b",
+        r"hurt(?:s|ing)? (?:himself|herself|themselves?) (?:on purpose|deliberately|intentionally)",
+        r"(?:been|keep|keeps|kept|started|always|often|can'?t stop|cannot stop) hurting myself\b",
+        r"(?:been|keep|kept|started) cutting (?:myself|himself|herself|themselves?)\b"
+        r"(?!\s+(?:some\s+)?slack)",
+        r"cut(?:s|ting)? (?:myself|himself|herself|themselves?) "
+        r"(?:on purpose|deliberately|intentionally)",
+        _de(r"selbstverletz\w*"),
+        _de(r"ritz\w* (?:mich|sich)\b|(?:mich|sich) (?:selbst )?(?:ritz\w*|geritzt)"),
+        _de(r"verletz\w* (?:mich|sich) selbst|(?:mich|sich) selbst (?:verletz\w*|geschnitten)"),
+        _de(r"schneid\w* (?:mich|sich) (?:absichtlich|selbst|mit absicht)"),
+        _de(
+            r"(?:mir|sich) (?:absichtlich|selbst|mit absicht) "
+            r"(?:weh\s?getan|weh\s?tun|wehzutun|schmerzen zugef(?:ü|ue)gt)"
+        ),
     ],
 }
 

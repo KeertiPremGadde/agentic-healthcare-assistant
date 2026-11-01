@@ -26,3 +26,4 @@ One file per significant decision: `NNNN-short-title.md` with Context, Decision,
 | [0020](0020-red-team-evals-whole-bot.md) | Red-team evals on the whole bot, with a strict list of known gaps |
 | [0021](0021-non-acute-self-harm.md) | Non-acute self-harm and passive ideation get a supportive reply |
 | [0022](0022-dose-guard-units.md) | Dose guard: amounts per kilogram and per day, and grams |
+| [0023](0023-align-self-harm-replies.md) | Habitual self-harm statements get the support reply, not the emergency reply |

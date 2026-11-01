@@ -1,6 +1,11 @@
 /** Shapes of the MedAgent API (see docs/adr/0008 and src/medagent/api/schemas.py). */
 
-export type MessageKind = "normal" | "booked" | "emergency" | "harmful_intent";
+export type MessageKind =
+  | "normal"
+  | "booked"
+  | "emergency"
+  | "harmful_intent"
+  | "self_harm_support";
 
 export interface Confirmation {
   type: "confirm_booking" | "confirm_cancel";

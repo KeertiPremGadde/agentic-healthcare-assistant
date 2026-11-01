@@ -12,12 +12,13 @@ from typing import Literal
 
 from medagent.guardrails.emergency import detect_red_flag, emergency_reply
 from medagent.guardrails.harmful import detect_harmful_intent
+from medagent.guardrails.self_harm import detect_self_harm_support
 from medagent.guardrails.texts import texts_for
 
 
 @dataclass(frozen=True, slots=True)
 class Screen:
-    kind: Literal["harmful_intent", "emergency"]
+    kind: Literal["harmful_intent", "emergency", "self_harm_support"]
     category: str  # e.g. "lethal_dose" or "cardiac": safe to log, never the user's text
     reply: str  # the fixed answer to send, with no LLM call, in the language of the matched rule
     language: str = "en"
@@ -41,5 +42,13 @@ def screen_message(text: str) -> Screen | None:
     if flag is not None and not flag.informational:
         return Screen(
             "emergency", flag.category, emergency_reply(flag.language, flag.category), flag.language
+        )
+    support = detect_self_harm_support(text)
+    if support is not None:
+        return Screen(
+            "self_harm_support",
+            support.category,
+            texts_for(support.language).self_harm_message,
+            support.language,
         )
     return None

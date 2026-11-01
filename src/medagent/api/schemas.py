@@ -73,7 +73,7 @@ class ChatResponse(BaseModel):
 
     conversation_id: str
     reply: str | None = Field(description="The assistant's reply, or null while waiting for you.")
-    kind: Literal["normal", "booked", "emergency", "harmful_intent"] = Field(
+    kind: Literal["normal", "booked", "emergency", "harmful_intent", "self_harm_support"] = Field(
         default="normal", description="How to present the reply (e.g. a crisis card)."
     )
     appointment_id: int | None = Field(default=None, description="Set when this turn booked one.")

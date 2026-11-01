@@ -33,6 +33,7 @@ class FixedTexts:
     emergency_message: str  # someone may be in acute danger: fixed reply, no model call
     emergency_poisoning_message: str  # the same, for a suspected poisoning or overdose
     harmful_message: str  # harmful intent (lethal dose, harming someone, suicide method)
+    self_harm_message: str  # self-harm or passive ideation, not acute: support, no refusal
     safety_notice: str  # in front of an answer to a general question about an emergency
 
 
@@ -76,9 +77,44 @@ _HARMFUL_EN = (
     "local poison control centre (Giftnotruf in Germany; Poison Help 1-800-222-1222 in the US).\n\n"
     "I'm happy to help with other health questions, finding a doctor, or booking an appointment."
 )
+# Not acute and not a request for information: someone says they hurt themselves, or that life is
+# too much. Short, warm, no refusal, no "I can't help". The numbers are from the official pages
+# (checked 2026-11-01): telefonseelsorge.de (0800 111 0 111, 0800 111 0 222, 116 123: free,
+# anonymous, day and night), nummergegenkummer.de (116 111 Kinder- und Jugendtelefon, Mon-Sat
+# 14-20 Uhr, free, anonymous; Elterntelefon 0800 111 0550), 116117.de (Terminservice for doctors
+# and psychotherapists for the statutory insured; the line is open day and night). 112 only for
+# danger right now. 988 for the US, as in the other safety replies.
+_SELF_HARM_EN = (
+    "Thank you for telling me. What you describe sounds painful, and you don't have to go through "
+    "it alone. There is help, and it is okay to ask for it.\n\n"
+    "You can talk to someone at any time:\n"
+    "- Germany: TelefonSeelsorge, free and anonymous, day and night: 0800 111 0 111 or 116 123\n"
+    "- US: call or text 988\n"
+    "- Worried about a child or teenager? Nummer gegen Kummer in Germany: 116 111 for children "
+    "and teenagers (free, anonymous, Mon-Sat 2-8 pm), 0800 111 0550 for parents\n\n"
+    "If you are in danger right now, call 112.\n\n"
+    "I can also help you find a doctor or a therapist, or book an appointment. In Germany, "
+    "116 117 can arrange an appointment with a psychotherapist if you have statutory health "
+    "insurance."
+)
 _SAFETY_NOTICE_EN = (
     "If you or someone near you has these symptoms right now, call emergency services "
     "(112 in Germany/EU, 911 in the US)."
+)
+
+_SELF_HARM_DE = (
+    "Danke, dass Sie mir das erzählen. Was Sie beschreiben, klingt schmerzhaft, und Sie müssen "
+    "damit nicht allein bleiben. Es gibt Hilfe, und es ist in Ordnung, sie anzunehmen.\n\n"
+    "Sie können jederzeit mit jemandem sprechen:\n"
+    "- TelefonSeelsorge, kostenlos, anonym, Tag und Nacht: 0800 111 0 111 oder 116 123\n"
+    "- Sorge um ein Kind oder eine Jugendliche oder einen Jugendlichen? Nummer gegen Kummer: "
+    "116 111 für Kinder und Jugendliche (kostenlos, anonym, Mo-Sa 14-20 Uhr), "
+    "0800 111 0550 für Eltern\n\n"
+    "Wenn Sie sich jetzt in Gefahr befinden, rufen Sie die 112 an.\n\n"
+    "Ich kann Ihnen auch helfen, eine Ärztin, einen Arzt oder einen Therapieplatz zu finden "
+    "oder einen Termin zu buchen. Einen Termin bei einer Psychotherapeutin oder einem "
+    "Psychotherapeuten vermittelt auch die Terminservicestelle unter 116 117 (für gesetzlich "
+    "Versicherte)."
 )
 
 _EMERGENCY_DE_FIRST = (
@@ -127,6 +163,7 @@ EN = FixedTexts(
     emergency_message=_EMERGENCY_EN,
     emergency_poisoning_message=_EMERGENCY_EN,  # English is unchanged: no separate poison line
     harmful_message=_HARMFUL_EN,
+    self_harm_message=_SELF_HARM_EN,
     safety_notice=_SAFETY_NOTICE_EN,
 )
 
@@ -157,6 +194,7 @@ DE = FixedTexts(
         _EMERGENCY_DE_FIRST + "\n\n" + _POISON_LINE_DE + "\n\n" + _EMERGENCY_DE_LAST
     ),
     harmful_message=_HARMFUL_DE,
+    self_harm_message=_SELF_HARM_DE,
     safety_notice=(
         "Wenn Sie oder jemand in Ihrer Nähe diese Symptome gerade haben, wählen Sie den Notruf 112."
     ),

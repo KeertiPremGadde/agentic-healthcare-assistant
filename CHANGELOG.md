@@ -4,6 +4,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 
 ## [Unreleased]
 
+### Added
+- Langfuse tracing (Phase 7): one trace per graph turn with nested node, LLM and tool observations,
+  token usage, a session per conversation, a hashed user id, and route / kind / estimated cost as
+  scores. Optional (no keys: nothing happens), never breaks a turn, covers the API and the dev CLI.
+  **Message text, passages, doctor and patient details and ids are redacted before they leave the
+  process** (`LANGFUSE_CAPTURE_CONTENT=false`, the default), in two layers: the SDK `mask` hook and an
+  export-stage scrubber that also covers exception text (LangGraph's pause for a confirmation put
+  the proposal into a status message; found by reading real traces back). Only the SDK's own spans
+  are exported. `LANGFUSE_SAMPLE_RATE` limits the share of turns traced.
+- `scripts/check_langfuse.py`, ADR 0012 and the first section of `docs/learning/phase7.md`.
+
 ### Changed
 - Dependabot: ignore minor and major bumps of the Python base image (we run 3.12 everywhere) and
   major bumps of `typescript` (typescript-eslint does not support TypeScript 7 yet).

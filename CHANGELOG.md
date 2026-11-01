@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- German fixed texts (Phase 7 follow-up): the "I don't know" reply, dose referral, `Quellen:` /
+  `Inhalt:` labels and the disclaimer (with the on-call number 116 117) are German for German
+  questions, chosen per turn from the router's `language` (`reply_language`); other languages fall
+  back to English. The output guard accepts the fixed texts of every language, the frontend reply
+  parser understands the German layout, and the dose guard knows German forms (Teelöffel, Zäpfchen,
+  Hübe, ...). English output is unchanged byte for byte. Emergency and harmful replies stay English
+  until the next PR. ADR 0015.
 - Langfuse tracing (Phase 7): one trace per graph turn with nested node, LLM and tool observations,
   token usage, a session per conversation, a hashed user id, and route / kind / estimated cost as
   scores. Optional (no keys: nothing happens), never breaks a turn, covers the API and the dev CLI.

@@ -95,6 +95,55 @@ async def test_booking_extraction_resolves_relative_dates(llm: AnthropicStructur
     assert request.exact_time is None
 
 
+@pytest.mark.parametrize(
+    ("message", "language", "has_query"),
+    [
+        ("What are the symptoms of diabetes?", "en", False),
+        ("Was sind die Symptome von Diabetes?", "de", True),
+        ("Wie wird Bluthochdruck behandelt?", "de", True),
+        ("Diyabetin belirtileri nelerdir?", "tr", True),
+    ],
+)
+async def test_router_reports_the_language_and_an_english_query_only_for_other_languages(
+    llm: AnthropicStructuredLLM, message: str, language: str, has_query: bool
+) -> None:
+    decision = await llm.ainvoke(
+        RouteDecision, ROUTER_SYSTEM_PROMPT.format(context="None."), [HumanMessage(message)]
+    )
+    assert decision.route is Route.MEDICAL_QUESTION
+    assert decision.language.lower().split("-")[0] == language
+    assert (decision.english_search_query() is not None) is has_query
+
+
+async def test_a_german_question_gets_german_fixed_texts_end_to_end(
+    llm: AnthropicStructuredLLM,
+) -> None:
+    from contextlib import nullcontext
+
+    from medagent.guardrails.texts import DE, EN
+    from tests.fakes import NoTools
+
+    deps = AgentDeps(
+        tools=NoTools(),  # type: ignore[arg-type]  (a medical question never uses the tools)
+        llm=llm,
+        answer_llm=FakeAnswerLLM(
+            AnswerPayload(answer="x", used_sources=[], context_sufficient=False)
+        ),
+        retriever=FakeRetriever(),
+        session_factory=lambda: nullcontext(None),  # type: ignore[arg-type,return-value]
+        clock=lambda: NOW,
+        tz=BERLIN,
+        public_only=True,
+        rag_min_score=0.7,
+    )
+    graph = build_graph(deps, InMemorySaver())
+    # no evidence is found, so the pipeline refuses without calling the answer model
+    result = await run_turn(graph, f"llm-{uuid.uuid4().hex[:8]}", 1, message="Was ist Gicht?")
+    assert result.reply == f"{DE.no_answer}\n\n{DE.disclaimer}"
+    assert EN.disclaimer not in (result.reply or "")
+    assert result.cost.usd < 0.01
+
+
 async def test_full_conversation_finds_a_doctor_and_books_with_confirmation(
     llm: AnthropicStructuredLLM, engine: Engine, session: Session
 ) -> None:

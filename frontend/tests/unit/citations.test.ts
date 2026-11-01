@@ -28,6 +28,38 @@ describe("parseReply", () => {
     });
   });
 
+  it("splits a German reply: Quellen, Inhalt and the German disclaimer", () => {
+    const disclaimer =
+      "Dies sind allgemeine Gesundheitsinformationen aus den oben genannten Quellen, keine " +
+      "medizinische Beratung und keine Diagnose. Im Notfall wählen Sie 112.";
+    const text = [
+      "Migräne ist eine wiederkehrende Form von Kopfschmerzen [MedlinePlus: Migraine].",
+      "",
+      "Quellen:",
+      "- MedlinePlus: Migraine <https://medlineplus.gov/migraine.html>",
+      "",
+      "Inhalt: MedlinePlus - National Library of Medicine (medlineplus.gov)",
+      "",
+      disclaimer,
+    ].join("\n");
+    expect(parseReply(text)).toEqual({
+      body: "Migräne ist eine wiederkehrende Form von Kopfschmerzen [MedlinePlus: Migraine].",
+      sources: [{ label: "MedlinePlus: Migraine", url: "https://medlineplus.gov/migraine.html" }],
+      attributions: ["MedlinePlus - National Library of Medicine (medlineplus.gov)"],
+      disclaimer,
+    });
+  });
+
+  it("keeps the German disclaimer of a German refusal", () => {
+    const disclaimer = "Dies sind allgemeine Gesundheitsinformationen, keine Beratung.";
+    const parsed = parseReply(
+      `Dazu kann ich leider keine verlässliche Antwort geben.\n\n${disclaimer}`,
+    );
+    expect(parsed.body).toBe("Dazu kann ich leider keine verlässliche Antwort geben.");
+    expect(parsed.disclaimer).toBe(disclaimer);
+    expect(parsed.sources).toEqual([]);
+  });
+
   it("leaves plain replies alone", () => {
     expect(parseReply("Hello! How can I help?")).toEqual({
       body: "Hello! How can I help?",

@@ -203,3 +203,32 @@ discarded it and kept every pass of the second one in a log file.
 About $1.7 for the four changes (two paid runs of about $0.53 for headers and the reranker, $0.68
 for the query translation including the safety re-runs, nothing for the threshold); about $2.5 for
 Phase 7 so far.
+
+---
+
+## German fixed texts
+
+### Why not let the model write the disclaimer in the user's language?
+The disclaimer, the refusal and the dose referral are safety statements, so I keep them as reviewed
+text rather than generated text: the exact wording is fixed, testable and the same every time. The
+model only writes the answer body. There is one set per language in one module, and the language is
+picked by the router (it already reports the message's language).
+
+### What breaks if you translate only the strings?
+Everything that looks for them. The output guard treated a reply without the English "Sources:" as
+uncited and swapped in the English refusal, and the frontend parser found the sources block and the
+disclaimer by their English text. So the guard now checks against the texts of every language and adds
+the one for the turn's language, and the parser mirrors the labels. Two places that must agree is a
+contract, so it is written down in both and tested on both sides.
+
+### How do you stop a stale language leaking from the previous turn?
+The supervisor sets `reply_language` on every routed turn, and a test sends a German then an English
+message in one conversation and checks each reply. Unknown languages fall back to English instead of a
+guessed translation.
+
+### What did you learn about the dose guard?
+That it has to follow the languages the answers are in. German answers started flowing with the
+query-translation change, but the dose regex knew only a few German forms. I added the common ones
+(Teelöffel, Zäpfchen, Hübe, Spritze, ...), and left "i.e." out of the unit list on purpose because it
+would flag English sentences. Negative tests matter as much as positive ones for a guard that replaces
+the whole answer.

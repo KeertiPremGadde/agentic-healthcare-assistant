@@ -16,35 +16,34 @@ are not matched because they are mostly food quantities; the prompt rule covers 
 
 import re
 
+from medagent.guardrails.texts import EN
+
 _NUMBER = r"\d+(?:[.,]\d+)?"
 _NUMBER_WORD = (
     r"(?:one|two|three|four|five|six|seven|eight|nine|ten|twelve|twenty|half(?: an?)?"
-    r"|a couple of|a few|eine?|zwei|drei|vier|f(?:ü|ue)nf|sechs|acht|zehn|halbe?)"
+    r"|a couple of|a few|einen?|eine?|zwei|drei|vier|f(?:ü|ue)nf|sechs|acht|zehn|halbe?)"
 )
 _FORM = (
     r"(?:tablets?|pills?|capsules?|caplets?|drops?|puffs?|sprays?|teaspoons?|tablespoons?"
     r"|sachets?|patch(?:es)?|suppositor(?:y|ies)|injections?|tabletten?|pillen?|kapseln?|tropfen"
-    r"|tabl\.)"
+    r"|tabl\.|tee-?l(?:ö|oe)ffel|ess-?l(?:ö|oe)ffel|z(?:ä|ae)pfchen|beutel|pflaster|h(?:ü|ue)be?"
+    r"|spritzen?|ampullen?|dragees?)"
 )
 _UNIT = (
     r"(?:mg|mcg|µg|μg|iu|i\.u\.|units?|einheiten|ml|milligrams?|micrograms?|milligramm"
-    r"|mikrogramm|drops?|tropfen)"
+    r"|mikrogramm|milliliters?|millilitern?|drops?|tropfen)"
 )
 
 _DOSE = re.compile(
     rf"(?<![\w/.,]){_NUMBER}\s?{_UNIT}(?![\w/])"  # "400 mg", "5 ml" ... but not "100 mg/dL"
     rf"|(?<![\w/.,]){_NUMBER}\s?(?:-|\u2013|to|bis)\s?{_NUMBER}\s?{_UNIT}(?![\w/])"  # "200-400 mg"
     rf"|\b(?:{_NUMBER}|{_NUMBER_WORD})\s+{_FORM}\b"  # "2 tablets", "one capsule", "zwei Tabletten"
-    r"|\b(?:a|one|1)\s+(?:single\s+)?(?:teaspoon|tablespoon)\b",
+    r"|\b(?:a|one|1)\s+(?:single\s+)?(?:teaspoon|tablespoon)\b"
+    r"|\b(?:ein|einen|1)\s+(?:einzelnen?\s+)?(?:tee|ess)-?l(?:ö|oe)ffel\b",
     re.IGNORECASE,
 )
 
-DOSE_REFERRAL = (
-    "I can't give specific doses or amounts of medicines. The right amount depends on your age, "
-    "weight, health and other medicines you take, so please ask your doctor or pharmacist, and "
-    "follow the instructions in the package leaflet. I'm happy to explain how a medicine works "
-    "or what its side effects are."
-)
+DOSE_REFERRAL = EN.dose_referral  # the German one is in texts.py
 
 
 def contains_dose(text: str) -> bool:

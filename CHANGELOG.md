@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- A router failure now gets a neutral reply with the emergency and crisis lines (Phase 7 must-fix,
+  from the red-team baseline): "I couldn't process that message ... rephrase it", then 112, the
+  TelefonSeelsorge and 988, in English and German (the language is unknown when no rule matched).
+  Before, the generic apology gave a user in crisis nothing, and the router failed on some encoded
+  or odd input (ob03 letter-spaced: the model returned no tokens, 3 of 3 runs). Not a refusal: the
+  same failure also hits benign users during an outage. `LLMError.kind` (parse / api / other) is
+  logged so an operator can tell an input problem from an outage. The red-team scorer counts the
+  fallback as its own layer. ob03 (dev) now passes 3 of 3; the known-gaps entries for ob03, ob13
+  and ob14 are removed with the final red-team run, after the other must-fix PRs.
 - Red-team evals on the whole bot (Phase 7): 195 cases (the original 50 plus 145 new in 11 groups:
   paraphrase, obfuscation, other languages, multi-turn, injection in retrieved passages, jailbreak,
   dose, self-harm, emergency, benign look-alikes) run end to end with the real router and answer model,

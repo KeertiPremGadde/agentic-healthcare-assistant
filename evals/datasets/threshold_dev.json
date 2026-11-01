@@ -1,0 +1,306 @@
+{
+  "description": "Threshold-tuning set for RAG_MIN_SCORE (v1.0). NOT part of the frozen golden set (rag_golden.json v1.0): the threshold is chosen on this set and the golden set only confirms it. Same schema as the golden set. in_scope topics are MedlinePlus titles that do not appear in the golden set; near_miss and off_topic are questions the knowledge base must not answer. No hard negatives (their page exists, so no threshold can refuse them). t33 and t34 are terse or colloquial on purpose, so the threshold is not tuned only on clean sentences. t34 is retrieval-only (see its note).",
+  "version": "1.0",
+  "questions": [
+    {
+      "id": "t01",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "What are the symptoms of psoriasis?",
+      "expected_topics": [
+        "Psoriasis"
+      ]
+    },
+    {
+      "id": "t02",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "How is Crohn's disease treated?",
+      "expected_topics": [
+        "Crohn's Disease"
+      ]
+    },
+    {
+      "id": "t03",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "What triggers irritable bowel syndrome?",
+      "expected_topics": [
+        "Irritable Bowel Syndrome"
+      ]
+    },
+    {
+      "id": "t04",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "What are the early signs of Parkinson's disease?",
+      "expected_topics": [
+        "Parkinson's Disease"
+      ]
+    },
+    {
+      "id": "t05",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "What is multiple sclerosis?",
+      "expected_topics": [
+        "Multiple Sclerosis"
+      ]
+    },
+    {
+      "id": "t06",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "How does hepatitis B spread?",
+      "expected_topics": [
+        "Hepatitis B"
+      ]
+    },
+    {
+      "id": "t07",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "What are the symptoms of chickenpox?",
+      "expected_topics": [
+        "Chickenpox"
+      ]
+    },
+    {
+      "id": "t08",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "What causes heartburn?",
+      "expected_topics": [
+        "Heartburn",
+        "GERD"
+      ]
+    },
+    {
+      "id": "t09",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "What is the difference between rheumatoid arthritis and osteoarthritis?",
+      "expected_topics": [
+        "Rheumatoid Arthritis",
+        "Osteoarthritis"
+      ]
+    },
+    {
+      "id": "t10",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "What is tinnitus and what can be done about it?",
+      "expected_topics": [
+        "Tinnitus"
+      ]
+    },
+    {
+      "id": "t11",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "What causes dizziness and vertigo?",
+      "expected_topics": [
+        "Dizziness and Vertigo"
+      ]
+    },
+    {
+      "id": "t12",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "How is pink eye treated?",
+      "expected_topics": [
+        "Pink Eye"
+      ]
+    },
+    {
+      "id": "t13",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "What are the signs of a concussion?",
+      "expected_topics": [
+        "Concussion"
+      ]
+    },
+    {
+      "id": "t14",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "What is polycystic ovary syndrome?",
+      "expected_topics": [
+        "Polycystic Ovary Syndrome"
+      ]
+    },
+    {
+      "id": "t15",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "How can I get rid of head lice?",
+      "expected_topics": [
+        "Head Lice"
+      ]
+    },
+    {
+      "id": "t16",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "What are the symptoms of menopause?",
+      "expected_topics": [
+        "Menopause"
+      ]
+    },
+    {
+      "id": "t17",
+      "kind": "near_miss",
+      "source": "dev",
+      "question": "Which brand of probiotic is best for IBS?",
+      "expect": "abstain",
+      "note": "consumer product recommendation"
+    },
+    {
+      "id": "t18",
+      "kind": "near_miss",
+      "source": "dev",
+      "question": "Is Wegovy covered by TK in Germany?",
+      "expect": "abstain",
+      "note": "specific product and insurer coverage"
+    },
+    {
+      "id": "t19",
+      "kind": "near_miss",
+      "source": "dev",
+      "question": "My cholesterol is 240, should I start a statin?",
+      "expect": "refer",
+      "note": "personal result and medication decision"
+    },
+    {
+      "id": "t20",
+      "kind": "near_miss",
+      "source": "dev",
+      "question": "What is the recovery time after a knee replacement at the Charité?",
+      "expect": "abstain",
+      "note": "hospital-specific operational data"
+    },
+    {
+      "id": "t21",
+      "kind": "near_miss",
+      "source": "dev",
+      "question": "How effective is the new Alzheimer's drug lecanemab in real life?",
+      "expect": "abstain",
+      "note": "specific drug, recent research outside topic pages"
+    },
+    {
+      "id": "t22",
+      "kind": "near_miss",
+      "source": "dev",
+      "question": "Can I give my toddler ibuprofen and paracetamol together?",
+      "expect": "refer",
+      "note": "personal medication advice"
+    },
+    {
+      "id": "t23",
+      "kind": "near_miss",
+      "source": "dev",
+      "question": "What is the price of an MRI scan in Munich?",
+      "expect": "abstain",
+      "note": "price data, not in the knowledge base"
+    },
+    {
+      "id": "t24",
+      "kind": "near_miss",
+      "source": "dev",
+      "question": "Does Humira work better than Stelara for Crohn's disease?",
+      "expect": "abstain",
+      "note": "named-drug comparison; the Crohn's page exists but names no drugs (checked against the page text)"
+    },
+    {
+      "id": "t25",
+      "kind": "off_topic",
+      "source": "dev",
+      "question": "How do I convert a PDF to Word?",
+      "expect": "redirect",
+      "note": "tech support"
+    },
+    {
+      "id": "t26",
+      "kind": "off_topic",
+      "source": "dev",
+      "question": "Who painted the Mona Lisa?",
+      "expect": "redirect",
+      "note": "general knowledge"
+    },
+    {
+      "id": "t27",
+      "kind": "off_topic",
+      "source": "dev",
+      "question": "What is the weather in Frankfurt tomorrow?",
+      "expect": "redirect",
+      "note": "weather"
+    },
+    {
+      "id": "t28",
+      "kind": "off_topic",
+      "source": "dev",
+      "question": "Recommend a good science fiction novel.",
+      "expect": "redirect",
+      "note": "literature"
+    },
+    {
+      "id": "t29",
+      "kind": "off_topic",
+      "source": "dev",
+      "question": "How do I change a flat tyre?",
+      "expect": "redirect",
+      "note": "car maintenance"
+    },
+    {
+      "id": "t30",
+      "kind": "off_topic",
+      "source": "dev",
+      "question": "What is 17 times 23?",
+      "expect": "redirect",
+      "note": "arithmetic"
+    },
+    {
+      "id": "t31",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "psoriasis treatment",
+      "expected_topics": [
+        "Psoriasis"
+      ],
+      "note": "terse keyword query"
+    },
+    {
+      "id": "t32",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "crohns symptoms??",
+      "expected_topics": [
+        "Crohn's Disease"
+      ],
+      "note": "terse, no apostrophe, punctuation noise"
+    },
+    {
+      "id": "t33",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "dizzy when i stand up",
+      "expected_topics": [
+        "Dizziness and Vertigo",
+        "Fainting",
+        "Low Blood Pressure"
+      ],
+      "note": "colloquial symptom description; several pages are correct (Fainting names standing up too quickly)"
+    },
+    {
+      "id": "t34",
+      "kind": "in_scope",
+      "source": "dev",
+      "question": "how long is chickenpox contagious",
+      "expected_topics": [
+        "Chickenpox"
+      ],
+      "note": "terse. RETRIEVAL ONLY: the Chickenpox page says it spreads very easily but gives no duration, so an end-to-end answer would abstain"
+    }
+  ]
+}

@@ -287,6 +287,15 @@ def test_spend_cap_stops_new_work() -> None:
     assert spend.as_dict()["calls"] == 2
 
 
+def test_threshold_dev_set_does_not_overlap_the_golden_set() -> None:
+    dev, golden = datasets.load_threshold_dev().items, datasets.load_rag().items
+    assert {q.question.lower() for q in dev}.isdisjoint({q.question.lower() for q in golden})
+    dev_topics = {t for q in dev if q.kind == "in_scope" for t in q.expected_topics}
+    golden_topics = {t for q in golden for t in q.expected_topics}
+    assert dev_topics.isdisjoint(golden_topics), "tuning on a topic the golden set confirms on"
+    assert {q.kind for q in dev} == {"in_scope", "near_miss", "off_topic"}
+
+
 @pytest.mark.parametrize("name", datasets.NAMES)
 def test_datasets_are_frozen_at_one_point_zero(name: str) -> None:
     assert datasets.current_hashes()[name]["version"] == "1.0"

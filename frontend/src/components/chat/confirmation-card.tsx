@@ -2,6 +2,7 @@
 
 import { CalendarClock, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { confirmationNote } from "@/lib/confirmation";
 import type { Confirmation } from "@/lib/types";
 
 /**
@@ -18,6 +19,7 @@ export function ConfirmationCard({
   onAnswer: (confirmed: boolean) => void;
 }) {
   const booking = confirmation.type === "confirm_booking";
+  const note = confirmationNote(confirmation);
   return (
     <section
       aria-label={booking ? "Confirm booking" : "Confirm cancellation"}
@@ -26,6 +28,7 @@ export function ConfirmationCard({
       <p className="font-semibold">
         {booking ? "Please confirm your appointment" : "Please confirm"}
       </p>
+      {note && <p className="mt-1.5 leading-relaxed">{note}</p>}
       <dl className="mt-2.5 space-y-1.5">
         <div className="flex items-center gap-2">
           <dt className="sr-only">Doctor</dt>

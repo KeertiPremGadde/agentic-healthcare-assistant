@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { useChat } from "@/lib/use-chat";
 import { Composer } from "./composer";
 import { ConfirmationCard } from "./confirmation-card";
+import type { BookState } from "./doctor-cards";
 import { EmptyState } from "./empty-state";
 import { MessageBubble } from "./message-bubble";
 
@@ -37,6 +38,16 @@ export function Chat() {
   const empty = chat.messages.length === 0 && !chat.pending;
   // "Book number N" refers to the newest list of suggested doctors, so older cards stay inert.
   const latestDoctors = chat.messages.findLast((m) => m.doctors?.length)?.id;
+  const bookState = (id: number): BookState => {
+    if (id !== latestDoctors) {
+      return {
+        disabled: true,
+        reason: "These doctors are from an earlier suggestion. Use the newest list.",
+      };
+    }
+    if (chat.pending) return { disabled: true, reason: "Answer the confirmation below first." };
+    return { disabled: chat.busy }; // busy is momentary, so no explanation is needed
+  };
   const blocked = chat.busy || chat.pending !== null;
 
   return (
@@ -63,7 +74,7 @@ export function Chat() {
             <MessageBubble
               key={message.id}
               message={message}
-              canBook={!blocked && message.id === latestDoctors}
+              bookState={bookState(message.id)}
               onBook={(number) => chat.send(`Book number ${number}`)}
             />
           ))}

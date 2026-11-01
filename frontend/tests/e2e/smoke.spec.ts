@@ -84,12 +84,28 @@ test("book end to end: confirm, add to calendar, see it under My appointments, c
   await expect(cards.first()).toContainText("Berlin");
   await expect(cards.first()).toContainText("German, English");
   await expect(page.getByRole("log")).not.toContainText("1. Dr. Anna Schmidt - Berlin");
+  await expect(page.getByRole("log")).not.toContainText("Doctors you can book");
+
+  // Order on screen: intro line, the cards, the hint, then the not-a-diagnosis note.
+  const top = async (text: string | RegExp) =>
+    (await page.getByText(text).first().boundingBox())!.y;
+  const intro = await top(/Dermatologist is the right specialist/);
+  const firstCard = (await cards.first().boundingBox())!.y;
+  const hint = await top(/Tap Book, or tell me a day and time/);
+  const note = await top(/not a diagnosis/);
+  expect(intro).toBeLessThan(firstCard);
+  expect(firstCard).toBeLessThan(hint);
+  expect(hint).toBeLessThan(note);
+  await expect(page.getByText('(e.g. "Book number 1 next Tuesday afternoon")')).toBeVisible();
 
   await page.getByRole("button", { name: "Book Dr. Anna Schmidt" }).click();
   await expect(page.getByRole("log").getByText("Book number 1", { exact: true })).toBeVisible();
   const card = page.getByRole("region", { name: "Confirm booking" });
   await expect(card).toContainText("Dr. Anna Schmidt");
   await expect(card).toContainText("Mon 4 Mar 2030, 09:00");
+  // the Book buttons are off and say why
+  await expect(page.getByRole("button", { name: "Book Dr. Anna Schmidt" })).toBeDisabled();
+  await expect(page.getByText("Answer the confirmation below first.")).toBeVisible();
   await page.getByLabel("Your message").fill("something else");
   await expect(page.getByRole("button", { name: "Send message" })).toBeDisabled(); // answer the card first
   await page.getByLabel("Your message").fill("");
@@ -154,16 +170,21 @@ test("an emergency gets the red alert card and a crisis message gets the calm su
   await expect(
     crisis.getByRole("link", { name: /TelefonSeelsorge 0800 111 0 111/ }),
   ).toHaveAttribute("href", "tel:08001110111");
-  await expect(crisis.getByRole("link", { name: "0800 111 0 111", exact: true })).toHaveAttribute(
-    "href",
-    "tel:08001110111",
-  );
+  // the numbers in the text are plain: the buttons carry them, not a second set of links
+  await expect(crisis.getByRole("link", { name: "0800 111 0 111", exact: true })).toHaveCount(0);
+  await expect(crisis.getByRole("link", { name: "112", exact: true })).toHaveCount(0);
   // poison control: 112 right away, or a regional Giftnotruf number, plus the official list
   await crisis.getByText(/Poison control \(Giftnotruf\)/).click();
   await expect(crisis.getByRole("link", { name: "030 19240" })).toHaveAttribute(
     "href",
     "tel:03019240",
   );
+  await expect(crisis.getByRole("link", { name: "089 19240" })).toHaveAttribute(
+    "href",
+    "tel:08919240",
+  );
+  await expect(crisis.getByRole("link", { name: "0228 19240" })).toHaveCount(0); // only verified
+  await expect(crisis.getByText("In an emergency call 112")).toBeVisible();
   await expect(
     crisis.getByRole("link", { name: /official list of poison centres/ }),
   ).toHaveAttribute("href", /bfr\.bund\.de/);
@@ -208,5 +229,15 @@ test("only the newest list of doctors can be booked from", async ({ page }) => {
   const books = page.getByRole("button", { name: "Book Dr. Anna Schmidt" });
   await expect(books).toHaveCount(2);
   await expect(books.first()).toBeDisabled(); // "Book number 1" means the newest list
+  await expect(page.getByText("These doctors are from an earlier suggestion")).toBeVisible();
   await expect(books.last()).toBeEnabled();
+});
+
+test("an explanation for a different day is shown on the confirmation card", async ({ page }) => {
+  await signUp(page);
+  await ask(page, "book it for sunday");
+  const card = page.getByRole("region", { name: "Confirm booking" });
+  await expect(card).toContainText("Dr. Anna Schmidt doesn't work on Sundays.");
+  await expect(card).toContainText("Mon 4 Mar 2030, 09:00");
+  await expect(card).not.toContainText("Shall I book"); // the question itself isn't repeated
 });

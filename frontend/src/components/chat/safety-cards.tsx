@@ -39,15 +39,14 @@ export function EmergencyCard({ text }: { text: string }) {
   );
 }
 
-// Regional poison information centres. Berlin and München are confirmed on the centres' own
-// pages; Bonn, Göttingen and Mainz on a public directory. Every other region is on the official
-// directory of the Federal Institute for Risk Assessment (BfR), which is linked below.
+// Poison information centres (Giftnotruf). Source: the official directory of the Federal Institute
+// for Risk Assessment (BfR), "Giftinformationszentren in Deutschland", marked "Stand: 22.07.2026",
+// emergency lines (Notruf) read from that page on 2026-11-01. Germany has several regional centres
+// and no single number, so only numbers confirmed there are shown; every other region is sent to
+// the official directory. Re-check against the directory before adding or changing a number.
 const POISON_CENTRES = [
   { city: "Berlin", label: "030 19240" },
   { city: "München", label: "089 19240" },
-  { city: "Bonn", label: "0228 19240" },
-  { city: "Göttingen", label: "0551 19240" },
-  { city: "Mainz", label: "06131 19240" },
 ];
 const POISON_DIRECTORY =
   "https://www.bfr.bund.de/deutsches-produktregister-de-pro/giftinformationszentren-in-deutschland/";
@@ -59,7 +58,8 @@ export function CrisisCard({ text }: { text: string }) {
   return (
     <div role="alert" className="flex">
       <Notice tone="care" icon={HeartHandshake} title="You are not alone">
-        <PhoneText text={text} />
+        {/* plain text here: the call buttons below carry the numbers, so no second set of links */}
+        <p className="mt-1.5 leading-relaxed whitespace-pre-wrap">{text}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <a href="tel:08001110111" className={`${callButton} bg-care-foreground text-care`}>
             <Phone className="size-4" aria-hidden />
@@ -83,7 +83,7 @@ export function CrisisCard({ text }: { text: string }) {
               <a href="tel:112" className={textLink}>
                 112
               </a>{" "}
-              right away. For advice, call your regional poison centre:
+              right away. For advice you can also call a poison centre:
             </p>
             <ul className="grid gap-x-4 gap-y-1 sm:grid-cols-2">
               {POISON_CENTRES.map((centre) => (
@@ -96,7 +96,7 @@ export function CrisisCard({ text }: { text: string }) {
               ))}
             </ul>
             <p>
-              Other regions:{" "}
+              Other regions: see the{" "}
               <a
                 href={POISON_DIRECTORY}
                 target="_blank"

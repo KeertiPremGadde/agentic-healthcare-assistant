@@ -2,20 +2,20 @@
 
 import { Info, TriangleAlert } from "lucide-react";
 import { parseReply } from "@/lib/citations";
+import { splitDoctorReply } from "@/lib/doctor-reply";
 import type { ChatMessage } from "@/lib/use-chat";
 import { BookedCard } from "./booked-card";
-import { DoctorCards } from "./doctor-cards";
+import { DoctorCards, type BookState } from "./doctor-cards";
 import { Notice } from "./notice";
 import { CrisisCard, EmergencyCard } from "./safety-cards";
 
 export function MessageBubble({
   message,
-  canBook,
+  bookState,
   onBook,
 }: {
   message: ChatMessage;
-  /** true only for the newest doctor suggestion: "Book number N" refers to the latest list */
-  canBook: boolean;
+  bookState: BookState;
   onBook: (number: number) => void;
 }) {
   if (message.role === "user") {
@@ -38,32 +38,30 @@ export function MessageBubble({
   }
   if (message.kind === "emergency") return <EmergencyCard text={message.text} />;
   if (message.kind === "harmful_intent") return <CrisisCard text={message.text} />;
-  if (message.kind === "booked")
+  if (message.kind === "booked") {
     return <BookedCard booking={message.booking} text={message.text} />;
-  return <AssistantBubble message={message} canBook={canBook} onBook={onBook} />;
+  }
+  return <AssistantBubble message={message} bookState={bookState} onBook={onBook} />;
 }
 
-/** Drop the text lines that the doctor cards show instead ("1. Dr. X - Berlin (...)"). */
-function withoutDoctorLines(body: string, doctors: NonNullable<ChatMessage["doctors"]>): string {
-  const listed = (line: string) => doctors.some((d, i) => line.startsWith(`${i + 1}. ${d.name}`));
-  return body
-    .split("\n")
-    .filter((line) => !listed(line.trim()))
-    .join("\n");
-}
+const BOOK_HINT =
+  'Tap Book, or tell me a day and time (e.g. "Book number 1 next Tuesday afternoon")';
 
 function AssistantBubble({
   message,
-  canBook,
+  bookState,
   onBook,
 }: {
   message: ChatMessage;
-  canBook: boolean;
+  bookState: BookState;
   onBook: (number: number) => void;
 }) {
   const { body, sources, attributions, disclaimer } = parseReply(message.text);
-  const doctors = message.doctors;
-  const shown = doctors?.length ? withoutDoctorLines(body, doctors) : body;
+  const doctors = message.doctors?.length ? message.doctors : undefined;
+  // Doctor suggestions read as: intro, cards, hint, note. If the list isn't recognised the text is
+  // shown as it is and the cards follow it.
+  const split = doctors ? splitDoctorReply(body, doctors) : null;
+  const shown = split ? split.intro : body;
   return (
     <div className="flex flex-col items-start">
       <div className="bg-card max-w-[92%] rounded-2xl rounded-bl-md border px-4 py-3 text-sm leading-relaxed shadow-xs">
@@ -106,9 +104,16 @@ function AssistantBubble({
           </p>
         )}
       </div>
-      {doctors && doctors.length > 0 && (
+      {doctors && (
         <div className="w-full max-w-[92%]">
-          <DoctorCards doctors={doctors} enabled={canBook} onBook={onBook} />
+          <DoctorCards doctors={doctors} state={bookState} onBook={onBook} />
+          <p className="text-muted-foreground mt-2 text-xs">{BOOK_HINT}</p>
+          {split?.notes.map((note) => (
+            <p key={note} className="text-muted-foreground mt-2 flex gap-1.5 text-xs">
+              <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+              {note}
+            </p>
+          ))}
         </div>
       )}
     </div>

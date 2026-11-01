@@ -140,7 +140,9 @@ async function chat(req, res) {
             type: "confirm_booking",
             doctor: "Dr. Anna Schmidt",
             start: "Mon 4 Mar 2030, 09:00",
-            question: "Shall I book Mon 4 Mar 2030, 09:00 with Dr. Anna Schmidt?",
+            question: `${
+                text.includes("sunday") ? "Dr. Anna Schmidt doesn't work on Sundays. " : ""
+            }Shall I book Mon 4 Mar 2030, 09:00 with Dr. Anna Schmidt?`,
         };
         remember(id, "assistant", "(waiting for confirmation)").pending = pending;
         event(res, "confirmation", pending);

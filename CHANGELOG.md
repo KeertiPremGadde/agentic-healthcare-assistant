@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- German emergency, crisis and poisoning replies (Phase 7 follow-up): the language of the rule that
+  matched decides the reply language (each emergency and harmful-intent pattern now carries its
+  language; a mixed message gets the English reply; detection itself is unchanged, checked on 247
+  messages), and the router's language decides when only its flags caught the message. German
+  texts with 112, TelefonSeelsorge (0800 111 0 111, 116 123), the on-call doctor service 116 117
+  (emergency reply only) and, for poisoning and in the crisis reply, the seven poison centres from
+  the BfR directory (Stand 22.07.2026); no US numbers. The safety notice follows the turn's language
+  and the emergency card makes the new numbers tappable. English replies are byte-identical. ADR 0016.
 - German fixed texts (Phase 7 follow-up): the "I don't know" reply, dose referral, `Quellen:` /
   `Inhalt:` labels and the disclaimer (with the on-call number 116 117) are German for German
   questions, chosen per turn from the router's `language` (`reply_language`); other languages fall

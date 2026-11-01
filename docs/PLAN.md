@@ -213,8 +213,8 @@ Done in order, each on its own branch and PR.
 
 - [x] German fixed texts: refusal, dose referral, labels and disclaimer in German for German
   questions (ADR 0015); the guard and the frontend parser accept both languages
-- [ ] German emergency and harmful-intent replies (the matched rule's language decides the reply
-  language; wording to be reviewed before committing)
+- [x] German emergency and harmful-intent replies (the matched rule's language decides the reply
+  language; BfR-verified poison numbers; ADR 0016)
 - [ ] Results table + chart in README
 - **Done when:** CI fails if faithfulness drops below threshold.
 

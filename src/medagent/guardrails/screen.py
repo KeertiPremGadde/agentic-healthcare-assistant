@@ -10,15 +10,17 @@ which also covers messages that combine a method question with suicidal intent.
 from dataclasses import dataclass
 from typing import Literal
 
-from medagent.guardrails.emergency import EMERGENCY_MESSAGE, detect_red_flag
-from medagent.guardrails.harmful import HARMFUL_MESSAGE, detect_harmful_intent
+from medagent.guardrails.emergency import detect_red_flag, emergency_reply
+from medagent.guardrails.harmful import detect_harmful_intent
+from medagent.guardrails.texts import texts_for
 
 
 @dataclass(frozen=True, slots=True)
 class Screen:
     kind: Literal["harmful_intent", "emergency"]
     category: str  # e.g. "lethal_dose" or "cardiac": safe to log, never the user's text
-    reply: str  # the fixed answer to send, with no LLM call
+    reply: str  # the fixed answer to send, with no LLM call, in the language of the matched rule
+    language: str = "en"
 
 
 def screen_message(text: str) -> Screen | None:
@@ -29,8 +31,15 @@ def screen_message(text: str) -> Screen | None:
     """
     harmful = detect_harmful_intent(text)
     if harmful is not None:
-        return Screen("harmful_intent", harmful.kind, HARMFUL_MESSAGE)
+        return Screen(
+            "harmful_intent",
+            harmful.kind,
+            texts_for(harmful.language).harmful_message,
+            harmful.language,
+        )
     flag = detect_red_flag(text)
     if flag is not None and not flag.informational:
-        return Screen("emergency", flag.category, EMERGENCY_MESSAGE)
+        return Screen(
+            "emergency", flag.category, emergency_reply(flag.language, flag.category), flag.language
+        )
     return None

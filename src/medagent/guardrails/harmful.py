@@ -20,6 +20,17 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
+from medagent.guardrails.texts import EN
+
+
+class _German(str):
+    """A pattern that matches German phrasing. The language of the pattern that matched decides
+    the language of the fixed reply (the rules run before any model, so there is nothing else to
+    go by)."""
+
+
+_de = _German
+
 # ---- building blocks -------------------------------------------------------------------------
 _PERSON_EN = (
     r"(?:person|people|someone|somebody|anyone|human|man|woman|adult|child|kid|baby|husband|wife"
@@ -65,16 +76,19 @@ _PATTERNS: dict[str, list[str]] = {
         r"\bhow (?:much|many)\b.{0,60}\b(?:is|are|would be|could be)\s+(?:a\s+)?"
         r"(?:lethal|fatal|deadly)\b",
         r"\boverdose\b.{0,15}\b(?:fatally|lethally)\b",
-        r"\bwie\s?viel\w*\b.{0,60}\b(?:sind|ist|w(?:ä|ae)re|w(?:ä|ae)ren)\s+"
-        r"(?:t(?:ö|oe)dlich|letal)",
+        _de(
+            r"\bwie\s?viel\w*\b.{0,60}\b(?:sind|ist|w(?:ä|ae)re|w(?:ä|ae)ren)\s+"
+            r"(?:t(?:ö|oe)dlich|letal)"
+        ),
         r"\bso (?:that )?i (?:don'?t|do not|never) wake up\b",
-        r"\bdosis\b.{0,25}\b(?:t(?:ö|oe)dlich|letal)",
-        # German
-        r"\b(?:t(?:ö|oe)dlich|letal)\w*\s+(?:dosis|dosierung|menge)\b",
-        r"\bwie\s?(?:viele?|viel)\b.{0,60}\b(?:um|damit|bis)\b.{0,30}"
-        r"\b(?:zu sterben|sterben|stirbt|sterbe|t(?:ö|oe)ten|umzubringen|umbringen|zu vergiften"
-        r"|vergiften|tot)\b",
-        r"\bgenug\b.{0,40}\b(?:um zu sterben|zum sterben|um mich umzubringen)\b",
+        _de(r"\bdosis\b.{0,25}\b(?:t(?:ö|oe)dlich|letal)"),
+        _de(r"\b(?:t(?:ö|oe)dlich|letal)\w*\s+(?:dosis|dosierung|menge)\b"),
+        _de(
+            r"\bwie\s?(?:viele?|viel)\b.{0,60}\b(?:um|damit|bis)\b.{0,30}"
+            r"\b(?:zu sterben|sterben|stirbt|sterbe|t(?:ö|oe)ten|umzubringen|umbringen|zu vergiften"
+            r"|vergiften|tot)\b"
+        ),
+        _de(r"\bgenug\b.{0,40}\b(?:um zu sterben|zum sterben|um mich umzubringen)\b"),
     ],
     "harm_to_others": [
         # "how can I poison someone", "best way to kill my husband", "how to harm a person"
@@ -97,16 +111,20 @@ _PATTERNS: dict[str, list[str]] = {
         rf"\bmake\s+{_GAP}{_PERSON_EN}\s+(?:very |really |seriously )?(?:ill|sick|unwell)\b",
         r"\b(?:look|appear|seem)\s+like\s+(?:natural causes|an accident|suicide)\b",
         rf"\bget rid of\s+{_GAP}{_PERSON_EN}\b.{{0,20}}\b(?:permanently|for good)\b",
-        r"\bnicht mehr aufwach\w*",
+        _de(r"\bnicht mehr aufwach\w*"),
         r"\bput (?:something|poison|drugs?|pills?)\b.{0,15}\bin\b.{0,25}\b(?:drink|food|coffee"
         r"|tea|meal|water)\b",
-        # German
-        rf"\bwie (?:kann|k(?:ö|oe)nnte|soll|muss|w(?:ü|ue)rde)\s+ich\s+.{{0,25}}\b{_PERSON_DE}\b"
-        rf".{{0,25}}\b{_HARM_VERB_DE}\b",
+        _de(
+            rf"\bwie (?:kann|k(?:ö|oe)nnte|soll|muss|w(?:ü|ue)rde)\s+ich\s+"
+            rf".{{0,25}}\b{_PERSON_DE}\b"
+            rf".{{0,25}}\b{_HARM_VERB_DE}\b"
+        ),
         # (up to two words may sit in between: "jemanden unbemerkt umbringen")
-        rf"\b{_PERSON_DE}\s+(?:\w+\s+){{0,2}}(?:zu\s+)?{_HARM_VERB_DE}\b",
-        r"\b(?:gift|substanz|mittel)\b.{0,30}\b(?:nicht nachweisbar|nicht auff(?:ä|ae)llt"
-        r"|unauff(?:ä|ae)llig|nicht erkennbar|spurlos)\b",
+        _de(rf"\b{_PERSON_DE}\s+(?:\w+\s+){{0,2}}(?:zu\s+)?{_HARM_VERB_DE}\b"),
+        _de(
+            r"\b(?:gift|substanz|mittel)\b.{0,30}\b(?:nicht nachweisbar|nicht auff(?:ä|ae)llt"
+            r"|unauff(?:ä|ae)llig|nicht erkennbar|spurlos)\b"
+        ),
     ],
     "self_harm_method": [
         r"\b(?:painless|peaceful|quick|quickest|easy|easiest|best|simplest|least painful|fastest"
@@ -119,35 +137,31 @@ _PATTERNS: dict[str, list[str]] = {
         r"|take my own life|overdose (?:and die|on purpose)|die in my sleep)",
         r"\bwhich (?:medication|pill|drug|medicine)s?\s+(?:is|are)\s+(?:the\s+)?"
         r"(?:painless|quick|fatal|lethal)",
-        r"\b(?:schmerzlos|schmerzfrei|sanft|schnell)\w*\s+(?:weg|methode|art)\s+"
-        r"(?:zu sterben|sich umzubringen|sich das leben zu nehmen)",
+        _de(
+            r"\b(?:schmerzlos|schmerzfrei|sanft|schnell)\w*\s+(?:weg|methode|art)\s+"
+            r"(?:zu sterben|sich umzubringen|sich das leben zu nehmen)"
+        ),
     ],
 }
 
-_COMPILED = {
-    kind: [re.compile(p, re.IGNORECASE | re.DOTALL) for p in patterns]
+_COMPILED: dict[str, list[tuple[str, re.Pattern[str]]]] = {
+    kind: [
+        ("de" if isinstance(p, _German) else "en", re.compile(p, re.IGNORECASE | re.DOTALL))
+        for p in patterns
+    ]
     for kind, patterns in _PATTERNS.items()
 }
 
-HARMFUL_MESSAGE = (
-    "I'm sorry, but I can't help with that, and I'm not able to give information about it.\n\n"
-    "If you are thinking about ending your life or hurting yourself, you don't have to carry "
-    "this alone. Please reach out right now:\n"
-    "- Germany: TelefonSeelsorge, free and anonymous, 24/7: 0800 111 0 111\n"
-    "- EU: 112 (emergency services)\n"
-    "- US: call or text 988 (Suicide & Crisis Lifeline)\n\n"
-    "If you are worried you might hurt someone else, please call 112 or talk to a doctor or "
-    "someone you trust today.\n\n"
-    "If someone has accidentally swallowed something dangerous, call 112 right away, or your "
-    "local poison control centre (Giftnotruf in Germany; Poison Help 1-800-222-1222 in the US).\n\n"
-    "I'm happy to help with other health questions, finding a doctor, or booking an appointment."
-)
+# The English text lives in texts.py (with the German one); re-exported so imports keep working.
+HARMFUL_MESSAGE = EN.harmful_message
 
 
 @dataclass(frozen=True, slots=True)
 class HarmfulFlag:
     kind: str  # "lethal_dose" | "harm_to_others" | "self_harm_method" (for logs; never the text)
     matched: str  # the matched phrase from the user's own text; never logged
+    # "de" only if every pattern that matched is German; a mix (or any English match) is "en".
+    language: str = "en"
 
 
 def _normalise(text: str) -> str:
@@ -155,11 +169,22 @@ def _normalise(text: str) -> str:
 
 
 def detect_harmful_intent(text: str) -> HarmfulFlag | None:
-    """Return the first harmful-intent pattern found in the message, or None."""
+    """Return the first harmful-intent pattern found in the message, or None.
+
+    All patterns are checked so the language can be decided: German only if nothing English
+    matched too (the English reply is the safe default for a mixed message)."""
     normalised = _normalise(text)
+    first: tuple[str, str] | None = None
+    languages: set[str] = set()
     for kind, patterns in _COMPILED.items():
-        for pattern in patterns:
+        for language, pattern in patterns:
             match = pattern.search(normalised)
             if match:
-                return HarmfulFlag(kind=kind, matched=match.group(0))
-    return None
+                languages.add(language)
+                if first is None:
+                    first = (kind, match.group(0))
+    if first is None:
+        return None
+    return HarmfulFlag(
+        kind=first[0], matched=first[1], language="de" if languages == {"de"} else "en"
+    )

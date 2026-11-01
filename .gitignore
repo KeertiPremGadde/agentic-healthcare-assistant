@@ -36,8 +36,11 @@ data/raw/*
 data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
-evals/results/*
-!evals/results/.gitkeep
+# Result folders such as evals/results/baseline-*/ and one per kept or rejected change are
+# committed (plain `git add <path>`). Only the runner's scratch output and the unreviewed
+# red-team dump stay local.
+evals/results/runs/
+evals/results/redteam_router.json
 
 # ---------- Frontend ----------
 node_modules/

@@ -219,6 +219,8 @@ Done in order, each on its own branch and PR.
   all seven BfR poison centres in the crisis card
 - [x] Safety rules for suicidal statements and other missing concepts, German and English (ADR 0018);
   the router measured as second layer
+- [x] General questions about a red-flag topic get the answer plus the safety notice, not the
+  emergency reply; anything happening or about what to do keeps it (ADR 0019)
 - [ ] Results table + chart in README
 - **Done when:** CI fails if faithfulness drops below threshold.
 

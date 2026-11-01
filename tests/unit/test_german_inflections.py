@@ -79,15 +79,8 @@ def test_no_message_of_the_routing_set_gets_a_safety_reply_it_should_not() -> No
     assert wrong == []
 
 
-# Known false alarm, older than this sweep: a first-person pronoun counts as "a person is
-# affected", so "How can I recognise a stroke?" (a general question) gets the emergency reply.
-# "Wie erkenne ich einen Schlaganfall?" does too. The informational check is a separate
-# precision decision; this test pins the one golden question it affects.
-KNOWN_FALSE_ALARMS = ["How can I recognise a stroke?"]
-
-
 def test_no_golden_or_tuning_question_gets_a_safety_reply() -> None:
     """In-scope, near-miss and off-topic questions of both RAG sets are ordinary questions."""
     texts = [q["question"] for q in _load("evals/datasets/rag_golden.json", "questions")]
     texts += [q["question"] for q in _load("evals/datasets/threshold_dev.json", "questions")]
-    assert [t for t in texts if screen_message(str(t))] == KNOWN_FALSE_ALARMS
+    assert [t for t in texts if screen_message(str(t))] == []

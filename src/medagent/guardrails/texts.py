@@ -164,6 +164,20 @@ DE = FixedTexts(
 
 ALL_TEXTS = (EN, DE)
 
+# When the router fails the message has not been checked for danger and its language is unknown
+# (the rules had no match to tell): a neutral request to rephrase, then the emergency and crisis
+# lines in both languages. Not a refusal: the user is most likely benign and the cause an outage.
+ROUTER_FAILURE_MESSAGE = (
+    "I couldn't process that message just now. Please try again, or rephrase it.\n\n"
+    "If this is an emergency, call 112 (911 in the US). If you are thinking about hurting "
+    "yourself, you can reach the TelefonSeelsorge in Germany any time on 0800 111 0 111 (free, "
+    "anonymous), or call or text 988 in the US.\n\n"
+    "Ich konnte Ihre Nachricht gerade nicht verarbeiten. Bitte versuchen Sie es noch einmal oder "
+    "formulieren Sie sie anders.\n\n"
+    "Im Notfall wählen Sie die 112. Wenn Sie daran denken, sich etwas anzutun, erreichen Sie die "
+    "TelefonSeelsorge jederzeit kostenlos und anonym unter 0800 111 0 111."
+)
+
 
 def reply_language(code: str | None) -> str:
     """The language of the fixed texts for an ISO 639-1 code: "de" for German, else "en"."""

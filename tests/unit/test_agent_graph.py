@@ -14,7 +14,6 @@ from structlog.testing import capture_logs
 from medagent.agents.deps import AgentDeps
 from medagent.agents.graph import AgentGraph, build_graph
 from medagent.agents.llm import LLMError
-from medagent.agents.nodes.common import APOLOGY
 from medagent.agents.nodes.output_guard import DOCTOR_NOTE, OSM_ATTRIBUTION, output_guard_node
 from medagent.agents.nodes.respond import CAPABILITIES, OUT_OF_SCOPE
 from medagent.agents.runner import run_turn
@@ -22,7 +21,7 @@ from medagent.agents.schemas import Route, RouteDecision
 from medagent.guardrails.disclaimer import DISCLAIMER
 from medagent.guardrails.dose import DOSE_REFERRAL
 from medagent.guardrails.emergency import EMERGENCY_MESSAGE, SAFETY_NOTICE
-from medagent.guardrails.texts import DE
+from medagent.guardrails.texts import DE, ROUTER_FAILURE_MESSAGE
 from medagent.observability.cost import estimate_cost
 from medagent.observability.tracing import TraceContext
 from medagent.rag.answer import NO_ANSWER, AnswerPayload
@@ -133,10 +132,24 @@ async def test_smalltalk_and_out_of_scope_use_fixed_replies(route: Route, expect
     assert llm.schemas_called == ["RouteDecision"]  # one cheap call, no second LLM call
 
 
-async def test_llm_failure_gives_an_apology_not_a_crash() -> None:
-    llm = FakeStructuredLLM({RouteDecision: [LLMError("APIConnectionError")]})
+async def test_router_failure_gives_a_neutral_reply_with_the_emergency_lines() -> None:
+    llm = FakeStructuredLLM({RouteDecision: [LLMError("APIConnectionError", "api")]})
     result = await run_turn(_graph(llm), _thread(), 1, message="hello")
-    assert result.reply == APOLOGY
+    assert result.reply == ROUTER_FAILURE_MESSAGE
+    # neutral, not a refusal; both languages; the emergency and crisis lines are always there
+    for needle in ("rephrase", "formulieren Sie", "112", "0800 111 0 111", "988"):
+        assert needle in ROUTER_FAILURE_MESSAGE
+    assert "can't help" not in ROUTER_FAILURE_MESSAGE
+
+
+@pytest.mark.parametrize("kind", ["parse", "api", "other"])
+async def test_router_failure_logs_its_kind_without_user_text(kind: str) -> None:
+    llm = FakeStructuredLLM({RouteDecision: [LLMError("boom during RouteDecision", kind)]})
+    with capture_logs() as logs:
+        await run_turn(_graph(llm), _thread(), 1, message="a secret sentence")
+    failed = [e for e in logs if e["event"] == "node_failed" and e["node"] == "supervisor"]
+    assert [e["kind"] for e in failed] == [kind]
+    assert "secret" not in str(logs)
 
 
 async def test_memory_persists_across_turns_in_a_thread() -> None:

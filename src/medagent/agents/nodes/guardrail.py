@@ -16,7 +16,8 @@ from medagent.guardrails.screen import screen_message
 
 EMERGENCY = "emergency"
 HARMFUL = "harmful_intent"
-FIXED_REPLY_ROUTES = (EMERGENCY, HARMFUL)  # routes whose reply is fixed text, never LLM output
+SELF_HARM = "self_harm_support"
+FIXED_REPLY_ROUTES = (EMERGENCY, HARMFUL, SELF_HARM)  # fixed text, never LLM output
 
 log = structlog.get_logger("medagent.agents")
 

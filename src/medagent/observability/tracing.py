@@ -60,6 +60,7 @@ SAFE_KEYS = frozenset(
         "reasoning",
         "is_emergency",
         "is_harmful",
+        "is_self_harm",
         "context_sufficient",
     }
 )

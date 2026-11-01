@@ -50,6 +50,16 @@ describe("linkifyPhones", () => {
     ]);
   });
 
+  it("links the children's, parents' and appointment numbers of the self-harm reply", () => {
+    expect(
+      tels("Nummer gegen Kummer: 116 111 für Kinder, 0800 111 0550 für Eltern; Termine 116 117."),
+    ).toEqual([
+      ["116 111", "116111"],
+      ["0800 111 0550", "08001110550"],
+      ["116 117", "116117"],
+    ]);
+  });
+
   it("does not link look-alikes of the German numbers", () => {
     expect(tels("Az. 030 19241, 1161171, 0361 7307300, 116 118, 9030 19240")).toEqual([]);
   });

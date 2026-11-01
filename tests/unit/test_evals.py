@@ -22,9 +22,8 @@ NOW = datetime(2026, 11, 2, 8, 0, tzinfo=UTC)
 
 def test_dataset_files_match_the_lock() -> None:
     lock = json.loads(datasets.LOCK_FILE.read_text(encoding="utf-8"))
-    assert (
-        lock == datasets.current_hashes()
-    ), "a golden set changed: bump its version and regenerate datasets.lock.json"
+    changed = sorted(n for n, h in datasets.current_hashes().items() if lock.get(n) != h)
+    assert not changed, f"golden set changed without a new version and lock: {changed}"
 
 
 def test_datasets_load_with_expected_sizes() -> None:

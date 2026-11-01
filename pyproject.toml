@@ -103,7 +103,9 @@ follow_imports = "skip"
 testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-addopts = "-ra --strict-markers"
+# deepeval (optional `evals` group) ships a pytest plugin that loads .env into the process
+# environment, which would put real API keys into unit tests; keep it off.
+addopts = "-ra --strict-markers -p no:deepeval"
 markers = [
     "integration: needs Docker services (Postgres)",
     "llm: calls a real LLM API (skipped in CI by default)",

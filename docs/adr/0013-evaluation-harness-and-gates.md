@@ -112,6 +112,9 @@ until after the improvements are measured.
 - The `evals` dependency group is large and pulled `click`, `fsspec`, `huggingface-hub`, `jiter` and
   `rich` down a minor version in the shared lock; the app's tests pass on them. The group is not
   installed in CI's normal job.
+- DeepEval ships a pytest plugin that loads `.env` into the process environment; with the `evals`
+  group installed that put real Langfuse keys into unit tests (three tests failed). The plugin is
+  disabled in `pyproject.toml` (`-p no:deepeval`) and `run_evals.py` sets `DEEPEVAL_DISABLE_DOTENV`.
 - A frozen set cannot grow silently: new cases mean a new version, a new baseline and a stated reason.
 - Judged metrics are Haiku grading Haiku. The planned Sonnet-judge cross-check on a 20-question
   sample (needs approval before it runs) measures how far that can be trusted.

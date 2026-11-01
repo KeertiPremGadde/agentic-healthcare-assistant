@@ -60,10 +60,18 @@ suggested them (the graph remembers them, but a later turn must not re-send them
 are disabled because "number N" always means the newest list.
 
 ### What did you do for the safety cards?
-Made them actionable without changing what the server says: `tel:` links on every known number, a
-"Call 112" button on the emergency card, and TelefonSeelsorge, 112 and a Giftnotruf section on the
-crisis card. Germany has no single poison-control number, so I list only the regional numbers I could
-verify and link the official BfR directory for the rest, rather than guess.
+Made them actionable without changing what the server says: `tel:` links on the emergency card and a
+"Call 112" button; on the crisis card plain text, call buttons for TelefonSeelsorge and 112, and a
+Giftnotruf section (each number appears once as an action). Germany has no single poison-control
+number, so I show only the two I read on the official BfR directory (Berlin, München), link that
+directory for every other region, and left out numbers I'd only seen on third-party lists. The source
+and the date I checked are in the code next to the numbers.
+
+### What did the real-stack check find that the mock didn't?
+That replacing text with a card can drop information: the confirmation question can start with a
+reason ("Dr. X doesn't work on Sundays"), and a card showing only doctor and time would have offered a
+different day with no explanation. The card now shows that reason. A mock only returns what I thought
+to put in it, so I run the real stack once before every PR.
 
 ### How do you test a streaming UI for free?
 A tiny Node server speaks the real contract (CORS, SSE with delays, error envelopes, per-user

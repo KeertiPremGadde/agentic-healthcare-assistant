@@ -22,6 +22,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 - Safety cards: every known phone number is a `tel:` link; "Call 112" button on the emergency card;
   TelefonSeelsorge, 112 and a Giftnotruf (poison control) section with regional numbers and the
   official BfR list on the crisis card.
+- Doctor suggestions read as intro, cards, hint, then the not-a-diagnosis note; disabled Book buttons
+  explain themselves; the confirmation card shows the assistant's reason when it offers another day.
+- Crisis card: numbers on call buttons instead of repeated links in the text. Poison control lists
+  only numbers confirmed on the official BfR directory (Berlin, München; "Stand 22.07.2026", checked
+  2026-11-01) and links that directory for every other region.
 - The booked card is structured like the confirmation card (doctor, time, confirmation number) with
   "Add to calendar" below; a shorter one-line disclaimer strip; a fourth example prompt.
 - ADR 0011, `docs/learning/phase6.md`.

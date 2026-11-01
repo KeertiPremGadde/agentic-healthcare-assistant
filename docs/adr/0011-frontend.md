@@ -40,17 +40,27 @@ specialty, city, languages, in the order the assistant numbers them) and, after 
 conversation memory in the graph, so it is attached only to the turn that suggested it
 (`draft_kind == "doctors"`), which a test pins. A Book button sends "Book number N", the exact
 sentence a user would type, so the booking flow is unchanged and the confirmation step is still
-mandatory. Cards of older lists are disabled because "number N" refers to the newest list. The
-numbered text lines the cards replace are hidden in the bubble by exact match on the known names.
+mandatory. A Book tap on its own makes the assistant ask for a day, as typing "Book number 1"
+would. Cards of older lists are disabled because "number N" refers to the newest list, and disabled
+buttons say why ("Answer the confirmation below first."). The reply reads as intro, cards, a
+hint, then the not-a-diagnosis note: the list is found by exact match on the known doctor names
+(`lib/doctor-reply.ts`), the numbered lines, the generic label and the text hint are dropped, and
+if the list isn't recognised the text is shown unchanged. Likewise the confirmation card shows the
+explanation the assistant gives before asking (for example "Dr. X doesn't work on Sundays"),
+because the card shows the doctor and time as data and would otherwise offer a different day with
+no reason.
 
 ### 3c. Safety actions are one tap away
-The emergency and crisis texts are fixed on the server; the UI only makes them actionable: every
-known number in them is a `tel:` link (a fixed list, not a regex over arbitrary digits), the
-emergency card has a "Call 112" button, the crisis card has TelefonSeelsorge and 112 buttons and
-a Giftnotruf section. Poison centres have no single number in Germany; the UI lists five centres
-whose numbers were checked against published lists (Berlin, München, Bonn, Göttingen, Mainz) and
-links the official directory of the Federal Institute for Risk Assessment (BfR) for every other
-region, plus 112 for emergencies. The numbers live in `safety-cards.tsx` with that provenance.
+The emergency and crisis texts are fixed on the server; the UI only makes them actionable. On the
+emergency card every known number in the text is a `tel:` link (a fixed list, not a regex over
+arbitrary digits) and there is a "Call 112" button. The crisis card keeps its text plain and carries
+the numbers on buttons (TelefonSeelsorge, 112), so each number appears once as an action, plus a
+Giftnotruf (poison control) section. Germany has no single poison-control number, so that section
+shows only numbers confirmed on the official directory of the Federal Institute for Risk Assessment
+(BfR, "Giftinformationszentren in Deutschland", marked "Stand: 22.07.2026", read on 2026-11-01):
+Berlin 030 19240 and München 089 19240. Every other region is sent to the directory, and 112 is the
+answer for an emergency. Numbers seen only on third-party lists were deliberately left out. The
+source and date are recorded next to the numbers in `safety-cards.tsx`.
 
 ### 4. Token storage: memory plus `sessionStorage`, not an httpOnly cookie
 A cookie is the safer place against XSS, but it would need cookie auth on the API, CSRF

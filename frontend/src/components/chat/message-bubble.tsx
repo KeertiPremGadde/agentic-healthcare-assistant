@@ -7,7 +7,7 @@ import type { ChatMessage } from "@/lib/use-chat";
 import { BookedCard } from "./booked-card";
 import { DoctorCards, type BookState } from "./doctor-cards";
 import { Notice } from "./notice";
-import { CrisisCard, EmergencyCard } from "./safety-cards";
+import { CrisisCard, EmergencyCard, SupportCard } from "./safety-cards";
 
 export function MessageBubble({
   message,
@@ -38,6 +38,7 @@ export function MessageBubble({
   }
   if (message.kind === "emergency") return <EmergencyCard text={message.text} />;
   if (message.kind === "harmful_intent") return <CrisisCard text={message.text} />;
+  if (message.kind === "self_harm_support") return <SupportCard text={message.text} />;
   if (message.kind === "booked") {
     return <BookedCard booking={message.booking} text={message.text} />;
   }

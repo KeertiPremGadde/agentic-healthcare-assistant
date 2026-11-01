@@ -222,7 +222,7 @@ async def _router_pass(
                         ROUTER_SYSTEM_PROMPT.format(context="None."),
                         [HumanMessage(text)],
                     )
-                    flagged = d.is_emergency or d.is_harmful
+                    flagged = d.is_emergency or d.is_harmful or d.is_self_harm
                 except Exception:
                     return
                 finally:

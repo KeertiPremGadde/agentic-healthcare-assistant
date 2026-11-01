@@ -39,8 +39,8 @@ class TurnResult:
 
     @property
     def kind(self) -> str:
-        """How a client should present the reply: emergency | harmful_intent | booked | normal."""
-        if self.route in ("emergency", "harmful_intent"):
+        """How a client presents the reply: emergency | harmful_intent | self_harm_support | ..."""
+        if self.route in ("emergency", "harmful_intent", "self_harm_support"):
             return self.route
         return "booked" if self.appointment_id is not None else "normal"
 

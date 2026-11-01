@@ -40,6 +40,17 @@ export function EmergencyCard({ text }: { text: string }) {
   );
 }
 
+/** Someone says they hurt themselves, or that life is too much: warm, no alarm, numbers tappable. */
+export function SupportCard({ text }: { text: string }) {
+  return (
+    <div role="alert" className="flex">
+      <Notice tone="care" icon={HeartHandshake} title="You are not alone">
+        <PhoneText text={text} />
+      </Notice>
+    </div>
+  );
+}
+
 // Poison information centres (Giftnotruf): all seven lines of the official BfR directory, see
 // lib/poison-centres.ts for the source and the rules for changing a number.
 const tel = (label: string) => `tel:${label.replace(/\s/g, "")}`;

@@ -8,7 +8,7 @@
 | Git 2.45 | ✅ (user configured) | everything |
 | VS Code | ✅ | development |
 | Docker 29 | ✅ installed, **Docker Desktop not running** | Postgres (Phase 1+) |
-| Node 20 / npm 11 | ✅ (Node 22 LTS recommended) | frontend (Phase 6) |
+| Node 22 LTS / npm 11 | ✅ (Node 22 pinned in `frontend/.nvmrc`; newer also works locally) | frontend |
 | AWS CLI 2 | ✅ | deploy (Phase 8) |
 | GitHub CLI `gh` | ❌ missing | create repo + PRs from terminal |
 | Terraform | ❌ missing | infrastructure (Phase 8) |
@@ -18,7 +18,7 @@
 ```powershell
 winget install --id GitHub.cli
 winget install --id Hashicorp.Terraform
-winget install --id OpenJS.NodeJS.LTS      # upgrades Node 20 -> 22 LTS (optional now, needed by Phase 6)
+winget install --id OpenJS.NodeJS.LTS      # Node 22 LTS (the frontend and CI use 22)
 ```
 
 Then open a new terminal and log in:
@@ -143,3 +143,18 @@ curl.exe -N -X POST http://localhost:8000/v1/chat -H "Authorization: Bearer <tok
 Limits (all configurable in `.env`): 1,000 characters per message, 50 messages per user per day,
 and a global daily budget of `DAILY_BUDGET_USD` (default 1.00); past it, chat answers "demo limit
 reached" and makes no LLM calls (emergency messages still get the emergency answer).
+
+## Run the frontend
+
+```powershell
+docker compose up -d
+uv run python scripts/serve.py          # API on http://localhost:8000
+cd frontend
+npm ci
+npx playwright install chromium         # once, for the browser tests
+npm run dev                             # http://localhost:3000
+```
+
+The API must allow the frontend's origin: `API_CORS_ORIGINS=http://localhost:3000` (the default in
+`.env.example`). Register any username on the login page (no email needed), then try the example
+prompts. See `frontend/README.md` for the scripts.

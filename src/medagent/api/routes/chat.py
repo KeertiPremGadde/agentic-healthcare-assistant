@@ -25,8 +25,10 @@ from medagent.api.deps import CurrentUser, CurrentUserDep, ResourcesDep, enforce
 from medagent.api.errors import DEMO_NOTICE, ApiError
 from medagent.api.resources import Resources
 from medagent.api.schemas import (
+    BookingOut,
     ChatRequest,
     ChatResponse,
+    DoctorOut,
     ErrorResponse,
     HistoryResponse,
     LimitsOut,
@@ -155,7 +157,13 @@ async def _emit_final(
             await queue.put(sse("token", {"text": chunk}))
             if delay:
                 await asyncio.sleep(delay)
-        await queue.put(sse("message", {"text": result.reply}))
+        payload: dict[str, Any] = {"text": result.reply, "kind": result.kind}
+        if result.booking is not None:
+            payload["appointment_id"] = result.appointment_id
+            payload["booking"] = result.booking
+        if result.doctors:
+            payload["doctors"] = result.doctors
+        await queue.put(sse("message", payload))
     await queue.put(
         sse(
             "done",
@@ -204,23 +212,31 @@ async def _respond(
     return ChatResponse(
         conversation_id=conversation_id,
         reply=result.reply,
+        kind=result.kind,
+        appointment_id=result.appointment_id,
+        booking=BookingOut(**result.booking) if result.booking else None,
+        doctors=[DoctorOut(**d) for d in result.doctors] if result.doctors else None,
         pending=result.pending,
         usage=_usage(result.cost),
     )
 
 
 async def _limit_response(
-    res: Resources, conversation_id: str, stream: bool, reply: str
+    res: Resources, conversation_id: str, stream: bool, reply: str, kind: str
 ) -> StreamingResponse | ChatResponse:
     """A fixed answer with no LLM call (used for emergencies when a limit is reached)."""
     zero = RunCost(0, 0, 0, 0.0)
     if not stream:
         return ChatResponse(
-            conversation_id=conversation_id, reply=reply, pending=None, usage=_usage(zero)
+            conversation_id=conversation_id,
+            reply=reply,
+            kind=kind,
+            pending=None,
+            usage=_usage(zero),
         )
 
     async def one_shot() -> AsyncIterator[bytes]:
-        yield sse("message", {"text": reply})
+        yield sse("message", {"text": reply, "kind": kind})
         yield sse(
             "done",
             {
@@ -268,7 +284,7 @@ async def chat(
         if screen is not None:
             # Safety first: the deterministic rules need no LLM, so they still answer
             # (harmful-intent and emergency messages get their fixed reply, not "limit reached").
-            return await _limit_response(res, conversation_id, stream, screen.reply)
+            return await _limit_response(res, conversation_id, stream, screen.reply, screen.kind)
         status = 503 if allowance.reason == "daily_budget" else 429
         raise ApiError(
             status,

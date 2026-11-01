@@ -23,6 +23,35 @@ that deploys to AWS.**
 - **Detects emergencies** and redirects to emergency services instead of chatting
 - **Remembers the conversation** across sessions (durable LangGraph checkpoints)
 
+## Screenshots
+
+<table>
+<tr>
+<td><img src="docs/screenshots/desktop-light-confirm.png" alt="Chat with the booking confirmation card (light)" width="480"></td>
+<td><img src="docs/screenshots/desktop-dark-answer.png" alt="Answer with sources and disclaimer (dark)" width="480"></td>
+</tr>
+<tr>
+<td align="center">Human-in-the-loop confirmation before anything is booked</td>
+<td align="center">Cited answer, MedlinePlus attribution and disclaimer</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td><img src="docs/screenshots/mobile-light-booked.png" alt="Booked appointment with Add to calendar (mobile)" width="230"></td>
+<td><img src="docs/screenshots/mobile-dark-safety.png" alt="Emergency and crisis-support cards (mobile, dark)" width="230"></td>
+<td><img src="docs/screenshots/desktop-light-appointments.png" alt="My appointments" width="400"></td>
+</tr>
+<tr>
+<td align="center">Booked, with an .ics download</td>
+<td align="center">Emergency (red) and crisis support (calm)</td>
+<td align="center">My appointments</td>
+</tr>
+</table>
+
+More in [docs/screenshots](docs/screenshots) (desktop and mobile, light and dark). They are generated
+by `npm run screenshots` from a mock API, so the content is synthetic and reproducible.
+
 ## Architecture
 
 ```mermaid
@@ -49,7 +78,7 @@ More diagrams (agent graph, booking sequence, RAG pipeline, CI/CD): [docs/ARCHIT
 | LLM / RAG | OpenAI / Anthropic, pgvector, hybrid search, reranking, citations |
 | Tools | Model Context Protocol (MCP) server, Google Calendar API |
 | Backend | FastAPI (async, SSE), Pydantic v2, SQLAlchemy 2, Alembic, PostgreSQL 16 |
-| Frontend | Next.js, TypeScript, Tailwind, shadcn/ui, Vercel AI SDK |
+| Frontend | Next.js (App Router), TypeScript, Tailwind, shadcn/ui, SSE over `fetch`, Playwright |
 | Quality | pytest, RAGAS, DeepEval, Langfuse tracing, ruff, mypy, pre-commit, gitleaks |
 | Delivery | Docker, GitHub Actions (CI + OIDC CD), Terraform, AWS ECR + ECS Fargate |
 
@@ -64,7 +93,13 @@ uv run python scripts/seed.py
 uv run python scripts/serve.py  # API; on Windows this starts uvicorn on the right event loop
 ```
 
-Open http://localhost:8000/docs (try it: register, **Authorize**, `POST /v1/chat`) or
+Then the web app (Node 22):
+
+```powershell
+cd frontend ; npm ci ; npm run dev     # http://localhost:3000
+```
+
+Open http://localhost:3000 for the chat UI, or http://localhost:8000/docs (try it: register, **Authorize**, `POST /v1/chat`) or
 http://localhost:8000/demo (a minimal page that shows the live stream). Full setup, including how
 to generate `JWT_SECRET`: [docs/SETUP.md](docs/SETUP.md)
 
@@ -89,6 +124,8 @@ Details: [ADR 0008](docs/adr/0008-api-auth-streaming-and-demo-protection.md).
 uv run ruff check . ; uv run ruff format .
 uv run mypy src
 uv run pytest
+
+cd frontend ; npm run lint ; npm run typecheck ; npm test ; npm run e2e
 ```
 
 Contributing workflow: [CONTRIBUTING.md](CONTRIBUTING.md) · Decisions: [docs/adr](docs/adr)

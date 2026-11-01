@@ -158,7 +158,7 @@ agentic-healthcare-assistant/
 ├── tests/unit · tests/integration
 ├── evals/                   datasets + eval scripts + results
 ├── migrations/              Alembic
-├── frontend/                Next.js app (Phase 6)
+├── frontend/                Next.js app
 ├── infra/docker · infra/terraform
 ├── data/raw · data/processed  (git-ignored)
 ├── docs/                    PLAN, ARCHITECTURE, SETUP, adr/

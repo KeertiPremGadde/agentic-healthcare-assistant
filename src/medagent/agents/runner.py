@@ -19,6 +19,7 @@ from langgraph.types import Command
 from medagent.agents.graph import AgentGraph
 from medagent.guardrails.pii import pseudonymise
 from medagent.observability.cost import RunCost, estimate_cost
+from medagent.observability.tracing import NullTracer, TraceContext, Tracer
 
 log = structlog.get_logger("medagent.agents")
 
@@ -61,6 +62,9 @@ def turn_config(thread_id: str, patient_id: int | None) -> RunnableConfig:
     return {"configurable": {"thread_id": thread_id, "patient_id": patient_id}}
 
 
+_NO_TRACING = NullTracer()
+
+
 async def stream_turn(
     graph: AgentGraph,
     thread_id: str,
@@ -69,17 +73,32 @@ async def stream_turn(
     message: str | None = None,
     resume: object = None,
     on_cost: Callable[[RunCost], None] | None = None,
+    tracer: Tracer | None = None,
+    trace: TraceContext | None = None,
 ) -> AsyncIterator[TurnEvent]:
     """Run a turn, yielding a `StepEvent` as each node starts and a final `FinalEvent`.
 
     `on_cost` is called exactly once with the turn's token cost, even if the run fails midway
     (a failed LLM call can still be billed), so callers can meter spend.
+    `tracer` (optional) records the run in Langfuse: one trace per turn, with `trace` naming its
+    session and hashed user. A tracing failure never affects the turn.
     Consume the generator to the end (or cancel the task running it): the usage meter is bound
     to the task that iterates it.
     """
     if (message is None) == (resume is None):
         raise ValueError("pass exactly one of `message` or `resume`")
     config = turn_config(thread_id, patient_id)
+    turn_trace = (tracer or _NO_TRACING).start(
+        trace, kind="resume" if resume is not None else "message"
+    )
+    run_config = config
+    if turn_trace.callbacks:
+        run_config = {
+            **config,
+            "callbacks": turn_trace.callbacks,
+            "metadata": turn_trace.metadata,
+            "run_name": "medagent.turn",
+        }
     payload: Any = (
         Command(resume=resume) if resume is not None else {"messages": [HumanMessage(message)]}
     )
@@ -91,7 +110,7 @@ async def stream_turn(
             usage_by_model = usage.usage_metadata  # filled in as LLM calls finish
             # "tasks" mode reports each node when it STARTS (and again when it ends, with a
             # "result" key), which is what lets the UI show "Searching..." while it happens.
-            async for chunk in graph.astream(payload, config, stream_mode="tasks"):
+            async for chunk in graph.astream(payload, run_config, stream_mode="tasks"):
                 if "result" not in chunk:
                     yield StepEvent(chunk["name"])
     finally:
@@ -125,16 +144,23 @@ async def stream_turn(
     # `doctor_options` is conversation memory; only the turn that suggested them shows them.
     suggested = snapshot.values.get("draft_kind") == "doctors" and reply is not None
     doctors = [dict(d) for d in snapshot.values.get("doctor_options") or []] if suggested else None
-    yield FinalEvent(
-        TurnResult(
-            reply=reply,
-            pending=pending,
-            route=route,
-            cost=cost,
-            booking=dict(booking) if booking else None,
-            doctors=doctors or None,
-        )
+    result = TurnResult(
+        reply=reply,
+        pending=pending,
+        route=route,
+        cost=cost,
+        booking=dict(booking) if booking else None,
+        doctors=doctors or None,
     )
+    turn_trace.finish(
+        route=route,
+        kind=result.kind,
+        usd=cost.usd,
+        input_tokens=cost.input_tokens,
+        output_tokens=cost.output_tokens,
+        paused=pending is not None,
+    )
+    yield FinalEvent(result)
 
 
 async def run_turn(
@@ -144,9 +170,13 @@ async def run_turn(
     *,
     message: str | None = None,
     resume: object = None,
+    tracer: Tracer | None = None,
+    trace: TraceContext | None = None,
 ) -> TurnResult:
     result: TurnResult | None = None
-    async for event in stream_turn(graph, thread_id, patient_id, message=message, resume=resume):
+    async for event in stream_turn(
+        graph, thread_id, patient_id, message=message, resume=resume, tracer=tracer, trace=trace
+    ):
         if isinstance(event, FinalEvent):
             result = event.result
     assert result is not None  # stream_turn always ends with a FinalEvent

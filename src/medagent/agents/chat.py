@@ -21,6 +21,8 @@ from medagent.core.config import get_settings
 from medagent.core.logging import configure_logging
 from medagent.db import repository
 from medagent.db.session import get_sessionmaker
+from medagent.guardrails.pii import pseudonymise
+from medagent.observability.tracing import TraceContext, get_tracer
 
 
 def _print_turn(result: TurnResult) -> None:
@@ -37,6 +39,8 @@ async def chat(patient_email: str, thread: str | None) -> None:
     if patient is None:
         raise SystemExit(f"No patient with email {patient_email}. Run scripts/seed.py first.")
     thread_id = thread or f"cli-{uuid.uuid4().hex[:8]}"
+    tracer = get_tracer(settings)  # Langfuse if keys are set, otherwise nothing
+    trace = TraceContext(session_id=thread_id, user_id=pseudonymise(patient.id), tags=("cli",))
     print(
         f"Thread: {thread_id}  (model: {settings.llm_model}, tools: {settings.tools_transport}; "
         "Ctrl+C or 'quit' to exit)"
@@ -66,13 +70,19 @@ async def chat(patient_email: str, thread: str | None) -> None:
                 break
             if question:
                 confirmed = text.lower() in {"y", "yes", "ja", "j"}
-                result = await run_turn(graph, thread_id, patient.id, resume=confirmed)
+                result = await run_turn(
+                    graph, thread_id, patient.id, resume=confirmed, tracer=tracer, trace=trace
+                )
                 pending = ()
             else:
                 if not text:
                     continue
-                result = await run_turn(graph, thread_id, patient.id, message=text)
+                result = await run_turn(
+                    graph, thread_id, patient.id, message=text, tracer=tracer, trace=trace
+                )
             _print_turn(result)
+
+    tracer.shutdown()
 
 
 def main() -> None:

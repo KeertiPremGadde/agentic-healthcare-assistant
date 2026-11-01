@@ -173,17 +173,20 @@ test("an emergency gets the red alert card and a crisis message gets the calm su
   // the numbers in the text are plain: the buttons carry them, not a second set of links
   await expect(crisis.getByRole("link", { name: "0800 111 0 111", exact: true })).toHaveCount(0);
   await expect(crisis.getByRole("link", { name: "112", exact: true })).toHaveCount(0);
-  // poison control: 112 right away, or a regional Giftnotruf number, plus the official list
+  // poison control: 112 right away, or any of the seven regional Giftnotruf numbers (BfR
+  // directory, Stand 22.07.2026), plus the official list
   await crisis.getByText(/Poison control \(Giftnotruf\)/).click();
-  await expect(crisis.getByRole("link", { name: "030 19240" })).toHaveAttribute(
-    "href",
-    "tel:03019240",
-  );
-  await expect(crisis.getByRole("link", { name: "089 19240" })).toHaveAttribute(
-    "href",
-    "tel:08919240",
-  );
-  await expect(crisis.getByRole("link", { name: "0228 19240" })).toHaveCount(0); // only verified
+  for (const [number, href] of [
+    ["030 19240", "tel:03019240"],
+    ["0228 19240", "tel:022819240"],
+    ["0361 730730", "tel:0361730730"],
+    ["0761 19240", "tel:076119240"],
+    ["0551 19240", "tel:055119240"],
+    ["06131 19240", "tel:0613119240"],
+    ["089 19240", "tel:08919240"],
+  ]) {
+    await expect(crisis.getByRole("link", { name: number })).toHaveAttribute("href", href);
+  }
   await expect(crisis.getByText("In an emergency call 112")).toBeVisible();
   await expect(
     crisis.getByRole("link", { name: /official list of poison centres/ }),

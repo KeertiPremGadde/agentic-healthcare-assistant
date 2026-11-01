@@ -265,3 +265,38 @@ Small wording decisions like this are made by a person and written down, then pi
 The cards are picked by message kind, so German replies already got them, but the emergency card only
 made a fixed list of numbers tappable. I extended that list (not a general regex, which would turn
 dates and ids into links) and added look-alike numbers to the tests.
+
+---
+
+## German rule inflections
+
+### How did you find out the German rules were weak?
+I wrote the phrases first. 79 sentences the way people actually type them: "er hat einen allergischen
+Schock", "bekommt kaum noch Luft", "ich bringe mich um", "Krampfanfälle", "Alkoholvergiftung". Then I
+ran the existing rules without changing anything: 47 of the 79 were missed. The rules had been written
+in dictionary form, and German changes the form of a word with its grammatical role.
+
+### Why is widening a safety rule risky?
+Every widening is a new chance to flag an ordinary message. "Ich bringe mich um." is a threat, but
+"Ich bringe meinen Vater um 9 Uhr zum Arzt" is an appointment, and a clinic assistant sees the second
+one all day. So each widening came with benign look-alikes written first, guards where the form is
+ambiguous (the separable verb only counts when "um" ends the clause), and a rule that inflected
+person nouns are only accepted next to first-person intent, never next to a bare infinitive.
+
+### What did the mutation check teach?
+That a guard can look tested and not be. Removing the "protective wording" guard changed no result,
+because my benign phrases had commas that already stopped the pattern. People type on phones without
+commas, so I added "Wie kann ich verhindern dass Kinder sich verletzen", and then the mutation was
+caught. A test that passes with the guard removed does not test the guard.
+
+### What is the difference between an inflection gap and a vocabulary gap?
+An inflection gap is the same concept in another form (a rule for "allergischer Schock" that misses
+"allergischen Schock"). A vocabulary gap is a concept with no rule ("Herzstillstand"). The first is a
+bug; the second is a policy decision about recall and false alarms. I fixed the first and wrote the
+second down as strict xfails, so closing one later is a deliberate, visible step.
+
+### What did the sweep find besides misses?
+A worse failure than silence: "Ich will meinen Nachbarn vergiften" got the *poisoning emergency* reply
+because the word "vergift-" matched the emergency rule while the harm rule missed "Nachbarn". And a
+language bug: the English anaphylaxis rule matched the stem that German shares, so a German sentence
+got the English reply. Both are fixed and pinned.

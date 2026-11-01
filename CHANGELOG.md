@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- German emergency and harmful-intent rules now match inflected forms (Phase 7 follow-up): of 79
+  realistic phrases ("einen allergischen Schock", "er bekommt kaum noch Luft", "ich bringe mich um",
+  "wie nehme ich mir das Leben", "Krampfanfälle", "Alkoholvergiftung", ...) the rules missed 47; now
+  none, with 0 of 40 benign look-alikes flagged ("ich bringe meinen Vater um 9 Uhr zum Arzt", "dass
+  Kinder sich verletzen"). A harmful intent that mentions "vergiften" now gets the crisis reply, not
+  the poisoning emergency. The English anaphylaxis rule no longer gives German sentences the English
+  reply. The crisis card shows all seven BfR poison centres from one shared list, checked against the
+  backend. Vocabulary gaps are pinned as strict xfails. ADR 0017.
 - German emergency, crisis and poisoning replies (Phase 7 follow-up): the language of the rule that
   matched decides the reply language (each emergency and harmful-intent pattern now carries its
   language; a mixed message gets the English reply; detection itself is unchanged, checked on 247

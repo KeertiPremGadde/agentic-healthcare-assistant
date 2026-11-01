@@ -50,9 +50,9 @@ _PATTERNS: dict[str, list[str]] = {
         r"heart attack",
         r"crushing (?:pain|pressure)",
         _de(r"brustschmerz\w*"),
-        _de(r"schmerzen in der brust"),
+        _de(r"schmerzen (?:in|auf) (?:\w+ ){0,2}brust\b"),  # der / meiner / der linken Brust
         _de(r"herzinfarkt"),
-        _de(r"engegefühl in der brust"),
+        _de(r"engegefühl (?:in|auf) (?:\w+ ){0,2}brust\b"),
     ],
     "breathing": [
         r"(?:can ?not|can'?t|cannot|unable to) breathe?",
@@ -62,7 +62,13 @@ _PATTERNS: dict[str, list[str]] = {
         r"choking",
         _de(r"atemnot"),
         _de(r"keine luft"),
-        _de(r"(?:kann|bekomme) (?:nicht|kaum) (?:mehr )?atmen"),
+        _de(
+            r"(?:bekomm\w*|kriegt|kriege)\s+(?:kaum|nicht genug|nicht mehr|schlecht)"
+            r"(?:\s+noch)?\s+luft"
+        ),
+        _de(r"(?:kann|können|konnte)\s+(?:nicht|kaum)(?:\s+(?:mehr|noch))*\s+atmen"),
+        # "atmet nicht mehr", but not a blocked nose ("atmet nicht durch die Nase")
+        _de(r"atmet\s+(?:nicht|kaum)\b(?!\s+(?:durch|mit)\b)"),
         _de(r"erstick\w*"),
     ],
     "stroke": [
@@ -71,8 +77,10 @@ _PATTERNS: dict[str, list[str]] = {
         r"slurred speech",
         r"(?:sudden(?:ly)?|one side).{0,30}(?:numb|weak|paraly[sz]ed)",
         _de(r"schlaganfall"),
-        _de(r"hängender mundwinkel"),
+        # "hängender Mundwinkel", "der Mundwinkel hängt", "bei ihm hängt der Mundwinkel herunter"
+        _de(r"h(?:ä|ae)ng\w*\s+(?:\w+\s+){0,2}mundwinkel|mundwinkel\s+h(?:ä|ae)ng\w*"),
         _de(r"lähmung\w*"),
+        _de(r"gel(?:ä|ae)hmt\w*"),
         _de(r"sprachstörung\w*"),
     ],
     "self_harm": [
@@ -87,7 +95,17 @@ _PATTERNS: dict[str, list[str]] = {
         r"hurt(?:ing)? myself",
         _de(r"suizid\w*"),
         _de(r"selbstmord\w*"),
-        _de(r"(?:mich|mir) (?:umbringen|das leben nehmen)"),
+        _de(r"(?:mich|sich)\s+(?:selbst\s+)?(?:umzubringen|umbringen|t(?:ö|oe)ten)"),
+        # "mir das Leben nehmen", "sich das Leben genommen", "sich das Leben zu nehmen"
+        _de(r"(?:mir|mich|sich)\s+(?:\w+\s+){0,2}das\s+leben\s+(?:zu\s+)?(?:nehmen|genommen)"),
+        # word order of questions and main clauses: "nehme ich mir das Leben", "er nimmt sich ..."
+        _de(r"(?:nehm\w*|nimm\w*)\s+(?:\w+\s+)?(?:mir|sich|mich)\s+das\s+leben"),
+        # separable verb, only when "um" ends the clause: "ich bringe mich um." but not
+        # "ich bringe mich um 8 Uhr zur Praxis"
+        _de(
+            r"bring\w*\s+(?:ich\s+)?(?:mich|sich)\s+(?:\w+\s+){0,3}um"
+            r"(?=\s*(?:[.,!?;:]|$|und\b|weil\b|damit\b))"
+        ),
         _de(r"nicht mehr leben"),
     ],
     "unconscious": [
@@ -96,36 +114,51 @@ _PATTERNS: dict[str, list[str]] = {
         r"(?:won'?t|not) wak(?:e|ing) up",
         r"unresponsive",
         _de(r"bewusstlos\w*"),
-        _de(r"ohnmächtig"),
-        _de(r"nicht ansprechbar"),
+        _de(r"ohnm(?:ä|ae)chtig\w*"),
+        # "in Ohnmacht gefallen", not the feeling of powerlessness ("Gefühl der Ohnmacht")
+        _de(r"in ohnmacht (?:gefallen|fallen|f(?:ä|ae)llt|sinken|sank)|ohnmachtsanfall\w*"),
+        _de(r"nicht (?:mehr )?ansprechbar"),
+        # "wacht nicht mehr auf" (not "wacht nachts nicht mehr auf": a child sleeping through)
+        _de(r"wach(?:t|te|en)\s+nicht(?:\s+mehr)?\s+auf\b"),
     ],
     "bleeding": [
         r"(?:heavy|severe|uncontrolled) bleeding",
         r"bleeding (?:heavily|a lot|won'?t stop)",
         r"vomiting blood",
         _de(r"starke blutung\w*"),
-        _de(r"blutet stark"),
+        _de(r"blutet\s+(?:\w+\s+)?stark"),
+        _de(r"stark\w*\s+blutend\w*"),
         _de(r"blut erbrechen"),
+        # "erbricht Blut", "hat Blut erbrochen"
+        _de(r"(?:erbricht|erbrach|erbrochen)\s+(?:\w+\s+)?blut\b|blut\s+(?:\w+\s+)?erbrochen"),
     ],
     "anaphylaxis": [
-        r"anaphyla\w*",
+        # English spellings only: "anaphylaxis", "anaphylactic". The German "Anaphylaxie" and
+        # "anaphylaktisch" share the stem, so a pattern on the stem would give a German sentence
+        # the English reply.
+        r"anaphylaxis|anaphylactic\w*",
         r"(?:throat|tongue|lips?) (?:is |are )?swell\w*",
         r"allergic reaction.{0,30}breath",
-        _de(r"allergischer schock"),
-        _de(r"zunge schwillt"),
+        _de(r"anaphylaxie|anaphylakt\w*"),
+        _de(r"allergisch\w*\s+schock\w*"),
+        _de(
+            r"(?:zunge|lippen?)\s+(?:\w+\s+)?"
+            r"(?:schwillt|schwellen|ist geschwollen|sind geschwollen)"
+        ),
     ],
     "overdose_poisoning": [
         r"overdos\w*",
         r"poison\w*",
         r"swallowed (?:bleach|pills)",
-        _de(r"überdosis"),
-        _de(r"vergift\w*"),
+        _de(r"überdosi\w*"),
+        _de(r"\w*vergift\w*"),  # also compounds: Alkoholvergiftung, Lebensmittelvergiftung
     ],
     "seizure": [
         r"seizure",
         r"convuls\w*",
-        _de(r"krampfanfall"),
-        _de(r"epileptischer anfall"),
+        _de(r"krampfanf(?:a|ä)ll\w*"),  # Krampfanfall, Krampfanfälle
+        _de(r"epileptisch\w*\s+anfall\w*"),  # epileptischer / epileptischen Anfall
+        _de(r"fieberkr(?:a|ä)mpf\w*"),
     ],
 }
 

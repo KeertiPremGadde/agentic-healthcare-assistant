@@ -46,7 +46,7 @@ failure; the check now looks for a question mark anywhere.
   `temperature`); the harness refuses any other ragas version. Judge `max_tokens` is 8192 (2048
   truncated an answer in the pilot, which showed up as a NaN). A row with a missing score is retried
   once; what is still missing is reported as `judge_nan_rate`, and the run fails above 5%, so a
-  score is never silently computed from the lucky subset. Telemetry of both libraries is switched off.
+  score is never silently computed from the lucky subset. Telemetry of both libraries is switched off in code and checked (see Consequences).
 - Every LLM suite has a `--max-usd` cap: once reached, no new calls start and the file is still
   written. Evals are not traced to Langfuse.
 
@@ -58,7 +58,7 @@ failure; the check now looks for a question mark anywhere.
   spread seen between three identical runs for judged metrics (floor 0.03), one item of slack for
   deterministic ones. A test checks that the committed baseline passes its own thresholds and that
   every kind of broken rule fails.
-- Reported but not gated: task completion (below), the German metrics, per-route recall.
+- Reported but not gated: task completion (above), the German metrics, per-route recall.
 
 ## Baseline (Phase 2 pipeline, Haiku, 2026-11-01; files in `evals/results/baseline-*`)
 Routing strict 0.963 / lenient 0.98, flag recall 100% / 100%, flag false positives 0; booking 27/27 in
@@ -71,27 +71,45 @@ by more than that**. Single questions swing far more than means (q10 scored 0.86
 compare means, not questions. Cost: about $0.04 routing, $0.02 per RAG run, $0.008 per booking run,
 $0.155 per judged run.
 
-## Why task completion (0.706) disagrees with 27/27 booking success
-Honest limit first: the DeepEval reasons were not recorded in the baseline files
-(`include_reason=False`), so this is an analysis of the per-scenario scores and the stored
-transcripts, not a quote of the judge. The six judged scenarios split cleanly:
+## Why task completion (0.706) disagreed with 27/27 booking success
+The first version fed DeepEval's task-completion judge only the user's turns and the last reply. The
+six judged scenarios split three ways (scores over three runs):
 
-| Scenario | Task completion (3 runs) | DB state | What the transcript shows |
-|---|---|---|---|
-| b01, b07, b11, b23 | 0.85 to 0.95 (mean 0.89) | correct | The right thing was asked, confirmed and done. The ~0.9 ceiling is a conservative judge that sees a transcript but not the database or tool results. |
-| b15 | 0.00, 0.05, 0.05 | correct | The user asked for Tuesday 10:00. Dr. Rosemann does not work Tuesdays; the agent said so, offered Wednesday 14:00, and the user said yes. The judge compares the outcome with the literal request. |
-| b24 | 0.5, 0.5, 0.9 | correct | The judge was given only the user turns ("Cancel my appointment", "Number 2, please", "yes") and the final reply. "Number 2" cannot be checked without the list the agent showed, and the score flips between runs. |
+| Scenario | First version | After re-judging with the full conversation and an explicit task |
+|---|---|---|
+| b01, b23 | 0.90, 0.90 | 1.00, 1.00 |
+| b07, b11 | 0.87, 0.88 | 0.90, 0.88 |
+| b15 (impossible Tuesday slot, alternative offered and confirmed) | 0.00, 0.05, 0.05 | 0.95, 0.95, 0.95 |
+| b24 (list two, cancel the second) | 0.5, 0.5, 0.9 | 0.4, 0.4, 0.4 |
+| **Mean of the six** | **0.706** (spread 0.067) | **0.855** (spread 0.008) |
 
-**Conclusion: the gap is the judge's input and the metric's definition, not agent behaviour.** b15 is
-the behaviour we want (refuse an impossible slot, propose a valid one, ask before writing) and the
-literal-request reading of "task completion" cannot score it; b24 is starved of context by how the
-harness builds the test case (user turns plus last reply instead of the whole conversation). Without
-b15 and b24 the mean is about 0.89. The metric still measures something (a plain happy path reads
-"mostly achieved"), but it is not a reliable gate yet. **Decision:** task completion is informational;
-booking quality is gated by DB-state success (hard violations 0, task success >= 0.96) and
-tool correctness. **Follow-up (about $0.02, needs approval):** re-judge the six scenarios with the
-full transcript, an explicit `task=` per scenario and `include_reason=True`, and keep the reasons in
-the result file.
+I first analysed the scores and transcripts, because the reasons had not been saved
+(`include_reason=False`); the re-judge saves them (`task_completion_reason` in the result files).
+What the reasons actually say:
+
+- **b15 was a judge-input problem, not agent behaviour.** With the whole conversation and a task
+  that says a confirmed alternative counts, the judge writes: it "identified that Dr. Rosemann does
+  not work on Tuesday, proposed the nearest valid slot, waited for user confirmation, and then
+  booked the confirmed alternative". The agent did what we want all along; the literal-request
+  reading could not score it.
+- **b01 and b23 are full marks once the judge can see the whole exchange.** The residual 0.9 in b07
+  and b11 is the judge saying a step is "not fully verifiable" (for b11: that the user confirmed the
+  afternoon slot before the booking, which the transcript does show). That is judge conservatism, and
+  it is stable (0.90, 0.90, 0.85/0.90).
+- **b24 stays low (0.4, three runs), and the reasons say why.** The judge reports that the listing
+  of the two appointments, the confirmation request and "the first appointment was left untouched"
+  are "unverified". The last one is a claim about database state that no transcript can show, and my
+  task text asked for it; the other two are in the transcript, so the judge's own task/outcome
+  summary step loses them (DeepEval first extracts a task and an outcome, then grades). The DB check
+  (second appointment cancelled, first still booked) passes in all three runs.
+
+**Conclusion: the gap was the judge's input and the metric's definition, not agent behaviour.**
+No scenario showed a real agent error that the DB-state judge missed. What remains (b24, and the
+conservative 0.9s) is the judge asking for evidence of things that are facts about the database. So
+task completion stays **informational**: booking quality is gated by DB-state success (hard
+violations 0, task success >= 0.96) and tool correctness, and a later fix is to drop the
+database-state clause from b24's task text (it is already covered by the DB judge) and re-judge.
+The thin-input results are kept under `evals/results/baseline-judged/superseded-thin-input/`.
 
 ## Routing misroutes in the baseline (strict misses)
 Four messages, 11 of 300 calls. None is a safety failure:
@@ -109,9 +127,25 @@ until after the improvements are measured.
 
 ## Consequences
 - Every later PR can state "before -> after" with a noise level, and CI can fail on a regression.
-- The `evals` dependency group is large and pulled `click`, `fsspec`, `huggingface-hub`, `jiter` and
-  `rich` down a minor version in the shared lock; the app's tests pass on them. The group is not
-  installed in CI's normal job.
+- ragas and DeepEval live in an isolated environment (`evals/pyproject.toml`, own `uv.lock`). Putting
+  them in a dependency group of the main project pulled `click` 8.5.0 -> 8.3.3, `rich` 15.0.0 ->
+  14.3.4, `jiter` 0.18.0 -> 0.14.0, `fsspec` 2026.9.0 -> 2026.6.0 and `huggingface-hub` 1.33.0 ->
+  1.16.1 into the app's lock (blockers: deepeval pins `click<8.4` and `rich<15`; instructor, via
+  ragas, pins `jiter<0.15`; datasets, via ragas, pins `fsspec<=2026.6.0`). No core package
+  (langchain-core, langgraph, anthropic, httpx, fastapi) moved, but `jiter` is anthropic's JSON
+  parser and `huggingface-hub` downloads the embedding model, so the app should not inherit them.
+  The first attempt at isolation, uv's `conflicts` between dependency groups, did not separate
+  the resolution; a separate project does. The application's `uv.lock` is unchanged apart from
+  `types-pyyaml`.
+- Telemetry: DeepEval reports to PostHog and ragas to its own analytics by default. The first
+  version of the runner did **not** switch them off (an edit of mine silently did not apply), and
+  a network audit (recording every hostname resolved during a judge run) showed
+  `us.i.posthog.com` next to `api.anthropic.com`; the earlier judged and baseline runs therefore sent
+  anonymous DeepEval events (an id, event names, library versions; no question, answer or
+  patient data). `medagent/evals/telemetry.py` now forces `RAGAS_DO_NOT_TRACK`,
+  `DEEPEVAL_TELEMETRY_OPT_OUT` and `DEEPEVAL_DISABLE_DOTENV` when `medagent.evals` is imported,
+  raises if either library still reports after import, and a test starts a fresh process with the
+  opposite settings. Re-audited: a DeepEval run and a ragas run resolve only `api.anthropic.com`.
 - DeepEval ships a pytest plugin that loads `.env` into the process environment; with the `evals`
   group installed that put real Langfuse keys into unit tests (three tests failed). The plugin is
   disabled in `pyproject.toml` (`-p no:deepeval`) and `run_evals.py` sets `DEEPEVAL_DISABLE_DOTENV`.

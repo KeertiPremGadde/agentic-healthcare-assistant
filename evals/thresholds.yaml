@@ -68,7 +68,8 @@ suites:
       tool_correctness: {min: 0.95}          # deterministic: baseline 1.0
 
 informational:
-  - task_completion        # baseline 0.706 (spread 0.067): judged on a thin input, see ADR 0013
+  - task_completion        # 0.855 (spread 0.008) with the full conversation; b24 still asks the judge to
+                           # verify database state, see ADR 0013
   - de_*                   # German: 1 of 5 answered; the target of the query-translation change
   - recall_*               # per-route recall (small n per route)
   - threshold_sweep

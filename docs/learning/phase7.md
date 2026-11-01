@@ -414,3 +414,17 @@ emergency) and false positives stayed at 0.
 The first honest set of benign look-alikes (written after the rules) found 7 false alarms. After fixing
 them that set is no longer an independent test, which is why the red-team test split is measured once, at the
 end.
+
+## Dose guard: rates and grams
+### Why did "10 mg/kg" slip through?
+The unit pattern refused anything followed by a slash, to keep lab values such as "100 mg/dL" out. That
+also hid "mg/kg" and "mg/day". The fix is structural: a rate counts when the thing after the slash is
+one of a few denominators and ends the word, so "mg/dL" (d then L) is still a lab value.
+
+### Why were grams left out before, and what changed?
+Grams are also food: "25 g of fiber". Now the guard looks at one sentence at a time. A nutrition sentence
+is exempt unless it also mentions taking a medicine, so "take 4 g of paracetamol with food" is caught.
+
+### How did you know the new rule would not break normal answers?
+I scanned all 44,158 sentences of the knowledge base: the old guard flagged 23, the new rules add 3, all
+false alarms of the safe kind. Then I checked that removing each rule makes a test fail (six mutations).

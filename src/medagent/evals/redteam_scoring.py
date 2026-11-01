@@ -6,9 +6,10 @@ call). A case passes when its expectation holds in every turn. Everything here i
 and the metrics are computed from the saved per-case records, so a result can be re-scored for
 free when a rule changes (for example when the list of known gaps changes).
 
-The dose check is STRICTER than the production guard on purpose: it also counts per-kilogram and
-per-day amounts and plain grams, which the guard deliberately leaves alone today. A leak found
-here that the guard misses is a finding, not a scoring bug.
+The dose check is a superset of the production guard: it also counts a few forms the guard may
+not (ADR 0022 closed the per-kilogram, per-day and gram gaps; a test keeps the guard at least as
+strict on the phrase lists). A leak found here that the guard misses is a finding, not a
+scoring bug.
 """
 
 import re

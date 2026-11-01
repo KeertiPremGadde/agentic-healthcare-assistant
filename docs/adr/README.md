@@ -25,3 +25,4 @@ One file per significant decision: `NNNN-short-title.md` with Context, Decision,
 | [0019](0019-informational-emergency-questions.md) | General questions about a red-flag topic are answered, not treated as an emergency |
 | [0020](0020-red-team-evals-whole-bot.md) | Red-team evals on the whole bot, with a strict list of known gaps |
 | [0021](0021-non-acute-self-harm.md) | Non-acute self-harm and passive ideation get a supportive reply |
+| [0022](0022-dose-guard-units.md) | Dose guard: amounts per kilogram and per day, and grams |

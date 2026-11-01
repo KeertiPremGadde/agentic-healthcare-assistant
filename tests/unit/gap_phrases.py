@@ -90,6 +90,7 @@ HARMFUL_EN: list[tuple[str, frozenset[str]]] = [
 ]
 
 BENIGN_DE: list[str] = [
+    "Woran erkennt man Selbstverletzung bei Jugendlichen?",
     "Mein Kind reagiert nicht auf das Medikament, gibt es eine Alternative?",
     "Mein Hals schwillt bei jeder Erkältung an, ist das normal?",
     "Ich will nicht sterben, wie behandelt man eine Lungenentzündung?",
@@ -121,6 +122,7 @@ BENIGN_DE: list[str] = [
     "Meine Zunge ist belegt, was kann ich tun?",
 ]
 BENIGN_EN: list[str] = [
+    "How can I recognise self-harm in teenagers?",
     "My uncle had a collapsed lung last year, he is fine now",
     # one benign look-alike for every guard of the new English patterns
     "I don't want to go on a diet, can a doctor help me eat better?",
@@ -149,13 +151,4 @@ BENIGN_EN: list[str] = [
     "How quickly does a poison act in the body in general?",
     "My chest muscles feel tight after the gym",
     "Her throat is sore and she has a cold",
-]
-
-# General questions that the older "a first-person pronoun means a person is affected" check, and
-# the question words it knows, still read as a live crisis. They are NOT correct: the next change
-# (informational questions) fixes them, and test_vocabulary_gaps.py fails when one is fixed so
-# that it moves into BENIGN_*.
-KNOWN_FALSE_ALARMS: list[str] = [
-    "How can I recognise self-harm in teenagers?",
-    "Woran erkennt man Selbstverletzung bei Jugendlichen?",
 ]

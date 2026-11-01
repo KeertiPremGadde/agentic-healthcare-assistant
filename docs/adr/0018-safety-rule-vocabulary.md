@@ -67,12 +67,12 @@ the fix. The rules now catch all 57 (right kind of reply, right language), with 
   listed person, and "Hals schwillt an" with the word adjacent). Those phrases were added; all 17
   are caught.
 
-## Known false alarms (pinned, fixed by the next change)
-General questions that the informational check still reads as a live crisis:
+## Known false alarms (pinned here, fixed in ADR 0019)
+General questions that the informational check still read as a live crisis:
 "How can I recognise self-harm in teenagers?" (the first-person "I" counts as a person involved; older
 than this change) and "Woran erkennt man Selbstverletzung bei Jugendlichen?" (new: the check does not
-know the question word "woran"). Both are pinned in `gap_phrases.KNOWN_FALSE_ALARMS`; a test fails when
-one is fixed so that it moves to the benign list.
+know the question word "woran"). Both were pinned in `gap_phrases.KNOWN_FALSE_ALARMS`; ADR 0019 fixed them and
+they moved to the benign list.
 
 ## Not covered
 Languages other than English and German; euphemisms ("ich möchte einschlafen und nicht mehr

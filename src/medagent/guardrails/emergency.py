@@ -43,6 +43,21 @@ def _language_of(pattern: str) -> str:
     return "de" if isinstance(pattern, _German) else "en"
 
 
+# What may follow "wake up" when someone is woken or when it is only about the hour.
+_WAKE_OBJECT = (
+    r"(?!\s+(?:the|my|your|his|her|their|our|him|them|me|us|you|everyone|anyone|early|late|too)\b)"
+)
+# A WISH not to wake up is passive ideation, not an unconscious person: "I wish I could go to sleep
+# and not wake up", "I'd rather not wake up", "hoping I won't wake up". These spans are exempt from
+# the "unconscious" category (the support reply handles them, see self_harm.py); an acute word
+# anywhere else in the message still matches its own category and keeps the emergency reply.
+WISH_NOT_WAKE_EN = [
+    r"\b(?:wish\w*|hop(?:e|es|ed|ing)|rather|want|wanna|would like|prefer)\b[^.!?]{0,50}?"
+    rf"(?:\b(?:not|never)|n'?t) wak(?:e|ing) up{_WAKE_OBJECT}",
+    rf"\bsleep\b[^.!?]{{0,15}}?\b(?:and|&)\s+(?:just\s+)?(?:not|never)\s+wake up{_WAKE_OBJECT}",
+]
+_WISH_NOT_WAKE = re.compile("|".join(f"(?:{p})" for p in WISH_NOT_WAKE_EN), re.IGNORECASE)
+
 _PATTERNS: dict[str, list[str]] = {
     "cardiac": [
         r"chest pains?",
@@ -144,7 +159,8 @@ _PATTERNS: dict[str, list[str]] = {
     "unconscious": [
         r"unconscious",
         r"passed out",
-        r"(?:won'?t|not) wak(?:e|ing) up",
+        # a person who will not wake up, not "I won't wake up the baby" / "not wake up early"
+        rf"(?:won'?t|not) wak(?:e|ing) up{_WAKE_OBJECT}",
         r"unresponsive",
         r"collaps(?:ed|ing)\b(?! lung)",
         # a person, not a website: "he isn't responding", but not "the portal isn't responding"
@@ -369,9 +385,18 @@ def detect_red_flag(text: str) -> RedFlag | None:
     normalised = _normalise(text)
     first: tuple[str, str] | None = None
     languages: set[str] = set()
+    wishes = [m.span() for m in _WISH_NOT_WAKE.finditer(normalised)]
     for category, by_language in _COMPILED.items():
         for language, pattern in by_language.items():
-            match = pattern.search(normalised)
+            # a match inside a wish not to wake up is passive ideation, not an unconscious person
+            match = next(
+                (
+                    m
+                    for m in pattern.finditer(normalised)
+                    if not any(s <= m.start() and m.end() <= e for s, e in wishes)
+                ),
+                None,
+            )
             if match:
                 languages.add(language)
                 if first is None:

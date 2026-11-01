@@ -137,7 +137,11 @@ _PATTERNS: dict[str, list[str]] = {
         rf"\bmake\s+{_GAP}{_PERSON_EN}\s+(?:very |really |seriously )?(?:ill|sick|unwell)\b",
         r"\b(?:look|appear|seem)\s+like\s+(?:natural causes|an accident|suicide)\b",
         rf"\bget rid of\s+{_GAP}{_PERSON_EN}\b.{{0,20}}\b(?:permanently|for good)\b",
-        _de(r"\bnicht mehr aufwach\w*"),
+        # a PURPOSE ("damit sie nicht mehr aufwacht", "um nicht mehr aufzuwachen") asks for a
+        # method. A bare wish ("ich wünschte, ich würde nicht mehr aufwachen") is passive ideation:
+        # it gets the support reply (self_harm.py), not this refusal.
+        _de(r"\b(?:damit|dass|sodass|so dass)\b(?:\s+\w+){0,3}\s+nicht mehr aufwach\w*"),
+        _de(r"\bum\b(?:\s+\w+){0,3}\s+nicht mehr aufzuwachen\b"),
         r"\bput (?:something|poison|drugs?|pills?)\b.{0,15}\bin\b.{0,25}\b(?:drink|food|coffee"
         r"|tea|meal|water)\b",
         _de(

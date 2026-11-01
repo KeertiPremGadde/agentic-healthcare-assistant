@@ -56,9 +56,8 @@ The crisis card keeps its plain-text layout: its call buttons carry the numbers,
 poison list shows Berlin and München only and links the BfR directory for the rest.
 
 ## Known gaps
-- A pre-existing detection gap, not changed here because this PR promises unchanged detection:
-  "einen allergischen Schock" (accusative) is not matched by the pattern `allergischer schock`.
-  A recall improvement for a separate change.
+- Inflected forms ("einen allergischen Schock") were not matched: this PR promised unchanged
+  detection, so the sweep is its own change, ADR 0017.
 - Other languages (Turkish, French, ...) get the English replies.
 - Only the replies are localised, not the rules' coverage: German phrasings the rules miss are
   still caught only by the router's flags.

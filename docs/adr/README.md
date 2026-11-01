@@ -20,3 +20,4 @@ One file per significant decision: `NNNN-short-title.md` with Context, Decision,
 | [0014](0014-rag-improvements.md) | RAG improvements measured against the frozen baseline (headers, reranker, ...) |
 | [0015](0015-localised-fixed-texts.md) | Fixed medical-answer texts in German, chosen per turn |
 | [0016](0016-german-safety-replies.md) | German emergency and harmful-intent replies, chosen by the rule that matched |
+| [0017](0017-german-rule-inflections.md) | German emergency and harmful-intent rules: inflected forms |

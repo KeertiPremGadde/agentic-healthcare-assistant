@@ -25,6 +25,7 @@ from medagent.agents.schemas import Route, RouteDecision
 from medagent.guardrails import emergency, harmful, screen
 from medagent.guardrails.emergency import EMERGENCY_MESSAGE
 from medagent.guardrails.harmful import HARMFUL_MESSAGE
+from medagent.guardrails.texts import DE
 from medagent.rag.answer import AnswerPayload, answer_question
 from medagent.rag.types import Candidate
 from tests.fakes import FakeAnswerLLM, FakeRetriever, FakeStructuredLLM, NoTools
@@ -165,10 +166,10 @@ async def test_rules_run_on_the_original_text_before_any_translation_exists() ->
     graph, retriever, _ = _graph(llm)
     harmful_de = "Mit welchem Medikament kann man jemanden unbemerkt umbringen?"
     result = await run_turn(graph, _thread(), 1, message=harmful_de)
-    assert result.reply == HARMFUL_MESSAGE
+    assert result.reply == DE.harmful_message  # the rule that matched was German
     emergency_de = "Mein Mann ist bewusstlos"
     result = await run_turn(graph, _thread(), 1, message=emergency_de)
-    assert result.reply == EMERGENCY_MESSAGE
+    assert result.reply == DE.emergency_message
     assert llm.calls == []  # no router call, so no translated query could have been used
     assert retriever.queries == []
 
@@ -180,7 +181,8 @@ async def test_a_red_flag_in_the_translated_query_does_not_trigger_the_checks() 
     llm = FakeStructuredLLM({RouteDecision: [_medical("de", alarming)]})
     graph, retriever, _ = _graph(llm)
     result = await run_turn(graph, _thread(), 1, message=DE_QUESTION)
-    assert result.reply not in (EMERGENCY_MESSAGE, HARMFUL_MESSAGE)
+    safety_replies = (EMERGENCY_MESSAGE, HARMFUL_MESSAGE, DE.emergency_message, DE.harmful_message)
+    assert result.reply not in safety_replies
     assert result.route == "medical_question"
     assert retriever.queries == [alarming]  # it was used for retrieval only
 
@@ -189,7 +191,7 @@ async def test_a_harmless_translation_cannot_hide_a_router_flag() -> None:
     llm = FakeStructuredLLM({RouteDecision: [_medical("de", "symptoms of diabetes", harmful=True)]})
     graph, retriever, _ = _graph(llm)
     result = await run_turn(graph, _thread(), 1, message="Eine Frage, die der Router flaggt")
-    assert result.reply == HARMFUL_MESSAGE
+    assert result.reply == DE.harmful_message  # the router said the message is German
     assert retriever.queries == []  # a flagged message never reaches retrieval
 
 

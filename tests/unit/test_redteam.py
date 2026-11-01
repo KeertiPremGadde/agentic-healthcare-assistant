@@ -23,12 +23,25 @@ from medagent.guardrails.dose import DOSE_REFERRAL, contains_dose
 from medagent.guardrails.emergency import EMERGENCY_MESSAGE
 from medagent.guardrails.harmful import HARMFUL_MESSAGE
 from medagent.guardrails.screen import screen_message
+from medagent.guardrails.texts import DE, EN
 from medagent.rag.answer import AnswerPayload
 from tests.fakes import FakeStructuredLLM
 from tests.unit.test_agent_graph import _graph
 
 DATASET = Path(__file__).resolve().parents[2] / "evals" / "redteam" / "cases.json"
 CASES: list[dict[str, str]] = json.loads(DATASET.read_text(encoding="utf-8"))["cases"]
+
+
+# The cases written in German: their fixed reply is German, the rest are English.
+GERMAN_CASES = frozenset({"h14", "h15", "h16", "h17", "h18", "h19", "s03"})
+
+
+def _harmful_reply(case: dict[str, str]) -> str:
+    return (DE if case["id"] in GERMAN_CASES else EN).harmful_message
+
+
+def _emergency_reply(case: dict[str, str]) -> str:
+    return (DE if case["id"] in GERMAN_CASES else EN).emergency_message
 
 
 def _of(*expects: str) -> list[Any]:
@@ -71,7 +84,7 @@ def test_rules_catch_harmful_intent_whatever_the_framing(case: dict[str, str]) -
     screen = screen_message(case["text"])
     assert screen is not None, case["text"]
     assert screen.kind == "harmful_intent"
-    assert screen.reply == HARMFUL_MESSAGE
+    assert screen.reply == _harmful_reply(case)
 
 
 @pytest.mark.parametrize("case", _of("emergency"))
@@ -79,7 +92,7 @@ def test_rules_catch_acute_self_harm_as_an_emergency(case: dict[str, str]) -> No
     screen = screen_message(case["text"])
     assert screen is not None, case["text"]
     assert screen.kind == "emergency"
-    assert screen.reply == EMERGENCY_MESSAGE
+    assert screen.reply == _emergency_reply(case)
 
 
 @pytest.mark.parametrize("case", _of("allow", "dose"))
@@ -103,7 +116,7 @@ async def test_harmful_messages_never_reach_the_llm_and_get_the_fixed_reply(
 ) -> None:
     llm = FakeStructuredLLM()  # no script: any LLM call fails the test
     result = await run_turn(_graph(llm, db=False), _thread(), 1, message=case["text"])
-    assert result.reply == HARMFUL_MESSAGE  # exactly: no disclaimer, no safety notice added
+    assert result.reply == _harmful_reply(case)  # exactly: no disclaimer, no safety notice added
     assert result.route == "harmful_intent"
     assert llm.calls == []
     assert result.cost.usd == 0
@@ -115,7 +128,7 @@ async def test_acute_self_harm_gets_the_emergency_reply_without_the_llm(
 ) -> None:
     llm = FakeStructuredLLM()
     result = await run_turn(_graph(llm, db=False), _thread(), 1, message=case["text"])
-    assert result.reply == EMERGENCY_MESSAGE
+    assert result.reply == _emergency_reply(case)
     assert llm.calls == []
 
 

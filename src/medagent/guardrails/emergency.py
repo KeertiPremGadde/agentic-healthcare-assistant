@@ -16,6 +16,17 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
+from medagent.guardrails.texts import EN, texts_for
+
+
+class _German(str):
+    """A pattern that matches German phrasing. The language of the pattern that matched decides
+    the language of the fixed reply (the rules run before any model, so there is nothing else to
+    go by)."""
+
+
+_de = _German
+
 
 @dataclass(frozen=True, slots=True)
 class RedFlag:
@@ -24,6 +35,12 @@ class RedFlag:
     # True for a general question with no person involved: answer it with a safety notice.
     # False => someone may be affected now: short-circuit to the emergency response.
     informational: bool = False
+    # "de" only if every pattern that matched is German; a mix (or any English match) is "en".
+    language: str = "en"
+
+
+def _language_of(pattern: str) -> str:
+    return "de" if isinstance(pattern, _German) else "en"
 
 
 _PATTERNS: dict[str, list[str]] = {
@@ -32,10 +49,10 @@ _PATTERNS: dict[str, list[str]] = {
         r"pain in (?:my|the|his|her) chest",
         r"heart attack",
         r"crushing (?:pain|pressure)",
-        r"brustschmerz\w*",
-        r"schmerzen in der brust",
-        r"herzinfarkt",
-        r"engegefühl in der brust",
+        _de(r"brustschmerz\w*"),
+        _de(r"schmerzen in der brust"),
+        _de(r"herzinfarkt"),
+        _de(r"engegefühl in der brust"),
     ],
     "breathing": [
         r"(?:can ?not|can'?t|cannot|unable to) breathe?",
@@ -43,20 +60,20 @@ _PATTERNS: dict[str, list[str]] = {
         r"short(?:ness)? of breath",
         r"not breathing",
         r"choking",
-        r"atemnot",
-        r"keine luft",
-        r"(?:kann|bekomme) (?:nicht|kaum) (?:mehr )?atmen",
-        r"erstick\w*",
+        _de(r"atemnot"),
+        _de(r"keine luft"),
+        _de(r"(?:kann|bekomme) (?:nicht|kaum) (?:mehr )?atmen"),
+        _de(r"erstick\w*"),
     ],
     "stroke": [
         r"stroke",
         r"face (?:is )?droop\w*",
         r"slurred speech",
         r"(?:sudden(?:ly)?|one side).{0,30}(?:numb|weak|paraly[sz]ed)",
-        r"schlaganfall",
-        r"hängender mundwinkel",
-        r"lähmung\w*",
-        r"sprachstörung\w*",
+        _de(r"schlaganfall"),
+        _de(r"hängender mundwinkel"),
+        _de(r"lähmung\w*"),
+        _de(r"sprachstörung\w*"),
     ],
     "self_harm": [
         r"kill (?:myself|me)",
@@ -68,52 +85,59 @@ _PATTERNS: dict[str, list[str]] = {
         r"(?:wish|wished) i (?:was|were) dead",
         r"self[- ]?harm",
         r"hurt(?:ing)? myself",
-        r"suizid\w*",
-        r"selbstmord\w*",
-        r"(?:mich|mir) (?:umbringen|das leben nehmen)",
-        r"nicht mehr leben",
+        _de(r"suizid\w*"),
+        _de(r"selbstmord\w*"),
+        _de(r"(?:mich|mir) (?:umbringen|das leben nehmen)"),
+        _de(r"nicht mehr leben"),
     ],
     "unconscious": [
         r"unconscious",
         r"passed out",
         r"(?:won'?t|not) wak(?:e|ing) up",
         r"unresponsive",
-        r"bewusstlos\w*",
-        r"ohnmächtig",
-        r"nicht ansprechbar",
+        _de(r"bewusstlos\w*"),
+        _de(r"ohnmächtig"),
+        _de(r"nicht ansprechbar"),
     ],
     "bleeding": [
         r"(?:heavy|severe|uncontrolled) bleeding",
         r"bleeding (?:heavily|a lot|won'?t stop)",
         r"vomiting blood",
-        r"starke blutung\w*",
-        r"blutet stark",
-        r"blut erbrechen",
+        _de(r"starke blutung\w*"),
+        _de(r"blutet stark"),
+        _de(r"blut erbrechen"),
     ],
     "anaphylaxis": [
         r"anaphyla\w*",
         r"(?:throat|tongue|lips?) (?:is |are )?swell\w*",
         r"allergic reaction.{0,30}breath",
-        r"allergischer schock",
-        r"zunge schwillt",
+        _de(r"allergischer schock"),
+        _de(r"zunge schwillt"),
     ],
     "overdose_poisoning": [
         r"overdos\w*",
         r"poison\w*",
         r"swallowed (?:bleach|pills)",
-        r"überdosis",
-        r"vergift\w*",
+        _de(r"überdosis"),
+        _de(r"vergift\w*"),
     ],
     "seizure": [
         r"seizure",
         r"convuls\w*",
-        r"krampfanfall",
-        r"epileptischer anfall",
+        _de(r"krampfanfall"),
+        _de(r"epileptischer anfall"),
     ],
 }
 
-_COMPILED = {
-    category: re.compile(r"\b(?:" + "|".join(patterns) + r")", re.IGNORECASE)
+_COMPILED: dict[str, dict[str, re.Pattern[str]]] = {
+    category: {
+        language: re.compile(
+            r"\b(?:" + "|".join(p for p in patterns if _language_of(p) == language) + r")",
+            re.IGNORECASE,
+        )
+        for language in ("en", "de")
+        if any(_language_of(p) == language for p in patterns)
+    }
     for category, patterns in _PATTERNS.items()
 }
 
@@ -131,19 +155,19 @@ _QUESTION_START = re.compile(
     re.IGNORECASE,
 )
 
-EMERGENCY_MESSAGE = (
-    "This may be a medical emergency. Please call emergency services now: 112 in Germany and the "
-    "EU (Notruf 112), 911 in the US. If someone is unconscious or not breathing, call immediately "
-    "and follow the dispatcher's instructions. For thoughts of suicide or self-harm in Germany you "
-    "can also call the TelefonSeelsorge on 0800 111 0 111 (free, 24/7).\n\n"
-    "I can't assess emergencies. If this is not acute, tell me and I can help you find a doctor "
-    "or book an appointment."
-)
+# English texts live in texts.py (with the German ones); re-exported so imports keep working.
+EMERGENCY_MESSAGE = EN.emergency_message
+SAFETY_NOTICE = EN.safety_notice
 
-SAFETY_NOTICE = (
-    "If you or someone near you has these symptoms right now, call emergency services "
-    "(112 in Germany/EU, 911 in the US)."
-)
+POISONING_CATEGORY = "overdose_poisoning"  # its reply also lists the poison information centres
+
+
+def emergency_reply(language: str, category: str | None = None) -> str:
+    """The fixed emergency reply in `language`; the poisoning category gets the poison line."""
+    texts = texts_for(language)
+    if category == POISONING_CATEGORY:
+        return texts.emergency_poisoning_message
+    return texts.emergency_message
 
 
 def _normalise(text: str) -> str:
@@ -156,10 +180,26 @@ def _is_informational(text: str) -> bool:
 
 
 def detect_red_flag(text: str) -> RedFlag | None:
-    """Return the first red flag found in the user's message, or None."""
+    """Return the first red flag found in the user's message (by category order), or None.
+
+    All patterns are checked so the language can be decided: German only if nothing English
+    matched too (a German sentence with an English loanword such as "stroke" gets the English
+    reply, which is the safe default)."""
     normalised = _normalise(text)
-    for category, pattern in _COMPILED.items():
-        match = pattern.search(normalised)
-        if match:
-            return RedFlag(category, match.group(0), informational=_is_informational(normalised))
-    return None
+    first: tuple[str, str] | None = None
+    languages: set[str] = set()
+    for category, by_language in _COMPILED.items():
+        for language, pattern in by_language.items():
+            match = pattern.search(normalised)
+            if match:
+                languages.add(language)
+                if first is None:
+                    first = (category, match.group(0))
+    if first is None:
+        return None
+    return RedFlag(
+        first[0],
+        first[1],
+        informational=_is_informational(normalised),
+        language="de" if languages == {"de"} else "en",
+    )

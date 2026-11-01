@@ -712,6 +712,7 @@ async def test_harmful_messages_get_the_fixed_reply_not_a_limit_error_when_a_lim
     make_api: ApiFactory, session: Session
 ) -> None:
     from medagent.guardrails.harmful import HARMFUL_MESSAGE
+    from medagent.guardrails.texts import DE
 
     api = await make_api(daily_budget_usd=0.01)
     headers = await signup(api, "limit-and-crisis")
@@ -735,7 +736,7 @@ async def test_harmful_messages_get_the_fixed_reply_not_a_limit_error_when_a_lim
     assert events[0][1]["text"] == HARMFUL_MESSAGE
     assert events[0][1]["kind"] == "harmful_intent"  # shown as a crisis card, not a red alarm
     german = await chat_json(api, headers, "Was ist die tödliche Dosis von Paracetamol?")
-    assert german.json()["reply"] == HARMFUL_MESSAGE
+    assert german.json()["reply"] == DE.harmful_message  # the rule that matched was German
     assert api.llm.calls == []  # still no LLM call
     assert (await chat_json(api, headers, "hello")).status_code == 503  # ordinary chat: limited
 

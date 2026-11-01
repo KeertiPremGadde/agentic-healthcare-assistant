@@ -232,3 +232,36 @@ query-translation change, but the dose regex knew only a few German forms. I add
 (Teelöffel, Zäpfchen, Hübe, Spritze, ...), and left "i.e." out of the unit list on purpose because it
 would flag English sentences. Negative tests matter as much as positive ones for a guard that replaces
 the whole answer.
+
+---
+
+## German safety replies
+
+### How can the emergency reply be German if the rules run before any model?
+The rules cannot ask the router what language the message is in, because the whole point is that
+no model is involved. So each pattern knows its own language: the German patterns are marked, and the
+reply is German only if every pattern that matched is German. A German sentence that also contains
+an English match, like "stroke", gets the English reply, which is the safe default and also carries
+112. When only the router's flag caught a message, the router's language is used.
+
+### How did you know you had not changed what the rules detect?
+I loaded the old rules from `main` next to the new ones and ran both on all 247 messages in the
+repository (the red-team set, routing, RAG and threshold sets) and compared category and kind: zero
+differences. The only new thing is the language, which the tests pin.
+
+### Where do the phone numbers come from?
+Not from memory. The poison centre numbers are read from the official directory of the federal
+risk-assessment institute (BfR), both the page and the PDF. That caught that a third-party list still
+had an old number for one centre. The directory gives no opening hours, so the reply does not claim
+any for them; the TelefonSeelsorge's own page says it is reachable day and night, so that reply does.
+A test lists the seven numbers independently of the code that holds them.
+
+### Why is 116 117 in one reply and not the other?
+It is the on-call doctor service for things that are not acute. In the emergency reply's "if this is
+not acute" line it helps; in the crisis reply it would send someone in distress to the wrong place.
+Small wording decisions like this are made by a person and written down, then pinned by tests.
+
+### What did the frontend need?
+The cards are picked by message kind, so German replies already got them, but the emergency card only
+made a fixed list of numbers tappable. I extended that list (not a general regex, which would turn
+dates and ids into links) and added look-alike numbers to the tests.

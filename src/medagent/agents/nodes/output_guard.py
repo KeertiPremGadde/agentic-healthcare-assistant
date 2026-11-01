@@ -16,7 +16,6 @@ from medagent.agents.nodes.common import APOLOGY
 from medagent.agents.nodes.guardrail import FIXED_REPLY_ROUTES
 from medagent.agents.state import AgentState
 from medagent.guardrails.dose import contains_dose
-from medagent.guardrails.emergency import SAFETY_NOTICE
 from medagent.guardrails.texts import ALL_TEXTS, texts_for
 from medagent.tools.models import NearbyClinics
 
@@ -57,6 +56,7 @@ def output_guard_node(state: AgentState) -> dict[str, Any]:
         draft = f"{draft}\n\n{OSM_ATTRIBUTION}"  # ODbL: attribution wherever the data appears
 
     if state.get("safety_notice"):
-        draft = f"{SAFETY_NOTICE}\n\n{draft}"
+        notice = texts_for(state.get("reply_language")).safety_notice
+        draft = f"{notice}\n\n{draft}"
 
     return {"messages": [AIMessage(content=draft)], "draft": ""}

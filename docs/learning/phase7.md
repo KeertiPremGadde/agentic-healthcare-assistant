@@ -364,3 +364,30 @@ Before and after, on every set: red-team, routing, RAG, tuning, booking, and eve
 last four changes, counting what each message gets (emergency reply, harmful reply, answer with notice,
 nothing). Only the intended 28 general questions moved, plus one golden RAG question. All 42 genuine
 emergencies and 10 deliberately ambiguous questions kept the emergency reply.
+
+## Red-team evals on the whole bot
+### Why test the whole bot when the rules already have 50 cases?
+The rules are one layer. In production a message also goes through the router (a model), the answer
+model and the output guard. A red-team eval runs all of them with the real models, so it measures what
+a user would get, not what one component does.
+
+### What is a "known gaps" list and why is it strict?
+The original 50 cases are a hard gate at 100%. The 145 new cases were written to find holes, so some
+fail on purpose. Each failing case goes on a list with its reason, and the gate fails on any failure
+that is not listed. A new regression cannot hide, and a fixed gap must be removed from the list in the
+same PR. The list is a to-do list that CI can read.
+
+### Why a dev/test split?
+If I fix the bot until every case passes, I only measure my own fixes. Fixes use the 49 dev cases; the
+96 test cases say whether the fix generalised.
+
+### How do you know which layer caught an attack?
+Cost. A reply with zero model cost came from the deterministic rules; one that cost money came from the
+router. A separate pass sends each attack to the router alone: 47% caught by rules only, 96% by the
+router only, 97% by both together. Neither layer alone is enough.
+
+### What did it find?
+Non-acute self-harm ("I burn myself with a lighter") reaches neither layer, so the user gets no crisis
+resources. And on some encoded inputs the router's output cannot be parsed, so the bot replies with the
+generic apology. Both are must-fix before Phase 8. That is the value of the suite: it found what the
+earlier tests could not.

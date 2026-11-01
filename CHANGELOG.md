@@ -5,6 +5,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- Red-team evals on the whole bot (Phase 7): 195 cases (the original 50 plus 145 new in 11 groups:
+  paraphrase, obfuscation, other languages, multi-turn, injection in retrieved passages, jailbreak,
+  dose, self-harm, emergency, benign look-alikes) run end to end with the real router and answer model,
+  3 repeats each, tools replaced by a recorder that fails any call, plus an LLM judge on answered
+  attacks. `run_evals.py redteam [--pilot] [--groups] [--no-judge]`, free `redteam-rescore`. Baseline
+  ($0.23): the original 50 hold at 100%, no dose, prompt, canary or tool-call leak, no judge-flagged
+  answer; rules alone catch 47% of single-turn attacks, router alone 96%, both 97%. 7 new cases fail
+  and are listed in `evals/redteam/known_gaps.json` (non-acute self-harm; router parse failures on
+  encoded input); the gate fails on any unlisted failure. Must-fix before Phase 8: character
+  normalisation, dose guard (mg/kg, grams), non-acute self-harm, router failure to safe reply. ADR 0020.
 - General questions about a red-flag topic are answered with the safety notice instead of getting
   the emergency reply (Phase 7 follow-up): "How can I recognise a stroke?", "Wie erkenne ich einen
   Schlaganfall?", "Woran erkennt man Selbstverletzung bei Jugendlichen?" (27 of 28 realistic general

@@ -5,6 +5,9 @@
     uv run python scripts/run_evals.py routing --repeats 3 --max-usd 0.5
     uv run python scripts/run_evals.py rag --per-kind 2 --max-usd 0.2   # a small pilot sample
     uv run python scripts/run_evals.py booking --only b01,b11,b23 --max-usd 0.3
+    uv run python scripts/run_evals.py redteam --pilot --max-usd 0.05   # 2 per group, 1 repeat
+    uv run python scripts/run_evals.py redteam --repeats 3 --max-usd 0.9   # whole bot, end to end
+    uv run python scripts/run_evals.py redteam-rescore --source evals/results/runs/redteam-....json
 
     uv run python scripts/run_evals.py gate --results evals/results/baseline-deterministic ...
     uv run python scripts/run_evals.py judge-rag --source evals/results/runs/rag-....json
@@ -19,12 +22,13 @@ Content is never sent to Langfuse (these runs are untraced).
 
 import argparse
 import json
+from pathlib import Path
 
 from medagent.core import aio
 from medagent.core.logging import configure_logging
-from medagent.evals import datasets, gate, judge, suites
+from medagent.evals import datasets, gate, judge, redteam_suite, suites
 from medagent.evals.booking_suite import run_booking
-from medagent.evals.results import EvalResult, Spend, write_result
+from medagent.evals.results import RESULTS_DIR, EvalResult, Spend, write_result
 
 
 def _print(result: EvalResult, path: object) -> None:
@@ -44,6 +48,31 @@ def _print(result: EvalResult, path: object) -> None:
     if result.aborted:
         print("  ABORTED:", result.aborted)
     print(f"  written: {path}")
+
+
+def _load_result(path: str) -> tuple[Path, EvalResult]:
+    source = Path(path)
+    return source, EvalResult.model_validate_json(source.read_text(encoding="utf-8"))
+
+
+def _save_replies(run_id: str, replies: dict[str, list[str]]) -> None:
+    """The full replies stay next to the result in the git-ignored runs folder."""
+    folder = RESULTS_DIR / "runs"
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / f"{run_id}.replies.json").write_text(
+        json.dumps(replies, indent=1, ensure_ascii=False), encoding="utf-8"
+    )
+
+
+def _print_redteam(result: EvalResult) -> None:
+    m = result.metrics
+    print("  pass rate by group (a case passes only if every repeat passes):")
+    for group, rate in m["pass_rate_by_group"].items():
+        print(f"    {group:16} {rate}")
+    print(f"  by split: {m['pass_rate_by_split']}   layers (whole bot): {m['block_layer_counts']}")
+    print(f"  router alone on single-turn attacks: {m['layers_single_turn']}")
+    if m["failing_new_cases"]:
+        print(f"  failing new cases: {m['failing_new_cases']}")
 
 
 def run_gate(directories: list[str]) -> int:
@@ -76,6 +105,8 @@ async def main() -> None:
             "booking",
             "judge-rag",
             "judge-booking",
+            "redteam",
+            "redteam-rescore",
             "gate",
         ],
     )
@@ -96,6 +127,9 @@ async def main() -> None:
     )
     p.add_argument("--per-kind", type=int, default=None, help="rag: N questions of each kind")
     p.add_argument("--only", default=None, help="booking: comma-separated scenario ids")
+    p.add_argument("--pilot", action="store_true", help="redteam: 2 cases per group, 1 repeat")
+    p.add_argument("--no-judge", action="store_true", help="redteam: skip the LLM judge")
+    p.add_argument("--groups", default=None, help="redteam: comma-separated groups only")
     p.add_argument("--max-usd", type=float, default=1.0, help="stop starting calls above this")
     p.add_argument("--check-lock", action="store_true", help="fail if a dataset changed")
     args = p.parse_args()
@@ -122,6 +156,25 @@ async def main() -> None:
         result = await judge.judge_rag_file(args.source, spend)
     elif args.suite == "judge-booking":
         result = await judge.judge_booking_file(args.source, spend, args.task_ids.split(","))
+    elif args.suite == "redteam":
+        result, replies = await redteam_suite.run_redteam(
+            spend,
+            args.repeats,
+            args.pilot,
+            not args.no_judge,
+            set(args.groups.split(",")) if args.groups else None,
+        )
+        path = write_result(result)
+        _save_replies(result.run_id, replies)
+        _print(result, path)
+        _print_redteam(result)
+        return
+    elif args.suite == "redteam-rescore":
+        source, loaded = _load_result(args.source)
+        result = redteam_suite.rescore(loaded)
+        _print(result, write_result(result, source.parent))
+        _print_redteam(result)
+        return
     else:
         only = args.only.split(",") if args.only else None
         result = await run_booking(spend, only)

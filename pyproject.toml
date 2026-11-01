@@ -52,10 +52,6 @@ dev = [
     "types-defusedxml>=0.7.0.20260504",
     "types-pyyaml>=6.0.12.20261030",
 ]
-evals = [
-    "deepeval==4.3.2",
-    "ragas==0.4.3",
-]
 
 [build-system]
 requires = ["hatchling"]

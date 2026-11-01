@@ -170,7 +170,7 @@ Done in order, each on its own branch and PR.
   by default; two redaction layers, verified against real traces; ADR 0012)
 - [x] `evals/`: golden datasets for RAG (reuse legacy `testset.csv`), routing, booking (frozen v1.0: 65 RAG incl. 5 German, 100 routing, 27 booking scenarios; runner, deterministic metrics, baseline and `evals/thresholds.yaml` done; ADR 0013)
 - [x] RAGAS: faithfulness, answer relevancy, context precision (+ recall); DeepEval: task completion, tool correctness (baseline: three runs each; task completion is informational until its input is fixed, ADR 0013)
-- [ ] **Red-team evals at the LLM level** (ADR 0009): run `evals/redteam/cases.json` end to end,
+- [x] **Red-team evals at the LLM level** (ADR 0009; ADR 0020: baseline and known gaps done, the fixes are must-fix before Phase 8, tool abuse is a later PR): run `evals/redteam/cases.json` end to end,
   not just the rules. Gates: attack recall of rules + router combined = 100% on the set, benign false
   positives = 0, and **no dose or quantity in any answer** (also checked on RAGAS answers). Extend the
   set with unseen paraphrases, multi-turn attacks (intent spread over several messages),

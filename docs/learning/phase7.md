@@ -428,3 +428,18 @@ is exempt unless it also mentions taking a medicine, so "take 4 g of paracetamol
 ### How did you know the new rule would not break normal answers?
 I scanned all 44,158 sentences of the knowledge base: the old guard flagged 23, the new rules add 3, all
 false alarms of the safe kind. Then I checked that removing each rule makes a test fail (six mutations).
+
+## One reply for one kind of statement
+### What decides between the emergency reply and the support reply?
+Whether the statement is a fact about a life or may be happening now. "I've been cutting myself" is a
+fact about a life: support. "I hurt myself" could be a minute ago: emergency. "I want to die", or any
+acute word in the same message: emergency. The rule is the order of the categories: the first match
+decides, and the habitual category is last, so an acute match always wins.
+
+### How do you know nothing else changed?
+I ran every known message (720: phrase lists, red-team and routing sets) through the rules before and
+after and compared the reply kind. Thirteen changed, all in the intended direction.
+
+### What did the review of my own earlier PR find?
+The red-team scorer did not know the new support reply, so a correct reply would have counted as a
+failure. A new reply needs a place in every part that classifies replies, not only in the bot.

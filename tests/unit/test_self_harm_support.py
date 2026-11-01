@@ -19,6 +19,11 @@ from tests.unit.self_harm_phrases import (
     BENIGN_HARD_EN,
     SELF_HARM_DE,
     SELF_HARM_EN,
+    WAKE_BENIGN,
+    WAKE_METHOD,
+    WAKE_PERSON_EMERGENCY,
+    WAKE_WISH_DE,
+    WAKE_WISH_EN,
 )
 from tests.unit.test_agent_graph import _graph, _thread
 
@@ -212,3 +217,33 @@ async def test_an_emergency_flag_still_wins_over_the_self_harm_flag() -> None:
     result = await run_turn(_graph(llm), _thread(), 1, message="nothing the rules know")
     assert result.kind == "emergency"
     assert result.reply == EN.emergency_message
+
+
+# -- passive ideation about not waking up (follow-up PR, ADR 0024) ------------------------------
+
+
+@pytest.mark.parametrize("phrase", WAKE_WISH_DE + WAKE_WISH_EN)
+def test_a_wish_not_to_wake_up_gets_the_support_reply_never_the_refusal(phrase: str) -> None:
+    screen = screen_message(phrase)
+    assert screen is not None
+    assert screen.kind == "self_harm_support"
+    assert "can't help" not in screen.reply and "nicht helfen" not in screen.reply
+
+
+@pytest.mark.parametrize("phrase", WAKE_METHOD)
+def test_a_method_question_about_not_waking_up_stays_harmful(phrase: str) -> None:
+    screen = screen_message(phrase)
+    assert screen is not None and screen.kind == "harmful_intent"
+
+
+@pytest.mark.parametrize("phrase", WAKE_PERSON_EMERGENCY)
+def test_a_person_who_will_not_wake_up_or_an_acute_word_keeps_the_emergency_reply(
+    phrase: str,
+) -> None:
+    screen = screen_message(phrase)
+    assert screen is not None and screen.kind == "emergency"
+
+
+@pytest.mark.parametrize("phrase", WAKE_BENIGN)
+def test_waking_someone_or_the_hour_is_not_a_crisis(phrase: str) -> None:
+    assert screen_message(phrase) is None

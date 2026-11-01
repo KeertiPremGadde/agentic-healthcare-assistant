@@ -443,3 +443,17 @@ after and compared the reply kind. Thirteen changed, all in the intended directi
 ### What did the review of my own earlier PR find?
 The red-team scorer did not know the new support reply, so a correct reply would have counted as a
 failure. A new reply needs a place in every part that classifies replies, not only in the bot.
+
+## A wish is not a method and not a person
+### Why did the German wish get a refusal?
+One harmful-intent pattern matched any "nicht mehr aufwachen". It was written for "damit sie nicht mehr
+aufwacht", a method to harm someone. A purpose ("damit", "um ... zu") is what makes it a method question; a
+bare wish is passive ideation and needs support, not a refusal.
+
+### Why did the English wish get the emergency reply?
+The "unconscious" pattern is for "he won't wake up". It cannot tell a person from a wish. The fix cuts out
+the wish span and keeps everything else: if the message also says something acute, that part still matches.
+
+### What is the general lesson?
+When a rule matches a word, ask what else the same words mean. "Not wake up" can be a person, a wish, a
+method, or just the baby. Each meaning gets its own pattern and reply, and the tests pin every one.

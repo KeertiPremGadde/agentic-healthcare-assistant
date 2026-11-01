@@ -1,6 +1,6 @@
 {
-  "description": "Threshold-tuning set for RAG_MIN_SCORE (v1.0). NOT part of the frozen golden set (rag_golden.json v1.0): the threshold is chosen on this set and the golden set only confirms it. Same schema as the golden set. in_scope topics are MedlinePlus titles that do not appear in the golden set; near_miss and off_topic are questions the knowledge base must not answer. No hard negatives (their page exists, so no threshold can refuse them). t33 and t34 are terse or colloquial on purpose, so the threshold is not tuned only on clean sentences. t34 is retrieval-only (see its note).",
-  "version": "1.0",
+  "description": "Threshold-tuning set for RAG_MIN_SCORE (v1.1: t20 is labelled a hard negative). NOT part of the frozen golden set (rag_golden.json v1.0): the threshold is chosen on this set and the golden set only confirms it. Same schema as the golden set. in_scope topics are MedlinePlus titles that do not appear in the golden set; near_miss and off_topic are questions the knowledge base must not answer. One hard negative, t20 (its page exists and scores above the lowest in-scope question, so no threshold can refuse it; it is listed apart from the negatives that a threshold could get wrong). t33 and t34 are terse or colloquial on purpose, so the threshold is not tuned only on clean sentences. t34 is retrieval-only (see its note).",
+  "version": "1.1",
   "questions": [
     {
       "id": "t01",
@@ -178,6 +178,7 @@
       "source": "dev",
       "question": "What is the recovery time after a knee replacement at the Charité?",
       "expect": "abstain",
+      "hard_negative": true,
       "note": "hospital-specific operational data"
     },
     {

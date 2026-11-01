@@ -143,6 +143,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ### Changed
 - Dependabot: ignore minor and major bumps of the Python base image (we run 3.12 everywhere) and
   major bumps of `typescript` (typescript-eslint does not support TypeScript 7 yet).
+- Dataset v1.1 (Phase 7): `routing_golden` and `threshold_dev` move to 1.1, the other sets stay at 1.0.
+  The 12 emergency and harmful routing rows are scored on their flags only (route accuracy fell from
+  0.963 to 0.933 without any change a user could see: every missed row had a fixed-reply flag); r074 is
+  reworded to an unambiguous smalltalk question; t20 is a labelled hard negative and the plateau report
+  lists known hard negatives apart; b24's judge task no longer asks for a database-state claim.
+  Re-baselined: routing strict and lenient 0.992 ($0.058), the three booking runs re-judged ($0.007; b24
+  0.4 to 0.5, task completion still informational), `threshold_dev` unchanged. Gate floors by the same
+  rule: strict and lenient route accuracy 0.96 (were 0.93 and 0.95). ADR 0025.
 
 ## [0.6.0] - 2026-11-01
 

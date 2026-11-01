@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
   "suite": "retrieval_dev",
-  "run_id": "retrieval_dev-20261101T163457Z",
-  "started_at": "2026-11-01T16:34:57+00:00",
-  "git_sha": "e5332b3",
+  "run_id": "retrieval_dev-20261101T234258Z",
+  "started_at": "2026-11-01T23:42:58+00:00",
+  "git_sha": "e2e168f",
   "model": null,
   "datasets": {
     "threshold_dev": {
-      "version": "1.0",
-      "sha256": "65abf942e0b42e6db91bdf4fbe452d0305c8e87c531e81504ddf9ca82a71d115"
+      "version": "1.1",
+      "sha256": "c7dccb50ed040609f3bf072337becf1add263cacafd2bd8a6e6b197657e6dab4"
     }
   },
   "params": {
@@ -87,6 +87,10 @@
       "unrefusable_negatives": [
         "t20"
       ],
+      "known_hard_negatives": [
+        "t20"
+      ],
+      "unlabelled_unrefusable": [],
       "margin_to_in_scope": 0.062,
       "margin_to_negative": 0.0107
     },
@@ -107,7 +111,8 @@
         "Psoriatic Arthritis",
         "Sarcoidosis"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t02",
@@ -119,7 +124,8 @@
         "Crohn's Disease",
         "Crohn's Disease"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t03",
@@ -131,7 +137,8 @@
         "Diarrhea",
         "Malabsorption Syndromes"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t04",
@@ -143,7 +150,8 @@
         "Lewy Body Dementia",
         "Lewy Body Dementia"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t05",
@@ -155,7 +163,8 @@
         "Multiple Sclerosis",
         "Multiple Sclerosis"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t06",
@@ -167,7 +176,8 @@
         "Hepatitis B",
         "Hepatitis A"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t07",
@@ -179,7 +189,8 @@
         "Mpox",
         "Salmonella Infections"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t08",
@@ -191,7 +202,8 @@
         "Esophagus Disorders",
         "GERD"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t09",
@@ -203,7 +215,8 @@
         "Osteoarthritis",
         "Arthritis"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t10",
@@ -215,7 +228,8 @@
         "Meniere's Disease",
         "Mastectomy"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t11",
@@ -227,7 +241,8 @@
         "Dizziness and Vertigo",
         "Meniere's Disease"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t12",
@@ -239,7 +254,8 @@
         "Eye Infections",
         "Diabetic Eye Problems"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t13",
@@ -251,7 +267,8 @@
         "Concussion",
         "Concussion"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t14",
@@ -263,7 +280,8 @@
         "Ovarian Disorders",
         "Polycystic Ovary Syndrome"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t15",
@@ -275,7 +293,8 @@
         "Head Lice",
         "Pubic Lice"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t16",
@@ -287,7 +306,8 @@
         "Menopause",
         "Hormone Therapy for Menopause"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t17",
@@ -299,7 +319,8 @@
         "Gastroenteritis",
         "Diverticulosis and Diverticulitis"
       ],
-      "expect": "abstain"
+      "expect": "abstain",
+      "hard_negative": false
     },
     {
       "id": "t18",
@@ -311,7 +332,8 @@
         "Medicare",
         "Tetanus, Diphtheria, and Pertussis Vaccines"
       ],
-      "expect": "abstain"
+      "expect": "abstain",
+      "hard_negative": false
     },
     {
       "id": "t19",
@@ -323,7 +345,8 @@
         "Statins",
         "Statins"
       ],
-      "expect": "refer"
+      "expect": "refer",
+      "hard_negative": false
     },
     {
       "id": "t20",
@@ -335,7 +358,8 @@
         "Knee Replacement",
         "Knee Replacement"
       ],
-      "expect": "abstain"
+      "expect": "abstain",
+      "hard_negative": true
     },
     {
       "id": "t21",
@@ -347,7 +371,8 @@
         "Alzheimer's Disease",
         "Leukodystrophies"
       ],
-      "expect": "abstain"
+      "expect": "abstain",
+      "hard_negative": false
     },
     {
       "id": "t22",
@@ -359,7 +384,8 @@
         "Cold and Cough Medicines",
         "Over-the-Counter Medicines"
       ],
-      "expect": "refer"
+      "expect": "refer",
+      "hard_negative": false
     },
     {
       "id": "t23",
@@ -371,7 +397,8 @@
         "Heart Health Tests",
         "Nuclear Scans"
       ],
-      "expect": "abstain"
+      "expect": "abstain",
+      "hard_negative": false
     },
     {
       "id": "t24",
@@ -383,7 +410,8 @@
         "Crohn's Disease",
         "Crohn's Disease"
       ],
-      "expect": "abstain"
+      "expect": "abstain",
+      "hard_negative": false
     },
     {
       "id": "t25",
@@ -395,7 +423,8 @@
         "How to Improve Mental Health",
         "Vitamin D Deficiency"
       ],
-      "expect": "redirect"
+      "expect": "redirect",
+      "hard_negative": false
     },
     {
       "id": "t26",
@@ -407,7 +436,8 @@
         "Inhalants",
         "Birthmarks"
       ],
-      "expect": "redirect"
+      "expect": "redirect",
+      "hard_negative": false
     },
     {
       "id": "t27",
@@ -419,7 +449,8 @@
         "Winter Weather Emergencies",
         "Hypothermia"
       ],
-      "expect": "redirect"
+      "expect": "redirect",
+      "hard_negative": false
     },
     {
       "id": "t28",
@@ -431,7 +462,8 @@
         "Ozone",
         "Nutrition"
       ],
-      "expect": "redirect"
+      "expect": "redirect",
+      "hard_negative": false
     },
     {
       "id": "t29",
@@ -443,7 +475,8 @@
         "Falls",
         "VLDL Cholesterol"
       ],
-      "expect": "redirect"
+      "expect": "redirect",
+      "hard_negative": false
     },
     {
       "id": "t30",
@@ -455,7 +488,8 @@
         "Teen Development",
         "Constipation"
       ],
-      "expect": "redirect"
+      "expect": "redirect",
+      "hard_negative": false
     },
     {
       "id": "t31",
@@ -467,7 +501,8 @@
         "Psoriasis",
         "Sarcoidosis"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t32",
@@ -479,7 +514,8 @@
         "Crohn's Disease",
         "Crohn's Disease"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t33",
@@ -491,7 +527,8 @@
         "Fainting",
         "Balance Problems"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     },
     {
       "id": "t34",
@@ -503,7 +540,8 @@
         "Shingles",
         "Campylobacter Infections"
       ],
-      "expect": null
+      "expect": null,
+      "hard_negative": false
     }
   ]
 }

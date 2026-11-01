@@ -443,3 +443,20 @@ after and compared the reply kind. Thirteen changed, all in the intended directi
 ### What did the review of my own earlier PR find?
 The red-team scorer did not know the new support reply, so a correct reply would have counted as a
 failure. A new reply needs a place in every part that classifies replies, not only in the bot.
+
+## Dataset v1.1
+### Why change a frozen dataset?
+Frozen means the data does not drift to flatter a result, not that a flaw stays forever. Three things
+measured noise: route accuracy on rows whose reply is fixed text, an ambiguous label (r074), and a judge
+task that asks for something no transcript shows. A change gets a new version, a new lock, a new
+baseline and a recorded reason; the old results are replaced so the gate never mixes two versions.
+
+### How do you know the change did not just make the numbers look better?
+I rescored two saved runs with the new definition before spending anything: the run that "dropped" to
+0.933 is 0.996, and the original baseline moves up less (0.963 to 0.989). Every row that dropped out of the
+accuracy was a flag row. The flag metrics stay hard gates at 100% and 0%, so nothing that protects a user is
+loosened. The floors follow the same rule as before, not the new numbers exactly.
+
+### What did not improve?
+b24's judged score went from 0.4 to 0.5. The clause I removed was not the main reason: the judge's summary
+step still loses the listing and the confirmation. It stays informational and is written down as such.

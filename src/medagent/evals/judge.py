@@ -266,7 +266,7 @@ TASKS: dict[str, str] = {
     "the confirmed alternative counts as the task completed.",
     "b23": "Cancel the user's only upcoming appointment, after the user confirms.",
     "b24": "List the user's two appointments, then cancel the second one (Dr. Olivia Martinez, "
-    "Friday 6 Nov 2026, 09:00) after confirmation, leaving the first appointment untouched.",
+    "Friday 6 Nov 2026, 09:00) after confirmation.",
 }
 
 

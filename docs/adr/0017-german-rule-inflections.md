@@ -67,7 +67,7 @@ by the tappable-number regex, and a backend test compares it with `POISON_CENTRE
 so the two copies cannot drift apart. The Playwright test for the cards passes in a real browser.
 
 ## Known gaps (not changed here)
-- **Vocabulary** the rules do not have, pinned as strict xfails in
+- **Vocabulary** the rules did not have (closed in ADR 0018; this list is kept for the record), pinned as strict xfails in
   `test_german_inflections.py` so that closing one is a deliberate step: Herzstillstand, "Druck auf der
   Brust", Brustkorb, "ringe nach Luft", "lallt", "ich möchte sterben", "keine Lust mehr zu leben",
   "ich verletze mich selbst", "zusammengebrochen", "Blutung hört nicht auf", "heftige Blutungen", "Hals

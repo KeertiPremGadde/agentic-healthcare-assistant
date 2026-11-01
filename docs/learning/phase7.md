@@ -1,6 +1,6 @@
 # Phase 7 (quality: observability and evaluation): interview Q&A
 
-Sections are added as the phase's pull requests land. Decisions: [ADR 0012](../adr/0012-langfuse-tracing-and-privacy.md).
+Sections are added as the phase's pull requests land. Decisions: [ADR 0012](../adr/0012-langfuse-tracing-and-privacy.md) (tracing), [ADR 0013](../adr/0013-evaluation-harness-and-gates.md) (evaluation).
 
 ---
 
@@ -58,3 +58,56 @@ a month. Sampling is the lever; it is decided once per turn so a skipped turn se
 Self-host Langfuse or use a plan with a BAA, keep content capture off, shorten retention, and treat the
 trace store as part of the system's data protection scope. On the free plan, synthetic data and
 metadata-only traces are the only defensible setup, and the ADR says so.
+
+---
+
+## Evaluation
+
+### What is a golden set and why freeze it?
+A fixed list of inputs with the right outcome for each. If the list changes while you change the
+system, you cannot tell which one moved the number. Mine is versioned (v1.0), hashed, and a test
+fails if the files change without a new version; every result file records the hash it ran on.
+
+### What is in it?
+65 RAG questions (40 in scope, 10 near-miss the corpus cannot answer, 10 off-topic, 5 German), 100
+routing messages run 3 times each, 27 booking scenarios. The references for the in-scope questions
+are written only from the MedlinePlus text the system retrieves from, not from my own knowledge.
+
+### Why are near-miss questions the interesting ones?
+Because a RAG system is judged most by what it refuses. Three of mine are "hard negatives": retrieval
+scores them above the similarity threshold (a related page exists), so only the model's own "this
+context cannot answer it" check can refuse. I verified against the page text that the answer is not
+there, otherwise the label would be wrong.
+
+### How do you judge a booking agent?
+By the database after the run, never by what the reply says. The expected appointments exist, the
+forbidden ones (holiday, past, day off) do not, other patients' rows are untouched, and nothing was
+written before the confirmation. A wrong reply that leaves the DB right is a UX bug; a right-sounding
+reply that wrote the wrong row is a safety bug, and only the DB check sees the difference.
+
+### Which metrics are gates and which are reported?
+Safety metrics are exact: flag recall 100%, false positives 0, dose leaks 0, hard violations 0, with
+no margin. Quality metrics gate on the baseline minus a margin of twice the spread between identical
+runs. Everything noisy or immature (task completion, German) is reported but not gated.
+
+### LLM-as-judge: what can go wrong?
+It is noisy (faithfulness moved 0.045 between identical runs, one question went 0.86, 0.79, 0.20),
+it can be starved of context (task completion could not verify "number 2" without the list), and it
+can disagree with the literal task when the correct behaviour is to refuse (an impossible slot). So:
+three runs, mean and spread, a missing-score rate that fails the run above 5%, and a judge's input
+that is checked before its score is trusted. The judge here is the same small model that is being
+graded; a stronger-judge cross-check on a sample is planned.
+
+### What did the first real run teach?
+That the harness has bugs too. My question-mark check marked a correct clarifying reply as a failure
+because the last sentence was not a question. The 100% flag recall also needed a careful definition
+of a false positive: a suicidal message is both harmful and an emergency, so flagging both is right.
+
+### How big is the noise, and what does that mean for improvements?
+About 0.02 to 0.05 on judged metrics. A change that moves faithfulness from 0.85 to 0.87 proves
+nothing; one that moves German answers from 1 of 5 to 4 of 5 does. Deterministic metrics (hit@5,
+answer rate) have no judge noise, so they carry the proof for retrieval changes.
+
+### What did it cost?
+About $0.75 for the whole harness and baseline on Haiku (routing $0.04, RAG $0.02 a run, booking
+$0.008 a run, judged layer $0.155 a run). A spend cap stops a run before it can surprise anyone.

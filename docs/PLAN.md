@@ -168,7 +168,7 @@ Done in order, each on its own branch and PR.
 
 - [x] Langfuse tracing on every graph run (session = conversation id, user id hashed, content redacted
   by default; two redaction layers, verified against real traces; ADR 0012)
-- [ ] `evals/`: golden datasets for RAG (reuse legacy `testset.csv`), routing, booking
+- [ ] `evals/`: golden datasets for RAG (reuse legacy `testset.csv`), routing, booking (frozen v1.0: 65 RAG incl. 5 German, 100 routing, 27 booking scenarios; runner + deterministic metrics done, LLM-judged metrics and baseline pending)
 - [ ] RAGAS: faithfulness, answer relevancy, context precision; DeepEval: task completion, tool correctness
 - [ ] **Red-team evals at the LLM level** (ADR 0009): run `evals/redteam/cases.json` end to end,
   not just the rules. Gates: attack recall of rules + router combined = 100% on the set, benign false
@@ -187,6 +187,11 @@ Done in order, each on its own branch and PR.
     can stay clean.
   - **Cross-encoder reranker:** a local cross-encoder behind the existing `Reranker` interface
     (compare against `ScoreReranker`: quality, latency, install size).
+  - **German queries on the English-only embedding model** (baseline: 2 of 5 German questions find the
+    right topic, 3 of 5 would be refused at the threshold). Add a `search_query_en` field to the router's
+    structured output: the model translates the query to English as part of the call it already makes,
+    so there is no extra LLM call; retrieval uses it. Measure on the German set only (reported separately,
+    never in the main score). A multilingual embedding model is the fallback idea if this is not enough.
   - **Re-measure `RAG_MIN_SCORE`** on a larger labelled question set (in-scope, near-miss and off-topic;
     Phase 2 used only 18 questions with a narrow 0.65-0.74 gap). Re-do it after each change above,
     because the threshold is specific to the embedding model, chunk text and corpus.

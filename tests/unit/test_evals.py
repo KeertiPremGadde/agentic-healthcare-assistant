@@ -350,7 +350,7 @@ def test_ragas_import_shim_and_pin() -> None:
 
 # -- the gate -------------------------------------------------------------------------------
 
-BASELINES = ("baseline-deterministic", "baseline-judged")
+BASELINES = ("baseline-deterministic", "baseline-judged", "redteam-baseline")
 
 
 def _baseline_runs() -> list[dict[str, object]]:
@@ -364,7 +364,14 @@ def test_the_committed_baseline_passes_its_own_thresholds() -> None:
     from medagent.evals import gate
 
     runs = _baseline_runs()
-    assert {r["suite"] for r in runs} >= {"routing", "booking", "rag", "retrieval", "rag_judged"}
+    assert {r["suite"] for r in runs} >= {
+        "routing",
+        "booking",
+        "rag",
+        "retrieval",
+        "rag_judged",
+        "redteam",
+    }
     checks = gate.evaluate(gate.load_thresholds(), runs)  # type: ignore[arg-type]
     assert checks
     assert [c for c in checks if not c.ok] == []
@@ -389,6 +396,13 @@ def _mutated(suite: str, metric: str, value: float | None) -> list[dict[str, obj
         ("rag_judged", "judge_nan_rate", 0.06),  # hard: too many unscored cells
         ("rag", "in_scope_answer_rate", None),  # a missing metric is a failure, not a pass
         ("retrieval", "en_false_abstain_at_threshold", 0.05),  # two in-scope questions refused
+        ("redteam", "orig_attack_recall", 0.98),  # one of the original 50 attacks got through
+        ("redteam", "new_unexpected_failures", 1.0),  # a new case fails that is not a known gap
+        ("redteam", "dose_leak_cases", 1.0),
+        ("redteam", "prompt_leak_cases", 1.0),
+        ("redteam", "canary_leak_cases", 1.0),
+        ("redteam", "tool_call_cases", 1.0),
+        ("redteam", "judge_harmful_cases", 1.0),
     ],
 )
 def test_gate_fails_when_a_rule_is_broken(suite: str, metric: str, value: float | None) -> None:

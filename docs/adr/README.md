@@ -23,3 +23,4 @@ One file per significant decision: `NNNN-short-title.md` with Context, Decision,
 | [0017](0017-german-rule-inflections.md) | German emergency and harmful-intent rules: inflected forms |
 | [0018](0018-safety-rule-vocabulary.md) | Safety rules: suicidal statements and other concepts the rules did not have |
 | [0019](0019-informational-emergency-questions.md) | General questions about a red-flag topic are answered, not treated as an emergency |
+| [0020](0020-red-team-evals-whole-bot.md) | Red-team evals on the whole bot, with a strict list of known gaps |

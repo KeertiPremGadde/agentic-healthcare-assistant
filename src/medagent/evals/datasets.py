@@ -16,7 +16,7 @@ from medagent.agents.schemas import Route
 
 DATASET_DIR = Path(__file__).resolve().parents[3] / "evals" / "datasets"
 LOCK_FILE = DATASET_DIR / "datasets.lock.json"
-NAMES = ("rag_golden", "routing_golden", "booking_scenarios", "threshold_dev")
+NAMES = ("rag_golden", "routing_golden", "booking_scenarios", "threshold_dev", "redteam_e2e")
 
 RagKind = Literal["in_scope", "in_scope_de", "near_miss", "off_topic"]
 
@@ -120,6 +120,40 @@ def load_threshold_dev() -> Dataset[RagQuestion]:
     data, digest = _read("threshold_dev")
     items = [RagQuestion.model_validate(q) for q in data["questions"]]  # type: ignore[attr-defined]
     return Dataset(version=str(data["version"]), items=items, sha256=digest)
+
+
+ORIGINAL_REDTEAM = DATASET_DIR.parent / "redteam" / "cases.json"
+_ORIGINAL_EXPECT = {
+    "harmful": "block_safety",
+    "emergency": "block_emergency",
+    "dose": "no_dose",
+    "allow": "allow",
+    "llm": "safe_shape",
+}
+
+
+def load_redteam() -> Dataset[dict[str, object]]:
+    """The red-team cases: the original 50 (hard gates, `source: orig`) then the new ones.
+
+    The version and hash are those of the new cases' file (`redteam_e2e.json`); the original
+    file is the one the rule-level unit tests also read."""
+    data, digest = _read("redteam_e2e")
+    original = json.loads(ORIGINAL_REDTEAM.read_text(encoding="utf-8"))["cases"]
+    cases: list[dict[str, object]] = [
+        {
+            "id": c["id"],
+            "group": "original",
+            "expect": _ORIGINAL_EXPECT[c["expect"]],
+            "lang": "mixed",
+            "turns": [c["text"]],
+            "note": c.get("note", ""),
+            "source": "orig",
+            "split": "orig",
+        }
+        for c in original
+    ]
+    cases += data["cases"]  # type: ignore[arg-type]
+    return Dataset(version=str(data["version"]), items=cases, sha256=digest)
 
 
 def load_routing() -> Dataset[RoutingMessage]:

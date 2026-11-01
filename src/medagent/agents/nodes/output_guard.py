@@ -15,10 +15,9 @@ from langchain_core.messages import AIMessage
 from medagent.agents.nodes.common import APOLOGY
 from medagent.agents.nodes.guardrail import FIXED_REPLY_ROUTES
 from medagent.agents.state import AgentState
-from medagent.guardrails.disclaimer import DISCLAIMER
-from medagent.guardrails.dose import DOSE_REFERRAL, contains_dose
+from medagent.guardrails.dose import contains_dose
 from medagent.guardrails.emergency import SAFETY_NOTICE
-from medagent.rag.answer import NO_ANSWER
+from medagent.guardrails.texts import ALL_TEXTS, texts_for
 from medagent.tools.models import NearbyClinics
 
 OSM_ATTRIBUTION = NearbyClinics.model_fields["attribution"].default
@@ -37,12 +36,21 @@ def output_guard_node(state: AgentState) -> dict[str, Any]:
         return {"messages": [AIMessage(content=draft)], "draft": ""}  # exactly as written
 
     if kind == "medical":
-        if contains_dose(draft.replace(DISCLAIMER, "")):
-            draft = DOSE_REFERRAL  # defence in depth: also enforced in answer_question
-        elif "Sources:" not in draft and not draft.startswith((NO_ANSWER, DOSE_REFERRAL)):
-            draft = NO_ANSWER  # never show uncited medical content (the fixed texts are exempt)
-        if DISCLAIMER not in draft:
-            draft = f"{draft}\n\n{DISCLAIMER}"
+        # A reply is checked against the fixed texts of every language (the model may answer in
+        # any); what the guard adds itself is in the language of the turn.
+        texts = texts_for(state.get("reply_language"))
+        without_disclaimers = draft
+        for t in ALL_TEXTS:
+            without_disclaimers = without_disclaimers.replace(t.disclaimer, "")
+        fixed_replies = tuple(r for t in ALL_TEXTS for r in (t.no_answer, t.dose_referral))
+        if contains_dose(without_disclaimers):
+            draft = texts.dose_referral  # defence in depth: also enforced in answer_question
+        elif not any(t.sources_label in draft for t in ALL_TEXTS) and not draft.startswith(
+            fixed_replies
+        ):
+            draft = texts.no_answer  # never show uncited medical content (fixed texts exempt)
+        if not any(t.disclaimer in draft for t in ALL_TEXTS):
+            draft = f"{draft}\n\n{texts.disclaimer}"
     elif kind == "doctors":
         draft = f"{draft}\n\n{DOCTOR_NOTE}"
     elif kind == "nearby" and OSM_ATTRIBUTION not in draft:

@@ -88,6 +88,12 @@ async def main() -> None:
     )
     p.add_argument("--repeats", type=int, default=3, help="routing: runs per message")
     p.add_argument("--limit", type=int, default=None, help="routing/rag: first N items")
+    p.add_argument(
+        "--dataset",
+        choices=["rag_golden", "threshold_dev"],
+        default="rag_golden",
+        help="retrieval: the golden set (default) or the RAG_MIN_SCORE tuning set",
+    )
     p.add_argument("--per-kind", type=int, default=None, help="rag: N questions of each kind")
     p.add_argument("--only", default=None, help="booking: comma-separated scenario ids")
     p.add_argument("--max-usd", type=float, default=1.0, help="stop starting calls above this")
@@ -105,7 +111,7 @@ async def main() -> None:
 
     spend = Spend(args.max_usd)
     if args.suite == "retrieval":
-        result = suites.run_retrieval()
+        result = suites.run_retrieval(dataset=args.dataset)
     elif args.suite == "retrieval-de":
         result = await suites.run_retrieval_de(spend, args.repeats)
     elif args.suite == "routing":

@@ -388,6 +388,7 @@ def _mutated(suite: str, metric: str, value: float | None) -> list[dict[str, obj
         ("rag_judged", "faithfulness", 0.70),  # gate: below baseline minus margin
         ("rag_judged", "judge_nan_rate", 0.06),  # hard: too many unscored cells
         ("rag", "in_scope_answer_rate", None),  # a missing metric is a failure, not a pass
+        ("retrieval", "en_false_abstain_at_threshold", 0.05),  # two in-scope questions refused
     ],
 )
 def test_gate_fails_when_a_rule_is_broken(suite: str, metric: str, value: float | None) -> None:
@@ -541,3 +542,37 @@ async def test_the_eval_applies_the_apps_translation_rule(
 
     llm = FakeStructuredLLM({RouteDecision: [RouteDecision(is_emergency=False, **decision)]})  # type: ignore[arg-type]
     assert await _english_query(llm, Spend(1.0), "Was ist Gicht?") == expected  # type: ignore[arg-type]
+
+
+# -- RAG_MIN_SCORE plateau (change 4) ---------------------------------------------------------
+
+
+def _rec(id_: str, kind: str, sim: float, expect: str | None = None) -> metrics.RetrievalRecord:
+    return metrics.RetrievalRecord(id_, kind, 1, sim, (), expect)
+
+
+def test_threshold_plateau_margins_and_unrefusable_negatives() -> None:
+    records = [
+        _rec("i1", "in_scope", 0.80),
+        _rec("i2", "in_scope", 0.72),  # the lowest in-scope question
+        _rec("n1", "near_miss", 0.69, "abstain"),  # the highest negative a threshold can refuse
+        _rec("n2", "near_miss", 0.60, "abstain"),
+        _rec("n3", "near_miss", 0.78, "abstain"),  # above the lowest in-scope: no threshold helps
+        _rec("r1", "near_miss", 0.74, "refer"),  # may be answered with a referral: ignored
+        _rec("o1", "off_topic", 0.50),
+    ]
+    p = metrics.threshold_plateau(records, 0.70)
+    assert p["lowest_in_scope"] == 0.72
+    assert p["highest_refusable_negative"] == 0.69
+    assert p["unrefusable_negatives"] == ["n3"]
+    assert p["margin_to_in_scope"] == pytest.approx(0.02)
+    assert p["margin_to_negative"] == pytest.approx(0.01)
+
+
+def test_threshold_plateau_goes_negative_when_the_threshold_is_outside_it() -> None:
+    records = [_rec("i1", "in_scope", 0.72), _rec("n1", "near_miss", 0.69, "abstain")]
+    too_high = metrics.threshold_plateau(records, 0.75)
+    assert too_high["margin_to_in_scope"] == pytest.approx(-0.03)  # would refuse i1
+    too_low = metrics.threshold_plateau(records, 0.65)
+    assert too_low["margin_to_negative"] == pytest.approx(-0.04)  # would answer n1
+    assert metrics.threshold_plateau([_rec("i1", "in_scope", 0.8)], 0.7) == {}

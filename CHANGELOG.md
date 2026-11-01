@@ -49,6 +49,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
   PR). New `retrieval-de` eval suite, `de_translation_rate`, `de_answered_in_german_rate`. Pre-commit
   ruff pinned to the locked version (a test keeps them equal). Results in
   `evals/results/query_translation/`.
+- `RAG_MIN_SCORE` re-measured (Phase 7, RAG improvement 4): 0.70 confirmed, no change. A locked
+  tuning set (`evals/datasets/threshold_dev.json`, 34 items) is used to choose and the golden set to
+  confirm; the thresholds 0.691-0.722 behave identically on both, and the rule's pick (0.726) fails
+  the golden confirmation. New: `retrieval --dataset threshold_dev`, plateau margins in every
+  retrieval run, gate `en_false_abstain_at_threshold <= 0.025`. ADR 0014, `evals/results/threshold/`.
 
 ### Changed
 - Dependabot: ignore minor and major bumps of the Python base image (we run 3.12 everywhere) and

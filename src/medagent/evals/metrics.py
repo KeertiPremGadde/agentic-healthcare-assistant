@@ -50,6 +50,7 @@ class RetrievalRecord:
     rank: int | None
     max_sim: float
     top_titles: tuple[str, ...]
+    expect: str | None = None  # near-miss label: "abstain" or "refer" (see the golden set)
 
 
 def retrieval_metrics(
@@ -88,6 +89,36 @@ def threshold_sweep(
             }
         )
     return rows
+
+
+def threshold_plateau(records: Sequence[RetrievalRecord], threshold: float) -> dict[str, object]:
+    """How much room `RAG_MIN_SCORE` has on this question set.
+
+    Any threshold between the highest negative it can still refuse and the lowest in-scope
+    question gives identical outcomes (the "plateau"). A negative scoring above the lowest in-scope
+    question cannot be refused by any threshold (only the LLM's own check can) and is listed
+    separately. `refer` near-misses are excluded: they may be answered with a referral.
+    A margin of 0 or less on either side means the current threshold already misclassifies
+    something here.
+    """
+    in_scope = [r.max_sim for r in records if r.kind == "in_scope"]
+    negatives = [
+        r
+        for r in records
+        if r.kind == "off_topic" or (r.kind == "near_miss" and r.expect == "abstain")
+    ]
+    if not in_scope or not negatives:
+        return {}
+    floor = min(in_scope)
+    refusable = [r.max_sim for r in negatives if r.max_sim < floor]
+    ceiling = max(refusable, default=0.0)
+    return {
+        "lowest_in_scope": round(floor, 4),
+        "highest_refusable_negative": round(ceiling, 4),
+        "unrefusable_negatives": sorted(r.id for r in negatives if r.max_sim >= floor),
+        "margin_to_in_scope": round(floor - threshold, 4),
+        "margin_to_negative": round(threshold - ceiling, 4),
+    }
 
 
 # -- routing --------------------------------------------------------------------------------

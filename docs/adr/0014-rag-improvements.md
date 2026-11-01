@@ -1,6 +1,6 @@
 # 0014 – RAG improvements, each measured against the frozen baseline
 
-Status: in progress (Phase 7). Changes 1-3 are decided; 4 (threshold) is added when it is measured.
+Status: accepted (Phase 7). All four changes are decided and measured.
 
 ## Context
 ADR 0013 froze the golden sets and recorded a Phase 2 baseline with its run-to-run spread. The rule
@@ -127,3 +127,59 @@ looks for the English disclaimer. A German user therefore sees an English refusa
 disclaimer. Planned as a small separate PR: localised fixed texts chosen from the router's
 `language`, with the output guard accepting both the English and the German disclaimer. Not part of
 this change because it does not affect retrieval quality and needs its own tests.
+
+## 4. `RAG_MIN_SCORE`: re-measured, 0.70 confirmed (no change)
+The threshold is specific to the embedding model, the chunk text and the corpus, and the first three
+changes altered the last two, so it was re-measured on the full pipeline. To avoid tuning on the
+set that confirms it, a separate tuning set was written first (`evals/datasets/threshold_dev.json`,
+v1.0, locked, 34 items: 20 in scope incl. four terse or colloquial queries, 8 near-miss, 6 off-topic;
+a test keeps it disjoint from the golden set). Rule fixed before looking at the result: choose on
+the tuning set the threshold with zero in-scope refusals and the best abstain recall (middle of any
+tie range; `refer` items and items no threshold can refuse are excluded), then confirm on the golden
+set; move only if golden in-scope false abstain stays 0 and abstain recall does not fall.
+
+Similarity of the best returned chunk, per class:
+
+| Class | Tuning set | Golden set |
+|---|---|---|
+| in scope | 0.762 - 0.921 (n=20) | 0.723 - 0.897 (n=40) |
+| near-miss to abstain / off-topic | 0.423 - 0.790 (n=12) | 0.454 - 0.778 (n=18) |
+
+Every threshold from 0.691 to 0.722 gives identical outcomes on both sets (in-scope refused 0 of 60;
+every refusable negative refused on both sets: 11 of 11 on the tuning set, all 16 on the golden set). Applying the rule:
+the tuning set alone allows 0.69-0.76 (middle 0.726), but 0.726 would refuse golden q28 (0.7226), so
+the confirmation fails and **0.70 stays**. The tuning set's in-scope questions are easier (lowest
+0.762 vs 0.723), which is exactly what the confirmation set is for: "the highest threshold with no
+in-scope refusal on the tuning set" (0.76) would refuse 3 of 40 golden questions.
+
+- **Margins are thin on the negative side:** 0.0095 (golden, to n07 at 0.6905) and 0.0107 (tuning, to
+  t24 at 0.6893); 0.0226 and 0.062 to the lowest in-scope question. The plateau is about 0.03 wide, so
+  a different embedder, header format or corpus needs a fresh sweep.
+- **New guards:** `retrieval` gate `en_false_abstain_at_threshold <= 0.025` (one of 40; it was not
+  gated before), and every retrieval run now reports `plateau_margin_to_in_scope`,
+  `plateau_margin_to_negative` and the list of negatives no threshold can refuse
+  (`threshold_plateau`, informational; a margin <= 0 means the current value misclassifies
+  something on that set). `retrieval --dataset threshold_dev` runs the tuning set (suite
+  `retrieval_dev`, never mixed into the golden-set gate).
+- **Negatives only the LLM can refuse:** golden n04 (0.778) and n05 (0.737), and tuning t20 (0.790,
+  "recovery time after a knee replacement at the Charite": a Knee Replacement page exists). They
+  score above the lowest in-scope question, so no threshold separates them; the answer model's
+  `context_sufficient` check does (hard-negative abstain rate 1.0 in every run).
+- **For dataset v1.1:** label tuning item t20 as a hard negative (it was written as a plain
+  near-miss); the locked v1.0 file is not edited.
+- No paid run was needed: nothing that reaches the answer model changed.
+
+## Summary of the four changes (against the frozen Phase 2 baseline)
+
+| | EN hit@1 | EN MRR | Context precision | Faithfulness | German answered |
+|---|---|---|---|---|---|
+| Baseline | 0.900 | 0.926 | 0.867 | 0.851 | 1 of 5 |
+| + headers | 0.925 | 0.956 | 0.909 | 0.879 | 1 of 5 |
+| + reranker | 0.975 | 0.9875 | 0.929 | 0.870 | 1 of 5 |
+| + English query | 0.975 | 0.9875 | 0.932 | 0.884 | **5 of 5** |
+| + threshold | unchanged (0.70 confirmed) | | | | |
+
+Judged columns are means of three runs; the baseline spread is 0.045 (faithfulness) and 0.030
+(context precision), so only context precision's rise (+0.065 in total) and the German result are
+beyond noise. Spend for the four changes: $0.53 (headers) + $0.53 (reranker) + $0.68 (query
+translation incl. safety re-runs) + $0 (threshold) = about $1.7; Phase 7 in total about $2.5 of $10.

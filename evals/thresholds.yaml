@@ -49,6 +49,8 @@ suites:
     gate:
       en_hit_at_5: {min: 0.95}               # baseline 0.975 (one of 40 questions = 0.025)
       en_mrr: {min: 0.88}                    # baseline 0.926
+      en_false_abstain_at_threshold: {max: 0.025}  # in-scope questions refused by RAG_MIN_SCORE
+                                                   # alone: baseline 0.0, one of 40 of slack
 
   rag_judged:
     hard:
@@ -74,3 +76,6 @@ informational:
                            # still informational, too few items to gate
   - recall_*               # per-route recall (small n per route)
   - threshold_sweep
+  - threshold_plateau      # room of RAG_MIN_SCORE: margin to the lowest in-scope question and to the
+                           # highest refusable negative (ADR 0014); a margin <= 0 means a misclassification
+  - plateau_*

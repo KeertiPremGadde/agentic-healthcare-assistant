@@ -188,7 +188,9 @@ The free tier allows 50k units a month (traces, observations and scores). A turn
 ## Running the evaluations (Phase 7)
 
 ```powershell
-uv run python scripts/run_evals.py retrieval        # free, no LLM
+uv run python scripts/run_evals.py retrieval        # free, no LLM (also prints the RAG_MIN_SCORE margins)
+uv run python scripts/run_evals.py retrieval --dataset threshold_dev   # free: the threshold tuning set
+uv run python scripts/run_evals.py retrieval-de --repeats 3            # German via the router (a few cents)
 uv run python scripts/run_evals.py routing --repeats 3 --max-usd 0.5
 uv run python scripts/run_evals.py gate --results evals/results/baseline-deterministic evals/results/baseline-judged
 ```

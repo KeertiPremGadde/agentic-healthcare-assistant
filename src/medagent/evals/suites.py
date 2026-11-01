@@ -62,9 +62,12 @@ def _base(
 # -- retrieval (free: local embeddings + Postgres, no LLM) ----------------------------------
 
 
-def run_retrieval(k: int = 5) -> EvalResult:
+def run_retrieval(k: int = 5, dataset: str = "rag_golden") -> EvalResult:
+    """`dataset="threshold_dev"` runs the tuning set (suite name `retrieval_dev`, so the gate,
+    which is keyed by suite name, never mixes it with the golden-set numbers)."""
     settings = get_settings()
-    questions = datasets.load_rag().items
+    on_dev = dataset == "threshold_dev"
+    questions = (datasets.load_threshold_dev() if on_dev else datasets.load_rag()).items
     retriever = HybridRetriever(get_embedder(settings), get_reranker(settings))
     records: list[metrics.RetrievalRecord] = []
     with get_sessionmaker()() as session:
@@ -78,16 +81,21 @@ def run_retrieval(k: int = 5) -> EvalResult:
                     rank=metrics.rank_of(titles, q.expected_topics) if q.expected_topics else None,
                     max_sim=round(max((c.vector_sim for c in found), default=0.0), 4),
                     top_titles=titles[:3],
+                    expect=q.expect,
                 )
             )
     result = _base(
-        "retrieval",
+        "retrieval_dev" if on_dev else "retrieval",
         None,
-        ("rag_golden",),
+        (dataset,),
         {"k": k, "min_score": settings.rag_min_score, **_reranker_params(settings)},
     )
     result.metrics = dict(metrics.retrieval_metrics(records, settings.rag_min_score))
     result.metrics["threshold_sweep"] = metrics.threshold_sweep(records, SWEEP)
+    plateau = metrics.threshold_plateau(records, settings.rag_min_score)
+    result.metrics["threshold_plateau"] = plateau
+    for key in ("margin_to_in_scope", "margin_to_negative"):  # scalars: printed by the CLI
+        result.metrics[f"plateau_{key}"] = plateau.get(key)
     result.items = [asdict(r) for r in records]
     return result
 

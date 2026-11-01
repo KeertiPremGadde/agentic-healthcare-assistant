@@ -1,0 +1,882 @@
+{
+  "schema_version": 1,
+  "suite": "retrieval",
+  "run_id": "retrieval-20261101T163359Z",
+  "started_at": "2026-11-01T16:33:59+00:00",
+  "git_sha": "e5332b3",
+  "model": null,
+  "datasets": {
+    "rag_golden": {
+      "version": "1.0",
+      "sha256": "e503a14d90a895f9905059522e96965c46fbff5b64f62cf3884a7bf75784345b"
+    }
+  },
+  "params": {
+    "k": 5,
+    "min_score": 0.7,
+    "reranker": "cross_encoder",
+    "reranker_model": "Xenova/ms-marco-MiniLM-L-6-v2",
+    "reranker_top_n": 10
+  },
+  "metrics": {
+    "en_hit_at_1": 0.975,
+    "en_hit_at_5": 1.0,
+    "en_mrr": 0.9875,
+    "en_false_abstain_at_threshold": 0.0,
+    "de_hit_at_1": 0.4,
+    "de_hit_at_5": 0.4,
+    "de_mrr": 0.4,
+    "de_false_abstain_at_threshold": 0.8,
+    "near_miss_abstain_at_threshold": 0.8,
+    "off_topic_abstain_at_threshold": 1.0,
+    "threshold_sweep": [
+      {
+        "threshold": 0.5,
+        "in_scope_false_abstain": 0.0,
+        "near_and_off_abstain": 0.2
+      },
+      {
+        "threshold": 0.55,
+        "in_scope_false_abstain": 0.0,
+        "near_and_off_abstain": 0.4
+      },
+      {
+        "threshold": 0.6,
+        "in_scope_false_abstain": 0.0,
+        "near_and_off_abstain": 0.5
+      },
+      {
+        "threshold": 0.65,
+        "in_scope_false_abstain": 0.0,
+        "near_and_off_abstain": 0.75
+      },
+      {
+        "threshold": 0.7,
+        "in_scope_false_abstain": 0.0,
+        "near_and_off_abstain": 0.9
+      },
+      {
+        "threshold": 0.72,
+        "in_scope_false_abstain": 0.0,
+        "near_and_off_abstain": 0.9
+      },
+      {
+        "threshold": 0.74,
+        "in_scope_false_abstain": 0.025,
+        "near_and_off_abstain": 0.95
+      },
+      {
+        "threshold": 0.76,
+        "in_scope_false_abstain": 0.075,
+        "near_and_off_abstain": 0.95
+      },
+      {
+        "threshold": 0.78,
+        "in_scope_false_abstain": 0.175,
+        "near_and_off_abstain": 1.0
+      },
+      {
+        "threshold": 0.8,
+        "in_scope_false_abstain": 0.325,
+        "near_and_off_abstain": 1.0
+      }
+    ],
+    "threshold_plateau": {
+      "lowest_in_scope": 0.7226,
+      "highest_refusable_negative": 0.6905,
+      "unrefusable_negatives": [
+        "n04",
+        "n05"
+      ],
+      "margin_to_in_scope": 0.0226,
+      "margin_to_negative": 0.0095
+    },
+    "plateau_margin_to_in_scope": 0.0226,
+    "plateau_margin_to_negative": 0.0095
+  },
+  "hard_violations": [],
+  "cost": {},
+  "aborted": null,
+  "items": [
+    {
+      "id": "q01",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7964,
+      "top_titles": [
+        "Diabetes",
+        "Diabetes Type 1",
+        "Diabetic Heart Disease"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q02",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8707,
+      "top_titles": [
+        "Asthma",
+        "Asthma in Children",
+        "Asthma in Children"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q03",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8252,
+      "top_titles": [
+        "Anemia",
+        "Aplastic Anemia",
+        "Thalassemia"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q04",
+      "kind": "in_scope",
+      "rank": 2,
+      "max_sim": 0.7804,
+      "top_titles": [
+        "Pulmonary Hypertension",
+        "High Blood Pressure",
+        "Blood Pressure Medicines"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q05",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8291,
+      "top_titles": [
+        "Pneumonia",
+        "Pneumonia",
+        "Pneumonia"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q06",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.886,
+      "top_titles": [
+        "Migraine",
+        "Migraine",
+        "Headache"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q07",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8973,
+      "top_titles": [
+        "Dehydration",
+        "Dehydration",
+        "Gastroenteritis"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q08",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.83,
+      "top_titles": [
+        "Chronic Bronchitis",
+        "Acute Bronchitis",
+        "Bronchial Disorders"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q09",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7625,
+      "top_titles": [
+        "Flu",
+        "H1N1 Flu (Swine Flu)",
+        "Viral Infections"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q10",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7841,
+      "top_titles": [
+        "Foodborne Illness",
+        "Eating Disorders",
+        "Food Allergy"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q11",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8177,
+      "top_titles": [
+        "Gout",
+        "Gout",
+        "Gout"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q12",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8861,
+      "top_titles": [
+        "Gout",
+        "Gout",
+        "Gout"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q13",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8292,
+      "top_titles": [
+        "Shingles",
+        "Shingles",
+        "Shingles"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q14",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8067,
+      "top_titles": [
+        "Shingles",
+        "Tetanus, Diphtheria, and Pertussis Vaccines",
+        "Shingles"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q15",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8312,
+      "top_titles": [
+        "Kidney Stones",
+        "Kidney Diseases",
+        "Paget's Disease of Bone"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q16",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8283,
+      "top_titles": [
+        "Hypothyroidism",
+        "Hypothyroidism",
+        "Hyperthyroidism"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q17",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8771,
+      "top_titles": [
+        "Glaucoma",
+        "Diabetic Eye Problems",
+        "Glaucoma"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q18",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8678,
+      "top_titles": [
+        "Cataract",
+        "Cataract",
+        "Cataract"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q19",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8449,
+      "top_titles": [
+        "Osteoporosis",
+        "Osteoporosis",
+        "Osteogenesis Imperfecta"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q20",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7948,
+      "top_titles": [
+        "Celiac Disease",
+        "Celiac Disease",
+        "Celiac Disease"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q21",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8013,
+      "top_titles": [
+        "Urinary Tract Infections",
+        "Infections and Pregnancy",
+        "Staphylococcal Infections"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q22",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8377,
+      "top_titles": [
+        "Sinusitis",
+        "Campylobacter Infections",
+        "Histoplasmosis"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q23",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7969,
+      "top_titles": [
+        "Streptococcal Infections",
+        "Streptococcal Infections",
+        "Sexually Transmitted Infections"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q24",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8319,
+      "top_titles": [
+        "Appendicitis",
+        "Gastroenteritis",
+        "Diverticulosis and Diverticulitis"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q25",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7436,
+      "top_titles": [
+        "Gallstones",
+        "Gallbladder Cancer",
+        "Gallbladder Diseases"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q26",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7783,
+      "top_titles": [
+        "Acne",
+        "Rosacea",
+        "Skin Conditions"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q27",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7816,
+      "top_titles": [
+        "Lyme Disease",
+        "Lyme Disease",
+        "Lyme Disease"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q28",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7226,
+      "top_titles": [
+        "Tuberculosis",
+        "Tuberculosis",
+        "Tuberculosis"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q29",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8709,
+      "top_titles": [
+        "Epilepsy",
+        "Seizures",
+        "Osteoporosis"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q30",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8234,
+      "top_titles": [
+        "Anxiety",
+        "Anxiety",
+        "Anxiety"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q31",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8082,
+      "top_titles": [
+        "Depression",
+        "Depression",
+        "Seasonal Affective Disorder"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q32",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8321,
+      "top_titles": [
+        "Insomnia",
+        "Insomnia",
+        "Insomnia"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q33",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7583,
+      "top_titles": [
+        "Sleep Apnea",
+        "Snoring",
+        "Sleep Disorders"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q34",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8644,
+      "top_titles": [
+        "Heart Attack",
+        "Heart Attack",
+        "Heart Disease in Women"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q35",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8048,
+      "top_titles": [
+        "Stroke",
+        "Stroke",
+        "Ischemic Stroke"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q36",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8515,
+      "top_titles": [
+        "HDL: The \"Good\" Cholesterol",
+        "LDL: The \"Bad\" Cholesterol",
+        "Cholesterol"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q37",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7777,
+      "top_titles": [
+        "Back Pain",
+        "Chronic Pain",
+        "Back Injuries"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q38",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8305,
+      "top_titles": [
+        "Arthritis",
+        "Joint Disorders",
+        "Arthritis"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q39",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7623,
+      "top_titles": [
+        "Measles",
+        "Rubella",
+        "Mumps"
+      ],
+      "expect": null
+    },
+    {
+      "id": "q40",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8461,
+      "top_titles": [
+        "Carpal Tunnel Syndrome",
+        "Carpal Tunnel Syndrome",
+        "Carpal Tunnel Syndrome"
+      ],
+      "expect": null
+    },
+    {
+      "id": "d01",
+      "kind": "in_scope_de",
+      "rank": 1,
+      "max_sim": 0.7999,
+      "top_titles": [
+        "Diabetes",
+        "Diabetes Type 1",
+        "Diabetic Heart Disease"
+      ],
+      "expect": null
+    },
+    {
+      "id": "d02",
+      "kind": "in_scope_de",
+      "rank": null,
+      "max_sim": 0.521,
+      "top_titles": [
+        "Gaucher Disease",
+        "Reflux in Children",
+        "Reflux in Infants"
+      ],
+      "expect": null
+    },
+    {
+      "id": "d03",
+      "kind": "in_scope_de",
+      "rank": null,
+      "max_sim": 0.5848,
+      "top_titles": [
+        "Bursitis",
+        "Thyroid Diseases",
+        "Joint Disorders"
+      ],
+      "expect": null
+    },
+    {
+      "id": "d04",
+      "kind": "in_scope_de",
+      "rank": null,
+      "max_sim": 0.6937,
+      "top_titles": [
+        "Bipolar Disorder",
+        "Dehydration",
+        "Atrial Fibrillation"
+      ],
+      "expect": null
+    },
+    {
+      "id": "d05",
+      "kind": "in_scope_de",
+      "rank": 1,
+      "max_sim": 0.5998,
+      "top_titles": [
+        "Migraine",
+        "Migraine",
+        "Migraine"
+      ],
+      "expect": null
+    },
+    {
+      "id": "n01",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.6031,
+      "top_titles": [
+        "Weight Loss Surgery",
+        "Weight Control",
+        "Diets"
+      ],
+      "expect": "abstain"
+    },
+    {
+      "id": "n02",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.6997,
+      "top_titles": [
+        "A1C",
+        "Blood Glucose",
+        "HDL: The \"Good\" Cholesterol"
+      ],
+      "expect": "refer"
+    },
+    {
+      "id": "n03",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.6178,
+      "top_titles": [
+        "Blood Transfusion and Donation",
+        "Pacemakers and Implantable Defibrillators",
+        "Stress"
+      ],
+      "expect": "abstain"
+    },
+    {
+      "id": "n04",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.778,
+      "top_titles": [
+        "Pulmonary Hypertension",
+        "Pulmonary Hypertension",
+        "Pulmonary Hypertension"
+      ],
+      "expect": "abstain"
+    },
+    {
+      "id": "n05",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.7369,
+      "top_titles": [
+        "Blood Clots",
+        "Blood Clots",
+        "Blood Thinners"
+      ],
+      "expect": "abstain"
+    },
+    {
+      "id": "n06",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.6089,
+      "top_titles": [
+        "Health Insurance",
+        "Dentures",
+        "Orthodontia"
+      ],
+      "expect": "abstain"
+    },
+    {
+      "id": "n07",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.6905,
+      "top_titles": [
+        "Lupus",
+        "Lupus",
+        "Genes and Gene Therapy"
+      ],
+      "expect": "abstain"
+    },
+    {
+      "id": "n08",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.6781,
+      "top_titles": [
+        "Migraine",
+        "How to Prevent High Blood Pressure",
+        "Blood Pressure Medicines"
+      ],
+      "expect": "refer"
+    },
+    {
+      "id": "n09",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.5867,
+      "top_titles": [
+        "Pregnancy and Nutrition",
+        "Carbohydrates",
+        "How to Lower Cholesterol with Diet"
+      ],
+      "expect": "abstain"
+    },
+    {
+      "id": "n10",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.6223,
+      "top_titles": [
+        "Knee Replacement",
+        "Osteoarthritis",
+        "Sprains and Strains"
+      ],
+      "expect": "abstain"
+    },
+    {
+      "id": "o01",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.4648,
+      "top_titles": [
+        "Histoplasmosis",
+        "Arsenic",
+        "Coma"
+      ],
+      "expect": "redirect"
+    },
+    {
+      "id": "o02",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.5353,
+      "top_titles": [
+        "Tubal Ligation",
+        "HIV Medicines",
+        "Vasectomy"
+      ],
+      "expect": "redirect"
+    },
+    {
+      "id": "o03",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.4542,
+      "top_titles": [
+        "Autism Spectrum Disorder",
+        "Coma",
+        "Cholera"
+      ],
+      "expect": "redirect"
+    },
+    {
+      "id": "o04",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.5387,
+      "top_titles": [
+        "Calcium",
+        "How to Lower Cholesterol with Diet",
+        "Menopause"
+      ],
+      "expect": "redirect"
+    },
+    {
+      "id": "o05",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.4702,
+      "top_titles": [
+        "Heart Failure",
+        "Patient Rights",
+        "HIV: PrEP and PEP"
+      ],
+      "expect": "redirect"
+    },
+    {
+      "id": "o06",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.5493,
+      "top_titles": [
+        "Nutrition",
+        "Guide to Good Posture",
+        "Ozone"
+      ],
+      "expect": "redirect"
+    },
+    {
+      "id": "o07",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.6493,
+      "top_titles": [
+        "Cat Scratch Disease",
+        "Rabies",
+        "Infections and Pregnancy"
+      ],
+      "expect": "redirect"
+    },
+    {
+      "id": "o08",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.5007,
+      "top_titles": [
+        "Diabetic Foot",
+        "Cryptosporidiosis",
+        "Cryptosporidiosis"
+      ],
+      "expect": "redirect"
+    },
+    {
+      "id": "o09",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.5574,
+      "top_titles": [
+        "Childbirth",
+        "Ear Disorders",
+        "Plague"
+      ],
+      "expect": "redirect"
+    },
+    {
+      "id": "o10",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.4557,
+      "top_titles": [
+        "How Much Exercise Do I Need?",
+        "Health Risks of an Inactive Lifestyle",
+        "Eye Diseases"
+      ],
+      "expect": "redirect"
+    }
+  ]
+}

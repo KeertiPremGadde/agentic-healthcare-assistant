@@ -23,7 +23,13 @@ log = structlog.get_logger("medagent.agents")
 
 def guardrail_node(state: AgentState) -> dict[str, Any]:
     # Reset the per-turn fields so nothing leaks from the previous turn.
-    update: dict[str, Any] = {"route": "", "draft": "", "draft_kind": "", "safety_notice": False}
+    update: dict[str, Any] = {
+        "route": "",
+        "draft": "",
+        "draft_kind": "",
+        "safety_notice": False,
+        "booking": None,
+    }
     text = last_user_text(state)
     screen = screen_message(text)
     if screen is not None:

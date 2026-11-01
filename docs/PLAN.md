@@ -24,7 +24,7 @@ Done in order, each on its own branch and PR.
   Day via the library's `catholic` category, switched on per city only). Pure services take an
   optional `holiday_on` lookup, new reason `public_holiday`, message "Dr. X's practice is closed on
   <date> (<holiday>)." plus the next free slot, names in `HOLIDAY_LANGUAGE`. ADR 0010.
-- [ ] **Phase 6:** an "Add to calendar" (.ics) download after booking (the patient-side
+- [x] **Phase 6:** an "Add to calendar" (.ics) download after booking (the patient-side
   counterpart of the demo clinic calendar; a service account cannot invite attendees).
 - [ ] **Phase 8:** SES confirmation email, sent to the maintainer's own verified address only.
 
@@ -156,11 +156,12 @@ Done in order, each on its own branch and PR.
 
 ## Phase 6 – Frontend
 
-- [ ] `frontend/`: Next.js + TypeScript + Tailwind + shadcn/ui, Vercel AI SDK `useChat`
-- [ ] Streaming chat, visible agent steps ("Searching knowledge base…"), source citations
-- [ ] Booking confirmation card (Confirm / Change buttons → resume endpoint)
-- [ ] Login page, "My appointments" page, medical disclaimer banner
-- [ ] ESLint + Prettier + Playwright smoke test; frontend job in CI; npm entry in `dependabot.yml`
+- [x] `frontend/`: Next.js + TypeScript + Tailwind + shadcn/ui, custom SSE stream reader instead of `useChat` (ADR 0011)
+- [x] Streaming chat, visible agent steps ("Searching knowledge base…"), source citations
+- [x] Booking confirmation card (Confirm / Change buttons → resume endpoint)
+- [x] Login page, "My appointments" page, medical disclaimer banner
+- [x] ESLint + Prettier + Playwright smoke test; frontend job in CI; npm entry in `dependabot.yml`
+- [x] "Add to calendar" (.ics) download (client-side), emergency and crisis cards, empty state with example prompts, light and dark themes, `docs/screenshots/`
 - **Done when:** a recruiter can open the site, chat, and book end-to-end.
 
 ## Phase 7 – Quality: observability & evaluation

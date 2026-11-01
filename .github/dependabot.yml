@@ -19,4 +19,12 @@ updates:
       # The project supports Python >=3.12,<3.14 (pyproject.toml); don't bump the image past it.
       - dependency-name: "python"
         versions: [">=3.14"]
-  # Phase 6: add an "npm" entry for /frontend once package.json exists
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule: { interval: "weekly" }
+    groups:
+      frontend-deps: { patterns: ["*"] }
+    ignore:
+      # CI and .nvmrc use Node 22 LTS; keep the Node typings in step with it.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]

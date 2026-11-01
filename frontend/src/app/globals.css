@@ -1,0 +1,150 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  /* Meaning colours: blue = brand/action, amber = disclaimer, red = emergency, green = success,
+     violet = crisis support (calm on purpose: it is not an alarm). */
+  --color-warn: var(--warn);
+  --color-warn-foreground: var(--warn-foreground);
+  --color-warn-border: var(--warn-border);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-border: var(--danger-border);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-border: var(--success-border);
+  --color-care: var(--care);
+  --color-care-foreground: var(--care-foreground);
+  --color-care-border: var(--care-border);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-border: var(--info-border);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+}
+
+:root {
+  --background: oklch(0.985 0.004 250);
+  --foreground: oklch(0.22 0.02 255);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.02 255);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.02 255);
+  --primary: oklch(0.5 0.17 255);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.955 0.008 250);
+  --secondary-foreground: oklch(0.28 0.03 255);
+  --muted: oklch(0.955 0.008 250);
+  --muted-foreground: oklch(0.45 0.02 255);
+  --accent: oklch(0.945 0.025 255);
+  --accent-foreground: oklch(0.3 0.08 255);
+  --destructive: oklch(0.5 0.2 27);
+  --border: oklch(0.91 0.008 250);
+  --input: oklch(0.88 0.01 250);
+  --ring: oklch(0.55 0.17 255);
+  --radius: 0.75rem;
+
+  --warn: oklch(0.97 0.05 90);
+  --warn-foreground: oklch(0.38 0.08 70);
+  --warn-border: oklch(0.88 0.1 88);
+  --danger: oklch(0.97 0.02 20);
+  --danger-foreground: oklch(0.4 0.17 27);
+  --danger-border: oklch(0.85 0.09 24);
+  --success: oklch(0.97 0.03 155);
+  --success-foreground: oklch(0.37 0.1 155);
+  --success-border: oklch(0.86 0.08 155);
+  --care: oklch(0.97 0.02 295);
+  --care-foreground: oklch(0.36 0.1 295);
+  --care-border: oklch(0.87 0.06 295);
+  --info: oklch(0.965 0.02 250);
+  --info-foreground: oklch(0.32 0.08 255);
+  --info-border: oklch(0.88 0.05 252);
+}
+
+.dark {
+  --background: oklch(0.17 0.015 255);
+  --foreground: oklch(0.95 0.005 250);
+  --card: oklch(0.22 0.02 255);
+  --card-foreground: oklch(0.95 0.005 250);
+  --popover: oklch(0.22 0.02 255);
+  --popover-foreground: oklch(0.95 0.005 250);
+  --primary: oklch(0.7 0.14 255);
+  --primary-foreground: oklch(0.16 0.03 255);
+  --secondary: oklch(0.27 0.02 255);
+  --secondary-foreground: oklch(0.95 0.005 250);
+  --muted: oklch(0.27 0.02 255);
+  --muted-foreground: oklch(0.74 0.015 255);
+  --accent: oklch(0.3 0.04 255);
+  --accent-foreground: oklch(0.93 0.02 255);
+  --destructive: oklch(0.72 0.16 22);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 18%);
+  --ring: oklch(0.7 0.14 255);
+
+  --warn: oklch(0.28 0.05 85);
+  --warn-foreground: oklch(0.92 0.08 90);
+  --warn-border: oklch(0.42 0.08 85);
+  --danger: oklch(0.27 0.06 22);
+  --danger-foreground: oklch(0.93 0.04 20);
+  --danger-border: oklch(0.45 0.12 24);
+  --success: oklch(0.27 0.05 155);
+  --success-foreground: oklch(0.92 0.06 155);
+  --success-border: oklch(0.42 0.09 155);
+  --care: oklch(0.27 0.04 295);
+  --care-foreground: oklch(0.93 0.03 295);
+  --care-border: oklch(0.44 0.08 295);
+  --info: oklch(0.26 0.04 255);
+  --info-foreground: oklch(0.93 0.02 255);
+  --info-border: oklch(0.42 0.07 255);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* Respect the user's motion preference: the bouncing dots and fade-ins just stop. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -5,6 +5,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- Phase 6 frontend (`frontend/`): Next.js App Router, TypeScript, Tailwind, shadcn/ui. Streaming chat
+  with live agent steps and source citations, booking and cancel confirmation card (Confirm / Change
+  time through the resume endpoint), emergency (red) and crisis-support (calm violet) cards, login
+  and registration with the demo notice, "My appointments" with cancel, "Add to calendar" (.ics)
+  download, disclaimer banner, example prompts, light and dark themes, mobile layout, keyboard and
+  screen-reader support. Token in memory plus `sessionStorage`; one user per tab is enforced.
+- The `message` event and `ChatResponse` carry `kind` (`normal` | `booked` | `emergency` |
+  `harmful_intent`) and `appointment_id`, so clients don't parse text to decide how to present a reply.
+- Tests: Vitest (SSE parser, event decoding, citations, `.ics`) and a Playwright smoke test against a
+  mock API; a `frontend` CI job; an npm entry in `dependabot.yml`; `npm run screenshots` and
+  `docs/screenshots/`.
+- Doctor suggestions as cards (name, specialty, city, languages) with a Book button that sends
+  "Book number N"; only the newest list is bookable. The `message` event and `ChatResponse` carry
+  `doctors` and `booking` (appointment id, doctor, time) as data, additive, with tests.
+- Safety cards: every known phone number is a `tel:` link; "Call 112" button on the emergency card;
+  TelefonSeelsorge, 112 and a Giftnotruf (poison control) section with regional numbers and the
+  official BfR list on the crisis card.
+- Doctor suggestions read as intro, cards, hint, then the not-a-diagnosis note; disabled Book buttons
+  explain themselves; the confirmation card shows the assistant's reason when it offers another day.
+- Crisis card: numbers on call buttons instead of repeated links in the text. Poison control lists
+  only numbers confirmed on the official BfR directory (Berlin, München; "Stand 22.07.2026", checked
+  2026-11-01) and links that directory for every other region.
+- The booked card is structured like the confirmation card (doctor, time, confirmation number) with
+  "Add to calendar" below; a shorter one-line disclaimer strip; a fourth example prompt.
+- ADR 0011, `docs/learning/phase6.md`.
+
+## [0.5.2] - 2026-10-31
+
+### Added
 - Public holidays: doctors are not bookable on the German public holidays of their own city
   (31 Oct closes Leipzig but not Berlin; München also observes Assumption Day, Nürnberg does not).
   Uses the `holidays` library through a static city table with a completeness test; pure

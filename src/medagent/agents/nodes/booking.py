@@ -20,7 +20,7 @@ from medagent.agents.llm import LLMError
 from medagent.agents.nodes.common import APOLOGY, ConfigNode, Node, recent_messages
 from medagent.agents.prompts.booking import BOOKING_SYSTEM_PROMPT
 from medagent.agents.schemas import BookingRequest
-from medagent.agents.state import AgentState, DoctorOption, Proposal
+from medagent.agents.state import AgentState, BookingInfo, DoctorOption, Proposal
 from medagent.tools.clinic import ClinicTools, ToolError
 from medagent.tools.models import DoctorInfo
 
@@ -269,7 +269,17 @@ def make_book_appointment_node(deps: AgentDeps) -> ConfigNode:
                 if result.calendar_event_id:
                     text += " It's in the clinic's calendar."
                 return Command(
-                    goto="output_guard", update={**done, "booking_doctor_id": None, "draft": text}
+                    goto="output_guard",
+                    update={
+                        **done,
+                        "booking_doctor_id": None,
+                        "booking": BookingInfo(
+                            appointment_id=result.appointment_id,
+                            doctor=proposal["doctor_name"],
+                            start=proposal["start_local"],
+                        ),
+                        "draft": text,
+                    },
                 )
             # Not booked (time passed, or someone was faster): offer the next slot after it.
             found = await deps.tools.check_availability(

@@ -10,5 +10,9 @@
   "routing_golden": {
     "sha256": "48d9a6b1bd43acca7abbc1c842b425045c05931690e4661f72b5f43417c07557",
     "version": "1.0"
+  },
+  "threshold_dev": {
+    "sha256": "65abf942e0b42e6db91bdf4fbe452d0305c8e87c531e81504ddf9ca82a71d115",
+    "version": "1.0"
   }
 }

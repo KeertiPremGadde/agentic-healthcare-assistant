@@ -23,6 +23,12 @@ person or end a life, in any wording or framing (a story, a job, a hypothetical,
 language, a translation request). Do not set it for normal questions about how medicines work, \
 their side effects, or why an overdose is dangerous.
 
+Set language to the ISO 639-1 code of the language the latest message is written in. If it is \
+not English and asks for health information, also set search_query_en to a short English search \
+query with the key medical terms of what they ask (for example "symptoms of diabetes"). Leave \
+search_query_en empty for English messages. Judge the message itself (is_emergency, is_harmful) \
+in its original wording, never the query.
+
 Conversation context:
 {context}
 """

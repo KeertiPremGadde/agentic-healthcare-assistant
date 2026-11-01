@@ -178,23 +178,39 @@ Done in order, each on its own branch and PR.
   `llm`-category cases (system-prompt extraction, role-play). Repeat router runs to measure its
   non-determinism, and record the rules-only vs router-only vs both table in the README results.
 - [ ] CI eval gate on PRs that touch `agents/`, `rag/`, prompts (thresholds in `evals/thresholds.yaml`)
-- [ ] **RAG improvements, each measured before/after with RAGAS** (record a baseline on the Phase 2
+- [x] **RAG improvements, each measured before/after with RAGAS** (record a baseline on the Phase 2
   pipeline first, then change one thing at a time and keep a results table):
   - **Contextual chunk headers:** prepend the topic title and its "Also called" synonyms to every chunk
     before embedding (and before the `tsvector` is built), then re-ingest. Motivation: Phase 2 retrieval
     for "symptoms of diabetes" ranked a risk-factors chunk first because a mid-topic chunk carries no
     mention of its topic. Show the header in citations/prompt text only if it helps; the stored text
     can stay clean.
+    **Result (kept):** EN hit@1 0.900 -> 0.925, hit@5 0.975 -> 1.000, MRR 0.926 -> 0.956; context
+    precision 0.867 -> 0.909 (beats the 0.030 spread), faithfulness 0.851 -> 0.879 (within noise);
+    German unchanged. `evals/results/headers/`.
   - **Cross-encoder reranker:** a local cross-encoder behind the existing `Reranker` interface
     (compare against `ScoreReranker`: quality, latency, install size).
+    **Result (kept as the default):** MiniLM-L-6 via fastembed on the top 10 candidates. EN hit@1
+    0.925 -> 0.975, MRR 0.956 -> 0.9875; context precision 0.909 -> 0.929 (no overlap between runs),
+    faithfulness unchanged; cost +0.65-0.74 s, 88 MB on disk, ~420 MB peak. A multilingual model
+    (561 MB, 37 s) does not help German: the topic is not in the candidate pool. ADR 0014,
+    `evals/results/reranker/`.
   - **German queries on the English-only embedding model** (baseline: 2 of 5 German questions find the
     right topic, 3 of 5 would be refused at the threshold). Add a `search_query_en` field to the router's
     structured output: the model translates the query to English as part of the call it already makes,
     so there is no extra LLM call; retrieval uses it. Measure on the German set only (reported separately,
     never in the main score). A multilingual embedding model is the fallback idea if this is not enough.
+    **Result (kept):** German hit@5 0.4 -> 1.0, answered 1 of 5 -> 5 of 5 in German with English
+    citations; English and all hard safety gates unchanged; the safety checks never see the translated
+    query (tests). No multilingual embedding model needed. Known gap, separate PR: German "I don't
+    know", labels and disclaimer. ADR 0014, `evals/results/query_translation/`.
   - **Re-measure `RAG_MIN_SCORE`** on a larger labelled question set (in-scope, near-miss and off-topic;
     Phase 2 used only 18 questions with a narrow 0.65-0.74 gap). Re-do it after each change above,
     because the threshold is specific to the embedding model, chunk text and corpus.
+    **Result (0.70 confirmed, no change):** chosen on a separate locked tuning set, confirmed on the golden
+    set; the plateau 0.691-0.722 is only ~0.03 wide, so the margins are now reported and
+    `en_false_abstain_at_threshold` is gated. ADR 0014, `evals/results/threshold/`.
+
 - [ ] Results table + chart in README
 - **Done when:** CI fails if faithfulness drops below threshold.
 

@@ -1,0 +1,509 @@
+{
+  "schema_version": 1,
+  "suite": "retrieval_dev",
+  "run_id": "retrieval_dev-20261101T163457Z",
+  "started_at": "2026-11-01T16:34:57+00:00",
+  "git_sha": "e5332b3",
+  "model": null,
+  "datasets": {
+    "threshold_dev": {
+      "version": "1.0",
+      "sha256": "65abf942e0b42e6db91bdf4fbe452d0305c8e87c531e81504ddf9ca82a71d115"
+    }
+  },
+  "params": {
+    "k": 5,
+    "min_score": 0.7,
+    "reranker": "cross_encoder",
+    "reranker_model": "Xenova/ms-marco-MiniLM-L-6-v2",
+    "reranker_top_n": 10
+  },
+  "metrics": {
+    "en_hit_at_1": 0.9,
+    "en_hit_at_5": 1.0,
+    "en_mrr": 0.95,
+    "en_false_abstain_at_threshold": 0.0,
+    "de_hit_at_1": null,
+    "de_hit_at_5": null,
+    "de_mrr": null,
+    "de_false_abstain_at_threshold": null,
+    "near_miss_abstain_at_threshold": 0.75,
+    "off_topic_abstain_at_threshold": 1.0,
+    "threshold_sweep": [
+      {
+        "threshold": 0.5,
+        "in_scope_false_abstain": 0.0,
+        "near_and_off_abstain": 0.2143
+      },
+      {
+        "threshold": 0.55,
+        "in_scope_false_abstain": 0.0,
+        "near_and_off_abstain": 0.5
+      },
+      {
+        "threshold": 0.6,
+        "in_scope_false_abstain": 0.0,
+        "near_and_off_abstain": 0.5
+      },
+      {
+        "threshold": 0.65,
+        "in_scope_false_abstain": 0.0,
+        "near_and_off_abstain": 0.6429
+      },
+      {
+        "threshold": 0.7,
+        "in_scope_false_abstain": 0.0,
+        "near_and_off_abstain": 0.8571
+      },
+      {
+        "threshold": 0.72,
+        "in_scope_false_abstain": 0.0,
+        "near_and_off_abstain": 0.8571
+      },
+      {
+        "threshold": 0.74,
+        "in_scope_false_abstain": 0.0,
+        "near_and_off_abstain": 0.8571
+      },
+      {
+        "threshold": 0.76,
+        "in_scope_false_abstain": 0.0,
+        "near_and_off_abstain": 0.8571
+      },
+      {
+        "threshold": 0.78,
+        "in_scope_false_abstain": 0.15,
+        "near_and_off_abstain": 0.9286
+      },
+      {
+        "threshold": 0.8,
+        "in_scope_false_abstain": 0.5,
+        "near_and_off_abstain": 1.0
+      }
+    ],
+    "threshold_plateau": {
+      "lowest_in_scope": 0.762,
+      "highest_refusable_negative": 0.6893,
+      "unrefusable_negatives": [
+        "t20"
+      ],
+      "margin_to_in_scope": 0.062,
+      "margin_to_negative": 0.0107
+    },
+    "plateau_margin_to_in_scope": 0.062,
+    "plateau_margin_to_negative": 0.0107
+  },
+  "hard_violations": [],
+  "cost": {},
+  "aborted": null,
+  "items": [
+    {
+      "id": "t01",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7904,
+      "top_titles": [
+        "Psoriasis",
+        "Psoriatic Arthritis",
+        "Sarcoidosis"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t02",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8408,
+      "top_titles": [
+        "Crohn's Disease",
+        "Crohn's Disease",
+        "Crohn's Disease"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t03",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8088,
+      "top_titles": [
+        "Irritable Bowel Syndrome",
+        "Diarrhea",
+        "Malabsorption Syndromes"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t04",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7797,
+      "top_titles": [
+        "Parkinson's Disease",
+        "Lewy Body Dementia",
+        "Lewy Body Dementia"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t05",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8594,
+      "top_titles": [
+        "Multiple Sclerosis",
+        "Multiple Sclerosis",
+        "Multiple Sclerosis"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t06",
+      "kind": "in_scope",
+      "rank": 2,
+      "max_sim": 0.859,
+      "top_titles": [
+        "Hepatitis",
+        "Hepatitis B",
+        "Hepatitis A"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t07",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7929,
+      "top_titles": [
+        "Chickenpox",
+        "Mpox",
+        "Salmonella Infections"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t08",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8355,
+      "top_titles": [
+        "Heartburn",
+        "Esophagus Disorders",
+        "GERD"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t09",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7946,
+      "top_titles": [
+        "Rheumatoid Arthritis",
+        "Osteoarthritis",
+        "Arthritis"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t10",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8519,
+      "top_titles": [
+        "Tinnitus",
+        "Meniere's Disease",
+        "Mastectomy"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t11",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.9212,
+      "top_titles": [
+        "Dizziness and Vertigo",
+        "Dizziness and Vertigo",
+        "Meniere's Disease"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t12",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7712,
+      "top_titles": [
+        "Pink Eye",
+        "Eye Infections",
+        "Diabetic Eye Problems"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t13",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8297,
+      "top_titles": [
+        "Concussion",
+        "Concussion",
+        "Concussion"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t14",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8723,
+      "top_titles": [
+        "Polycystic Ovary Syndrome",
+        "Ovarian Disorders",
+        "Polycystic Ovary Syndrome"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t15",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7873,
+      "top_titles": [
+        "Head Lice",
+        "Head Lice",
+        "Pubic Lice"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t16",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.8299,
+      "top_titles": [
+        "Menopause",
+        "Menopause",
+        "Hormone Therapy for Menopause"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t17",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.6771,
+      "top_titles": [
+        "Irritable Bowel Syndrome",
+        "Gastroenteritis",
+        "Diverticulosis and Diverticulitis"
+      ],
+      "expect": "abstain"
+    },
+    {
+      "id": "t18",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.5413,
+      "top_titles": [
+        "Birth Control",
+        "Medicare",
+        "Tetanus, Diphtheria, and Pertussis Vaccines"
+      ],
+      "expect": "abstain"
+    },
+    {
+      "id": "t19",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.7702,
+      "top_titles": [
+        "Cholesterol Medicines",
+        "Statins",
+        "Statins"
+      ],
+      "expect": "refer"
+    },
+    {
+      "id": "t20",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.7896,
+      "top_titles": [
+        "Knee Replacement",
+        "Knee Replacement",
+        "Knee Replacement"
+      ],
+      "expect": "abstain"
+    },
+    {
+      "id": "t21",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.601,
+      "top_titles": [
+        "Alzheimer's Disease",
+        "Alzheimer's Disease",
+        "Leukodystrophies"
+      ],
+      "expect": "abstain"
+    },
+    {
+      "id": "t22",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.6727,
+      "top_titles": [
+        "Toddler Health",
+        "Cold and Cough Medicines",
+        "Over-the-Counter Medicines"
+      ],
+      "expect": "refer"
+    },
+    {
+      "id": "t23",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.6333,
+      "top_titles": [
+        "MRI Scans",
+        "Heart Health Tests",
+        "Nuclear Scans"
+      ],
+      "expect": "abstain"
+    },
+    {
+      "id": "t24",
+      "kind": "near_miss",
+      "rank": null,
+      "max_sim": 0.6893,
+      "top_titles": [
+        "Crohn's Disease",
+        "Crohn's Disease",
+        "Crohn's Disease"
+      ],
+      "expect": "abstain"
+    },
+    {
+      "id": "t25",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.468,
+      "top_titles": [
+        "Infant and Newborn Development",
+        "How to Improve Mental Health",
+        "Vitamin D Deficiency"
+      ],
+      "expect": "redirect"
+    },
+    {
+      "id": "t26",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.4229,
+      "top_titles": [
+        "Lead Poisoning",
+        "Inhalants",
+        "Birthmarks"
+      ],
+      "expect": "redirect"
+    },
+    {
+      "id": "t27",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.5345,
+      "top_titles": [
+        "Climate Change",
+        "Winter Weather Emergencies",
+        "Hypothermia"
+      ],
+      "expect": "redirect"
+    },
+    {
+      "id": "t28",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.4335,
+      "top_titles": [
+        "Guide to Good Posture",
+        "Ozone",
+        "Nutrition"
+      ],
+      "expect": "redirect"
+    },
+    {
+      "id": "t29",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.5407,
+      "top_titles": [
+        "Guide to Good Posture",
+        "Falls",
+        "VLDL Cholesterol"
+      ],
+      "expect": "redirect"
+    },
+    {
+      "id": "t30",
+      "kind": "off_topic",
+      "rank": null,
+      "max_sim": 0.5369,
+      "top_titles": [
+        "Teen Depression",
+        "Teen Development",
+        "Constipation"
+      ],
+      "expect": "redirect"
+    },
+    {
+      "id": "t31",
+      "kind": "in_scope",
+      "rank": 2,
+      "max_sim": 0.762,
+      "top_titles": [
+        "Psoriatic Arthritis",
+        "Psoriasis",
+        "Sarcoidosis"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t32",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7927,
+      "top_titles": [
+        "Crohn's Disease",
+        "Crohn's Disease",
+        "Crohn's Disease"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t33",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7958,
+      "top_titles": [
+        "Dizziness and Vertigo",
+        "Fainting",
+        "Balance Problems"
+      ],
+      "expect": null
+    },
+    {
+      "id": "t34",
+      "kind": "in_scope",
+      "rank": 1,
+      "max_sim": 0.7813,
+      "top_titles": [
+        "Chickenpox",
+        "Shingles",
+        "Campylobacter Infections"
+      ],
+      "expect": null
+    }
+  ]
+}

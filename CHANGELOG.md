@@ -23,6 +23,37 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
   booking hard violations 0) and baseline-minus-margin gates for quality. The Phase 2 baseline is
   committed under `evals/results/baseline-*`. ADR 0013.
 - `scripts/check_langfuse.py`, ADR 0012 and the first section of `docs/learning/phase7.md`.
+- Contextual chunk headers (Phase 7, RAG improvement 1, kept): every chunk is embedded and full-text
+  indexed with `Title (also called: ...)` in front; the stored text and citations are unchanged
+  (`kb_chunks.context_header`, `tsv` generated from header + content, migration `a7c1d2e3f405`;
+  re-ingest needed, the document hash includes a header version). Measured against the frozen
+  baseline: English hit@1 0.900 -> 0.925, hit@5 0.975 -> 1.000, MRR 0.926 -> 0.956 (three questions
+  moved up, none down; German unchanged); judged, mean of three runs: context precision 0.867 ->
+  0.909 (beats the baseline spread 0.030), faithfulness 0.851 -> 0.879 and context recall 0.956 ->
+  0.971 (up, within noise). Safety gates unchanged. Results in `evals/results/headers/`.
+- Cross-encoder reranker (Phase 7, RAG improvement 2, kept as the default): `Xenova/ms-marco-MiniLM-L-6-v2`
+  via fastembed reorders the top 10 candidates (`RERANKER`, `RERANKER_MODEL`, `RERANKER_TOP_N`;
+  `RERANKER=score` restores the old blend). EN hit@1 0.925 -> 0.975, MRR 0.956 -> 0.9875; judged
+  context precision 0.909 -> 0.929 (every run above every previous run), faithfulness unchanged.
+  Cost: 88 MB on disk, 218 MB resident (416 MB peak), +0.65-0.74 s per question on a laptop CPU.
+  German is unchanged (the right topic is not in the candidate pool). Four models compared with
+  `scripts/compare_rerankers.py`. ADR 0014, including the Phase 8 notes (bake the model into the
+  image, memory per request).
+- English search query for German questions (Phase 7, RAG improvement 3, kept): the router also
+  returns `language` and `search_query_en` (same call, no extra LLM call); a non-English medical
+  question is retrieved with the English query and answered in the user's language with the English
+  citation labels. The safety rules and router flags only ever see the user's own text, and English
+  messages are always retrieved with their original text (tests, mutation-checked). German in-scope
+  set: hit@5 0.4 -> 1.0, answered 1 of 5 -> 5 of 5, English metrics and all hard safety gates
+  unchanged. Known gap: the German "I don't know", labels and disclaimer are still English (separate
+  PR). New `retrieval-de` eval suite, `de_translation_rate`, `de_answered_in_german_rate`. Pre-commit
+  ruff pinned to the locked version (a test keeps them equal). Results in
+  `evals/results/query_translation/`.
+- `RAG_MIN_SCORE` re-measured (Phase 7, RAG improvement 4): 0.70 confirmed, no change. A locked
+  tuning set (`evals/datasets/threshold_dev.json`, 34 items) is used to choose and the golden set to
+  confirm; the thresholds 0.691-0.722 behave identically on both, and the rule's pick (0.726) fails
+  the golden confirmation. New: `retrieval --dataset threshold_dev`, plateau margins in every
+  retrieval run, gate `en_false_abstain_at_threshold <= 0.025`. ADR 0014, `evals/results/threshold/`.
 
 ### Changed
 - Dependabot: ignore minor and major bumps of the Python base image (we run 3.12 everywhere) and

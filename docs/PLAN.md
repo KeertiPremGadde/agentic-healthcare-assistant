@@ -215,6 +215,8 @@ Done in order, each on its own branch and PR.
   questions (ADR 0015); the guard and the frontend parser accept both languages
 - [x] German emergency and harmful-intent replies (the matched rule's language decides the reply
   language; BfR-verified poison numbers; ADR 0016)
+- [x] German emergency inflections: 79 realistic phrases, 0 benign look-alikes flagged (ADR 0017);
+  all seven BfR poison centres in the crisis card
 - [ ] Results table + chart in README
 - **Done when:** CI fails if faithfulness drops below threshold.
 

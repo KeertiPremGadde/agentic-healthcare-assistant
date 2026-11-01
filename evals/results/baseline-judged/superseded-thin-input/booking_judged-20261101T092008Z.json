@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "suite": "booking_judged",
+  "run_id": "booking_judged-20261101T092008Z",
+  "started_at": "2026-11-01T09:20:08+00:00",
+  "git_sha": "a2c5966",
+  "model": "claude-haiku-5-5",
+  "datasets": {
+    "booking_scenarios": {
+      "version": "1.0",
+      "sha256": "a6c65206b1f4d29efadf3bdcd76e6a6a7d2a6dab1a0fdbb658324c7353abc3f8"
+    }
+  },
+  "params": {
+    "source_run": "booking-20261101T082956Z",
+    "judge_max_tokens": 8192
+  },
+  "metrics": {
+    "task_completion": 0.675,
+    "tool_correctness": 1.0,
+    "judge_nan_rate": 0.0,
+    "rows_retried": 0
+  },
+  "hard_violations": [],
+  "cost": {
+    "input_tokens": 13643,
+    "output_tokens": 1398,
+    "usd": 0.00206,
+    "calls": 1
+  },
+  "aborted": null,
+  "items": [
+    {
+      "id": "b01",
+      "tool_correctness": 1.0,
+      "task_completion": 0.9
+    },
+    {
+      "id": "b02",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b03",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b04",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b05",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b06",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b07",
+      "tool_correctness": 1.0,
+      "task_completion": 0.85
+    },
+    {
+      "id": "b08",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b09",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b10",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b11",
+      "tool_correctness": 1.0,
+      "task_completion": 0.9
+    },
+    {
+      "id": "b12",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b15",
+      "task_completion": 0.0
+    },
+    {
+      "id": "b23",
+      "tool_correctness": 1.0,
+      "task_completion": 0.9
+    },
+    {
+      "id": "b24",
+      "tool_correctness": 1.0,
+      "task_completion": 0.5
+    }
+  ]
+}

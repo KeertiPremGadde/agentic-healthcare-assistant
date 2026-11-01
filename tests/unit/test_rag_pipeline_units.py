@@ -10,7 +10,7 @@ from medagent.rag.answer import (
     build_prompt,
     estimate_tokens,
 )
-from medagent.rag.chunking import CHUNK_SIZE, chunk_pages
+from medagent.rag.chunking import CHUNK_SIZE, chunk_pages, context_header
 from medagent.rag.ingest import document_hash
 from medagent.rag.loaders import MedlinePlusLoader, PdfLoader, html_to_text
 from medagent.rag.retriever import ScoreReranker, reciprocal_rank_fusion
@@ -199,6 +199,20 @@ def test_document_hash_changes_with_text_or_metadata_only() -> None:
     assert document_hash(_doc(pages=(PageText("other text", 1),))) != base
     assert document_hash(_doc(is_public=False)) != base
     assert document_hash(_doc(license="M")) != base
+
+
+def test_context_header_names_topic_and_synonyms_but_not_paged_sources() -> None:
+    topic = _doc(pages=(PageText("body", None),), title="Flu", synonyms=("Influenza", "Grippe"))
+    assert context_header(topic) == "Flu (also called: Influenza, Grippe)"
+    assert context_header(_doc(pages=(PageText("body", None),), title="Gout")) == "Gout"
+    assert context_header(_doc()) == ""  # paged source: the title is a file name
+
+
+def test_document_hash_changes_with_the_header() -> None:
+    plain = _doc(pages=(PageText("body", None),))
+    assert document_hash(plain) != document_hash(
+        _doc(pages=(PageText("body", None),), synonyms=("X",))
+    )
 
 
 # ------------------------------------------------------------------ answering

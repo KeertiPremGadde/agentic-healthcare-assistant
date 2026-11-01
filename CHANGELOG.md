@@ -23,6 +23,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
   booking hard violations 0) and baseline-minus-margin gates for quality. The Phase 2 baseline is
   committed under `evals/results/baseline-*`. ADR 0013.
 - `scripts/check_langfuse.py`, ADR 0012 and the first section of `docs/learning/phase7.md`.
+- Contextual chunk headers (Phase 7, RAG improvement 1, kept): every chunk is embedded and full-text
+  indexed with `Title (also called: ...)` in front; the stored text and citations are unchanged
+  (`kb_chunks.context_header`, `tsv` generated from header + content, migration `a7c1d2e3f405`;
+  re-ingest needed, the document hash includes a header version). Measured against the frozen
+  baseline: English hit@1 0.900 -> 0.925, hit@5 0.975 -> 1.000, MRR 0.926 -> 0.956 (three questions
+  moved up, none down; German unchanged); judged, mean of three runs: context precision 0.867 ->
+  0.909 (beats the baseline spread 0.030), faithfulness 0.851 -> 0.879 and context recall 0.956 ->
+  0.971 (up, within noise). Safety gates unchanged. Results in `evals/results/headers/`.
 
 ### Changed
 - Dependabot: ignore minor and major bumps of the Python base image (we run 3.12 everywhere) and

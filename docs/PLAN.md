@@ -185,6 +185,9 @@ Done in order, each on its own branch and PR.
     for "symptoms of diabetes" ranked a risk-factors chunk first because a mid-topic chunk carries no
     mention of its topic. Show the header in citations/prompt text only if it helps; the stored text
     can stay clean.
+    **Result (kept):** EN hit@1 0.900 -> 0.925, hit@5 0.975 -> 1.000, MRR 0.926 -> 0.956; context
+    precision 0.867 -> 0.909 (beats the 0.030 spread), faithfulness 0.851 -> 0.879 (within noise);
+    German unchanged. `evals/results/headers/`.
   - **Cross-encoder reranker:** a local cross-encoder behind the existing `Reranker` interface
     (compare against `ScoreReranker`: quality, latency, install size).
   - **German queries on the English-only embedding model** (baseline: 2 of 5 German questions find the

@@ -152,4 +152,5 @@ class MedlinePlusLoader:
             attribution=self.ATTRIBUTION,
             is_public=True,
             url=topic.get("url"),
+            synonyms=tuple(synonyms),
         )

@@ -23,6 +23,7 @@ class RawDocument:
     attribution: str
     is_public: bool  # False = local dev only; excluded when KB_PUBLIC_ONLY=true
     url: str | None = None
+    synonyms: tuple[str, ...] = ()  # "Also called" names, used in the chunk header
 
 
 @dataclass(frozen=True, slots=True)

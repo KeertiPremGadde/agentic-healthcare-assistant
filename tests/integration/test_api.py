@@ -370,7 +370,9 @@ async def test_booking_confirmation_round_trip_over_http(
     api = await make_api()
     headers = await signup(api, "booker")
     script_find_doctor(api)
-    first = (await chat_json(api, headers, "chest tightness on stairs, which doctor?")).json()
+    # (not "chest tightness on stairs": that is a red flag and gets the emergency reply, like
+    # "chest pain" always did; this test is about the booking round trip)
+    first = (await chat_json(api, headers, "my heart races at night, which doctor?")).json()
     conversation = first["conversation_id"]
 
     script_book(api, time_of_day="afternoon")

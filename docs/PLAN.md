@@ -217,6 +217,8 @@ Done in order, each on its own branch and PR.
   language; BfR-verified poison numbers; ADR 0016)
 - [x] German emergency inflections: 79 realistic phrases, 0 benign look-alikes flagged (ADR 0017);
   all seven BfR poison centres in the crisis card
+- [x] Safety rules for suicidal statements and other missing concepts, German and English (ADR 0018);
+  the router measured as second layer
 - [ ] Results table + chart in README
 - **Done when:** CI fails if faithfulness drops below threshold.
 

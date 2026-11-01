@@ -3,9 +3,11 @@
 import uuid
 from contextlib import nullcontext
 from datetime import UTC, datetime
+from typing import Any
 from zoneinfo import ZoneInfo
 
 import pytest
+from langchain_core.callbacks import BaseCallbackHandler
 from langgraph.checkpoint.memory import InMemorySaver
 from structlog.testing import capture_logs
 
@@ -21,6 +23,7 @@ from medagent.guardrails.disclaimer import DISCLAIMER
 from medagent.guardrails.dose import DOSE_REFERRAL
 from medagent.guardrails.emergency import EMERGENCY_MESSAGE, SAFETY_NOTICE
 from medagent.observability.cost import estimate_cost
+from medagent.observability.tracing import TraceContext
 from medagent.rag.answer import NO_ANSWER, AnswerPayload
 from medagent.rag.types import Candidate
 from tests.fakes import FakeAnswerLLM, FakeRetriever, FakeStructuredLLM, NoTools, no_database
@@ -249,3 +252,85 @@ async def test_stream_turn_yields_steps_as_nodes_start_then_one_final_event() ->
     assert isinstance(events[-1], FinalEvent)
     assert sum(isinstance(e, FinalEvent) for e in events) == 1
     assert events[-1].result.reply == CAPABILITIES
+
+
+# ------------------------------------------------------------------ tracing
+
+
+class _RecordingHandler(BaseCallbackHandler):
+    """Stands in for the Langfuse handler: records which graph nodes started."""
+
+    def __init__(self) -> None:
+        self.nodes: list[str] = []
+
+    def on_chain_start(self, serialized: Any, inputs: Any, **kwargs: Any) -> None:
+        node = (kwargs.get("metadata") or {}).get("langgraph_node")
+        if node and node not in self.nodes:
+            self.nodes.append(node)
+
+
+class _RecordingTrace:
+    def __init__(self, tracer: "_RecordingTracer") -> None:
+        self._tracer = tracer
+        self.callbacks: list[BaseCallbackHandler] = [tracer.handler]
+        self.metadata = tracer.metadata
+
+    def finish(self, **kwargs: Any) -> None:
+        self._tracer.finished.append(kwargs)
+
+
+class _RecordingTracer:
+    def __init__(self) -> None:
+        self.handler = _RecordingHandler()
+        self.started: list[tuple[TraceContext | None, str]] = []
+        self.finished: list[dict[str, Any]] = []
+        self.metadata: dict[str, Any] = {"langfuse_session_id": "conv-1"}
+
+    def start(self, context: TraceContext | None, *, kind: str) -> Any:
+        self.started.append((context, kind))
+        return _RecordingTrace(self)
+
+    def shutdown(self) -> None:
+        return None
+
+
+async def test_a_turn_is_traced_node_by_node_and_scored_at_the_end() -> None:
+    tracer = _RecordingTracer()
+    llm = FakeStructuredLLM({RouteDecision: [_route(Route.MEDICAL_QUESTION)]})
+    context = TraceContext(session_id="conv-1", user_id="abc", tags=("api",))
+    result = await run_turn(
+        _graph(llm), _thread(), 1, message="What is a stroke?", tracer=tracer, trace=context
+    )
+    assert tracer.started == [(context, "message")]
+    assert tracer.handler.nodes[:2] == ["guardrail", "supervisor"]
+    assert "medical_rag" in tracer.handler.nodes
+    assert "output_guard" in tracer.handler.nodes
+    (finished,) = tracer.finished
+    assert finished["route"] == Route.MEDICAL_QUESTION.value
+    assert finished["kind"] == "normal"
+    assert finished["paused"] is False
+    assert finished["usd"] == result.cost.usd
+
+
+async def test_tracing_changes_nothing_about_the_answer() -> None:
+    def scripted() -> FakeStructuredLLM:
+        return FakeStructuredLLM({RouteDecision: [_route(Route.SMALLTALK)]})
+
+    plain = await run_turn(_graph(scripted()), _thread(), 1, message="hi")
+    traced = await run_turn(
+        _graph(scripted()), _thread(), 1, message="hi", tracer=_RecordingTracer()
+    )
+    assert traced.reply == plain.reply
+    assert traced.route == plain.route
+
+
+async def test_an_emergency_turn_is_traced_with_its_kind() -> None:
+    tracer = _RecordingTracer()
+    llm = FakeStructuredLLM()  # no LLM call is scripted: the rules answer
+    result = await run_turn(
+        _graph(llm), _thread(), 1, message="I have crushing chest pain", tracer=tracer
+    )
+    assert result.reply == EMERGENCY_MESSAGE
+    (finished,) = tracer.finished
+    assert finished["kind"] == "emergency"
+    assert finished["route"] == "emergency"

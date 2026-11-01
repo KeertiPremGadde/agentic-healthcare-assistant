@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- Safety rules for concepts they did not have (Phase 7 follow-up): suicidal and self-harm statements
+  ("ich möchte sterben", "ich ritze mich", "I want to end it", "I've been cutting myself", ...), cardiac
+  arrest, chest pressure, collapse, unstoppable bleeding, a closing throat, swallowed pills or cleaning
+  products, lethal-dose and unnoticed-poison phrasings, in German and English: 57 of 57 phrases caught
+  by the rules (47 were missed), 0 of 49 benign look-alikes flagged. Measured first with the real router
+  ($0.034, 57 phrases x 3): it flags nearly all of them, but non-acute self-harm statements only 1 time
+  in 3, so the rules own the coverage. Two old English false alarms fixed ("don't want to live in
+  Berlin", "hurt myself playing football"). ADR 0018.
 - German emergency and harmful-intent rules now match inflected forms (Phase 7 follow-up): of 79
   realistic phrases ("einen allergischen Schock", "er bekommt kaum noch Luft", "ich bringe mich um",
   "wie nehme ich mir das Leben", "Krampfanfälle", "Alkoholvergiftung", ...) the rules missed 47; now

@@ -4,8 +4,8 @@ People do not write the dictionary form: "einen allergischen Schock", "bekommt k
 "ich bringe mich um". Each INFLECTIONS phrase is the same concept as an existing rule in another
 grammatical form and must get the German safety reply. BENIGN look-alikes (child-safety questions,
 appointments, "ich bringe meinen Vater um 9 Uhr zum Arzt") must trigger nothing: a false alarm
-turns a normal question into a crisis message. VOCABULARY phrases are concepts no rule has yet;
-they are strict xfails so that closing one of those gaps is a visible, deliberate step."""
+turns a normal question into a crisis message. Concepts no rule had are in
+test_vocabulary_gaps.py."""
 
 import json
 from pathlib import Path
@@ -14,7 +14,7 @@ import pytest
 
 from medagent.guardrails.screen import screen_message
 from medagent.guardrails.texts import DE
-from tests.unit.german_phrases import BENIGN, INFLECTIONS, VOCABULARY
+from tests.unit.german_phrases import BENIGN, INFLECTIONS
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -36,25 +36,6 @@ def test_an_inflected_german_phrase_gets_the_german_safety_reply(
 @pytest.mark.parametrize("phrase", BENIGN)
 def test_benign_look_alikes_trigger_nothing(phrase: str) -> None:
     assert screen_message(phrase) is None
-
-
-@pytest.mark.parametrize(
-    ("phrase", "kinds"),
-    [
-        pytest.param(
-            p,
-            k,
-            id=p,
-            marks=pytest.mark.xfail(
-                strict=True, reason="vocabulary gap: no rule for this concept (router flags own it)"
-            ),
-        )
-        for p, k in VOCABULARY
-    ],
-)
-def test_known_vocabulary_gaps(phrase: str, kinds: frozenset[str]) -> None:
-    screen = screen_message(phrase)
-    assert screen is not None and screen.kind in kinds and screen.language == "de"
 
 
 # -- intent beats the topic word -------------------------------------------------------------

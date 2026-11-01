@@ -49,6 +49,12 @@ _PATTERNS: dict[str, list[str]] = {
         r"pain in (?:my|the|his|her) chest",
         r"heart attack",
         r"crushing (?:pain|pressure)",
+        r"cardiac arrest|heart (?:has |had )?stopped",
+        r"(?:pressure|tightness|heaviness) (?:in|on) (?:\w+ ){0,2}chest\b",
+        r"chest (?:pressure|tightness)",
+        _de(r"herzstillstand"),
+        _de(r"(?:druck|enge) (?:auf|in) (?:\w+ ){0,2}brust\b|brustenge\w*"),
+        _de(r"(?:schmerzen|druck|enge|engegefühl) im brustkorb\b"),
         _de(r"brustschmerz\w*"),
         _de(r"schmerzen (?:in|auf) (?:\w+ ){0,2}brust\b"),  # der / meiner / der linken Brust
         _de(r"herzinfarkt"),
@@ -60,6 +66,8 @@ _PATTERNS: dict[str, list[str]] = {
         r"short(?:ness)? of breath",
         r"not breathing",
         r"choking",
+        r"gasping for (?:air|breath)|can'?t catch (?:my|his|her|their) breath",
+        _de(r"(?:ring\w*|japs\w*) nach luft"),
         _de(r"atemnot"),
         _de(r"keine luft"),
         _de(
@@ -75,7 +83,12 @@ _PATTERNS: dict[str, list[str]] = {
         r"stroke",
         r"face (?:is )?droop\w*",
         r"slurred speech",
+        r"slurr(?:ing|ed) (?:(?:his|her|my|their|the) )?(?:words|speech)",
         r"(?:sudden(?:ly)?|one side).{0,30}(?:numb|weak|paraly[sz]ed)",
+        r"sudden(?:ly)?.{0,30}can'?t (?:lift|raise|move)",
+        # "lallt" alone is also a baby babbling: only together with another stroke sign
+        _de(r"lall\w*\b.{0,40}\b(?:arm|bein|gesicht|mundwinkel|gelähmt|heben)"),
+        _de(r"plötzlich.{0,40}\b(?:arm|bein)\b.{0,20}nicht (?:mehr )?(?:heben|bewegen)"),
         _de(r"schlaganfall"),
         # "hängender Mundwinkel", "der Mundwinkel hängt", "bei ihm hängt der Mundwinkel herunter"
         _de(r"h(?:ä|ae)ng\w*\s+(?:\w+\s+){0,2}mundwinkel|mundwinkel\s+h(?:ä|ae)ng\w*"),
@@ -88,12 +101,45 @@ _PATTERNS: dict[str, list[str]] = {
         r"suicid\w*",
         r"end (?:my life|it all)",
         r"(?:want|going) to die",
-        r"(?:don'?t|do not|no longer) want to (?:live|be alive|go on)",
+        # not "I don't want to live in Berlin anymore" / "...to go on a diet"
+        r"(?:don'?t|do not|no longer) want to (?:live|be alive|go on)\b"
+        r"(?!\s+(?:in|at|with|near|here|there|alone|by|on|abroad|together|a|an|the|my|this|that"
+        r"|holiday|vacation)\b)",
         r"better off dead",
         r"(?:wish|wished) i (?:was|were) dead",
         r"self[- ]?harm",
-        r"hurt(?:ing)? myself",
+        # not an accident: "I hurt myself playing football", but a bare "I hurt myself" still counts
+        r"hurt(?:ing)? myself(?!\s+(?:playing|while|during|at\b|in the|on the|doing|lifting"
+        r"|running|training|today|yesterday|last\b|badly|a little|a bit|slightly|falling"
+        r"|cooking|skiing|cycling|biking|jogging|exercising|shaving))",
+        r"(?:want|going|ready|need|plan(?:ning)?) to end it\b"
+        r"(?!\s+(?:with|for|between|after|before|by|when|if)\b)",
+        r"(?:don'?t|do not) want to be (?:here|around|alive) (?:any ?more|any longer)",
+        r"(?:harm|harms|harming) (?:myself|himself|herself|themselves?)\b",
+        r"hurt(?:s|ing)? (?:himself|herself|themselves?) (?:on purpose|deliberately|intentionally)",
+        r"(?:been|keep|kept|started) cutting (?:myself|himself|herself|themselves?)\b"
+        r"(?!\s+(?:some\s+)?slack)",
+        r"cut(?:s|ting)? (?:myself|himself|herself|themselves?) "
+        r"(?:on purpose|deliberately|intentionally)",
+        r"(?:no|not any) (?:point|reason|sense) (?:in|to) (?:living|live|going on|life)",
+        r"life (?:is not|isn'?t|is no longer) worth living",
         _de(r"suizid\w*"),
+        _de(r"selbstverletz\w*"),
+        _de(
+            r"(?:will|m(?:ö|oe)chte|m(?:ö|oe)chten|wollte|w(?:ü|ue)rde gerne?) "
+            r"(?:(?!nicht\b)\w+ ){0,2}(?:sterben|tot sein)\b"
+        ),
+        _de(r"nicht mehr da sein\b(?!\s+f(?:ü|ue)r\b)"),
+        _de(r"keine lust mehr (?:zu leben|auf das leben|weiterzuleben)"),
+        _de(r"lebensm(?:ü|ue)de\w*"),
+        _de(r"nicht (?:mehr )?weiterleben"),
+        _de(r"ritz\w* (?:mich|sich)\b|(?:mich|sich) (?:selbst )?(?:ritz\w*|geritzt)"),
+        _de(r"verletz\w* (?:mich|sich) selbst|(?:mich|sich) selbst (?:verletz\w*|geschnitten)"),
+        _de(r"schneid\w* (?:mich|sich) (?:absichtlich|selbst|mit absicht)"),
+        _de(
+            r"(?:mir|sich) (?:absichtlich|selbst|mit absicht) "
+            r"(?:weh\s?getan|weh\s?tun|wehzutun|schmerzen zugef(?:ü|ue)gt)"
+        ),
         _de(r"selbstmord\w*"),
         _de(r"(?:mich|sich)\s+(?:selbst\s+)?(?:umzubringen|umbringen|t(?:ö|oe)ten)"),
         # "mir das Leben nehmen", "sich das Leben genommen", "sich das Leben zu nehmen"
@@ -113,6 +159,19 @@ _PATTERNS: dict[str, list[str]] = {
         r"passed out",
         r"(?:won'?t|not) wak(?:e|ing) up",
         r"unresponsive",
+        r"collaps(?:ed|ing)\b(?! lung)",
+        # a person, not a website: "he isn't responding", but not "the portal isn't responding"
+        r"(?:he|she|they|baby|child|toddler|patient|person|dad|mum|mom|husband|wife|son|daughter)"
+        r" (?:is not|isn'?t|won'?t|doesn'?t|not) (?:responding|respond|reacting|react)",
+        _de(
+            r"(?:er|sie|vater|mutter|mann|frau|kind|baby|opa|oma|patient\w*|jemand) "
+            r"(?:\w+ ){0,2}(?:zusammengebrochen|zusammengesackt|kollabiert)"
+        ),
+        # "reagiert nicht" next to a person, not "reagiert nicht auf das Medikament"
+        _de(
+            r"(?:er|sie|kind|baby|opa|oma|vater|mutter|jemand)\b.{0,40}\breagiert "
+            r"(?:nicht|nicht mehr|gar nicht)\b(?!\s+auf\s+(?!ansprache|anrufe|rufen|schmerz))"
+        ),
         _de(r"bewusstlos\w*"),
         _de(r"ohnm(?:ä|ae)chtig\w*"),
         # "in Ohnmacht gefallen", not the feeling of powerlessness ("Gefühl der Ohnmacht")
@@ -123,9 +182,16 @@ _PATTERNS: dict[str, list[str]] = {
     ],
     "bleeding": [
         r"(?:heavy|severe|uncontrolled) bleeding",
-        r"bleeding (?:heavily|a lot|won'?t stop)",
-        r"vomiting blood",
+        r"bleeding (?:heavily|a lot|badly|profusely|won'?t stop)",
+        r"vomiting blood|(?:coughing|throwing|spitting) up blood|spitting blood",
         _de(r"starke blutung\w*"),
+        _de(r"(?:heftige|massive|schwere)[rsmn]? blutung\w*"),
+        _de(
+            r"blutung\w* (?:\w+ ){0,2}"
+            r"(?:hört nicht auf|steht nicht|nicht zu stoppen|lässt sich nicht stoppen)"
+        ),
+        _de(r"(?:spuckt|hustet) blut\b"),
+        _de(r"blutet (?:\w+ )?(?:heftig|massiv|wie verrückt)"),
         _de(r"blutet\s+(?:\w+\s+)?stark"),
         _de(r"stark\w*\s+blutend\w*"),
         _de(r"blut erbrechen"),
@@ -139,6 +205,8 @@ _PATTERNS: dict[str, list[str]] = {
         r"anaphylaxis|anaphylactic\w*",
         r"(?:throat|tongue|lips?) (?:is |are )?swell\w*",
         r"allergic reaction.{0,30}breath",
+        r"throat (?:is |are )?(?:closing|swelling shut|tightening)",
+        _de(r"hals (?:\w+ )?(?:schwillt zu|schnürt sich zu|ist zugeschwollen|wird zu)"),
         _de(r"anaphylaxie|anaphylakt\w*"),
         _de(r"allergisch\w*\s+schock\w*"),
         _de(
@@ -150,12 +218,27 @@ _PATTERNS: dict[str, list[str]] = {
         r"overdos\w*",
         r"poison\w*",
         r"swallowed (?:bleach|pills)",
+        r"(?:swallowed|took|taken|drank|ingested|ate|eaten) (?:\w+ ){0,3}?"
+        r"(?:bleach|detergent|antifreeze|cleaning (?:fluid|products?|liquid)"
+        r"|too many (?:pills|tablets|painkillers|meds|medication)"
+        r"|a lot of (?:pills|tablets|painkillers))",
+        _de(
+            r"zu viele (?:tabletten|pillen|medikamente|schlaftabletten) (?:\w+ )?"
+            r"(?:geschluckt|genommen|eingenommen)"
+        ),
+        _de(
+            r"(?:reiniger|putzmittel|waschmittel|bleiche|frostschutz\w*|sp(?:ü|ue)lmittel|rohrfrei\w*)"
+            r" (?:\w+ )?(?:getrunken|geschluckt|verschluckt)"
+        ),
+        _de(r"gift (?:getrunken|geschluckt|verschluckt|genommen)"),
         _de(r"überdosi\w*"),
         _de(r"\w*vergift\w*"),  # also compounds: Alkoholvergiftung, Lebensmittelvergiftung
     ],
     "seizure": [
         r"seizure",
         r"convuls\w*",
+        r"shaking (?:all over|uncontrollably)|having a fit",
+        _de(r"zuck\w* (?:\w+ )?am ganzen (?:körper|leib)"),
         _de(r"krampfanf(?:a|ä)ll\w*"),  # Krampfanfall, Krampfanfälle
         _de(r"epileptisch\w*\s+anfall\w*"),  # epileptischer / epileptischen Anfall
         _de(r"fieberkr(?:a|ä)mpf\w*"),

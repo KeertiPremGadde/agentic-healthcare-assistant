@@ -91,6 +91,11 @@ _PATTERNS: dict[str, list[str]] = {
         r"\bhow (?:much|many)\b.{0,60}\b(?:is|are|would be|could be)\s+(?:a\s+)?"
         r"(?:lethal|fatal|deadly)\b",
         r"\boverdose\b.{0,15}\b(?:fatally|lethally)\b",
+        # "at how many pills do you die", "how much paracetamol is life threatening"
+        r"\bat how many\b.{0,40}\b(?:die|dies|death|dead)\b",
+        r"\bhow (?:much|many)\b.{0,50}\b(?:is|are)\s+(?:life[- ]threatening|life[- ]endangering)\b",
+        _de(r"\bab wie vielen?\b.{0,40}\b(?:stirbt|sterben|ist man tot)\b"),
+        _de(r"\bwie\s?viel\w*\b.{0,40}\blebensgef(?:ä|ae)hrlich"),
         _de(
             r"\bwie\s?viel\w*\b.{0,60}\b(?:sind|ist|w(?:ä|ae)re|w(?:ä|ae)ren)\s+"
             r"(?:t(?:ö|oe)dlich|letal)"
@@ -124,6 +129,8 @@ _PATTERNS: dict[str, list[str]] = {
         r"\b(?:poison|toxin|drug|substance|method)s?\b",
         r"\b(?:poison|toxin|drug|substance)s?\b.{0,25}\b(?:untraceable|undetectable|undetected"
         r"|not (?:be )?(?:traced|detected|found)|no (?:trace|taste|smell))",
+        r"\bpoison\w*\b.{0,30}\b(?:without (?:being )?(?:noticed|detected)|unnoticed)\b",
+        _de(r"\bgift\w*\b.{0,30}\bunbemerkt"),
         r"\b(?:spike|lace)\b.{0,25}\b(?:drink|food|coffee|tea|meal|water)\b",
         r"\bto make (?:someone|somebody|a person|him|her|them|people) (?:very |really |seriously"
         r" |extremely )?(?:sick|ill|unwell|pass out|unconscious)\b",

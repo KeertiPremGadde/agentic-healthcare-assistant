@@ -93,4 +93,4 @@ checkpointer, Haiku). Linux/AWS need nothing special.
   endpoint yet (right to erasure; planned); in-memory limits per process; rate limiting by peer IP
   (behind a proxy, run uvicorn with `--proxy-headers` and a trusted `--forwarded-allow-ips`);
   usernames can be enumerated through registration conflicts.
-- Phase 6 decides where the browser stores the token (memory/localStorage vs an httpOnly cookie).
+- Phase 6 decided where the browser stores the token: memory plus `sessionStorage` (ADR 0011).

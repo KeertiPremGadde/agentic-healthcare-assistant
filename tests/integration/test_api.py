@@ -325,6 +325,10 @@ async def test_chat_json_returns_reply_conversation_id_and_usage(make_api: ApiFa
     assert len(body["conversation_id"]) == 32
     assert "I'm MedAgent" in body["reply"]
     assert body["pending"] is None
+    assert body["kind"] == "normal"
+    assert body["appointment_id"] is None
+    assert body["booking"] is None
+    assert body["doctors"] is None  # only a reply that suggests doctors carries them
     assert {"input_tokens", "output_tokens", "est_cost_usd"} <= body["usage"].keys()
     assert response.headers["X-Request-ID"]
 
@@ -349,6 +353,12 @@ async def test_chat_stream_event_order_and_token_replay(make_api: ApiFactory) ->
     message = next(d["text"] for n, d in events if n == "message")
     assert tokens == message  # the replayed chunks are exactly the final message
     assert "Cardiologist" in message
+    # The options arrive as data, so the UI can render cards and a Book button per doctor.
+    doctors = next(d for n, d in events if n == "message")["doctors"]
+    assert doctors
+    assert {"id", "name", "specialty", "city", "languages"} == set(doctors[0])
+    assert all(d["specialty"] == "Cardiologist" for d in doctors)
+    assert all(d["name"] in message for d in doctors)  # same doctors, same order as the text
     done = events[-1][1]
     assert done["pending"] is False
     assert len(done["conversation_id"]) == 32
@@ -424,7 +434,19 @@ async def test_sse_confirmation_event_and_resume_stream(make_api: ApiFactory) ->
         api, f"/v1/chat/{conversation}/resume", headers, {"confirmed": True}
     )
     assert [d["node"] for n, d in resumed if n == "step"] == ["book_appointment"]
-    assert next(d["text"] for n, d in resumed if n == "message").startswith("Booked:")
+    final = next(d for n, d in resumed if n == "message")
+    assert final["text"].startswith("Booked:")
+    assert final["kind"] == "booked"  # lets the UI show the green card and the .ics button
+    assert "doctors" not in final  # the doctor list belongs to the turn that suggested them
+    booking = final["booking"]
+    assert set(booking) == {"appointment_id", "doctor", "start"}
+    assert booking["appointment_id"] == final["appointment_id"]
+    assert booking["doctor"] in final["text"]
+    assert booking["start"] in final["text"]
+    assert (
+        final["appointment_id"]
+        == (await api.client.get("/v1/appointments", headers=headers)).json()[0]["id"]
+    )
 
 
 async def test_declining_a_confirmation_books_nothing(
@@ -675,6 +697,7 @@ async def test_emergency_messages_are_still_answered_when_a_limit_is_reached(
     response = await chat_json(api, headers, "I have crushing chest pain and can't breathe")
     assert response.status_code == 200  # not a limit error
     assert response.json()["reply"] == EMERGENCY_MESSAGE
+    assert response.json()["kind"] == "emergency"
     streamed = await api.client.post(
         "/v1/chat", headers=headers, json={"message": "Mein Vater ist bewusstlos"}
     )
@@ -710,6 +733,7 @@ async def test_harmful_messages_get_the_fixed_reply_not_a_limit_error_when_a_lim
     events = parse_sse(streamed.text)
     assert [n for n, _ in events] == ["message", "done"]
     assert events[0][1]["text"] == HARMFUL_MESSAGE
+    assert events[0][1]["kind"] == "harmful_intent"  # shown as a crisis card, not a red alarm
     german = await chat_json(api, headers, "Was ist die tödliche Dosis von Paracetamol?")
     assert german.json()["reply"] == HARMFUL_MESSAGE
     assert api.llm.calls == []  # still no LLM call
@@ -842,3 +866,18 @@ async def test_real_model_through_the_api_costs_a_fraction_of_a_cent(
     assert "".join(d["text"] for n, d in events if n == "token") == next(
         d["text"] for n, d in events if n == "message"
     )
+
+
+async def test_doctor_options_are_returned_as_data_in_json_mode_and_only_for_that_turn(
+    make_api: ApiFactory,
+) -> None:
+    api = await make_api()
+    headers = await signup(api, "card-user")
+    script_find_doctor(api)
+    first = (await chat_json(api, headers, "palpitations, which doctor?")).json()
+    assert [d["specialty"] for d in first["doctors"]] == ["Cardiologist"] * len(first["doctors"])
+    assert first["doctors"][0]["name"] in first["reply"]
+
+    script_smalltalk(api)  # the options stay in the conversation memory, but are not re-sent
+    later = (await chat_json(api, headers, "thanks!", first["conversation_id"])).json()
+    assert later["doctors"] is None

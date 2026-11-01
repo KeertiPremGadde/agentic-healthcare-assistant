@@ -81,6 +81,9 @@ def import_ragas() -> types.SimpleNamespace:
     )
     from ragas.run_config import RunConfig
 
+    from medagent.evals import telemetry
+
+    telemetry.assert_off()
     if ragas.__version__ != PINNED_RAGAS:
         raise RuntimeError(
             f"ragas {ragas.__version__} is installed, the harness is written for {PINNED_RAGAS}"
@@ -247,30 +250,59 @@ def make_deepeval_judge(settings: Settings, handler: UsageMetadataCallbackHandle
     return _Judge()
 
 
+# What "done" means for each judged scenario. The first version of this metric gave the judge only
+# the user's turns and the last reply, which scored a correct "impossible slot, alternative
+# accepted" run 0.0 and an unverifiable "number 2" run 0.5 (ADR 0013). The judge now sees the whole
+# conversation and the task, including that a confirmed alternative counts as success.
+TASKS: dict[str, str] = {
+    "b01": "Book an appointment with Dr. Michael Johnson on Tuesday 3 Nov 2026 at 10:00, "
+    "asking the user to confirm before booking.",
+    "b07": "Suggest a suitable specialist for an itchy rash, then book the first suggested doctor "
+    "for tomorrow morning (Tuesday 3 Nov 2026, between 08:00 and 12:00), asking to confirm first.",
+    "b11": "Propose a morning slot with Dr. Michael Johnson; when the user declines, accept that "
+    "and, after the user asks for the afternoon, propose one and book it once confirmed.",
+    "b15": "The requested day is impossible: Dr. Natalja Rosemann does not work on Tuesdays. Tell "
+    "the user, propose the nearest valid slot, and book it only after the user confirms. Booking "
+    "the confirmed alternative counts as the task completed.",
+    "b23": "Cancel the user's only upcoming appointment, after the user confirms.",
+    "b24": "List the user's two appointments, then cancel the second one (Dr. Olivia Martinez, "
+    "Friday 6 Nov 2026, 09:00) after confirmation, leaving the first appointment untouched.",
+}
+
+
+def _conversation(transcript: Sequence[dict[str, str]]) -> str:
+    return chr(10).join(
+        f"{'User' if t['role'] == 'user' else 'Assistant'}: {t['text']}" for t in transcript
+    )
+
+
 def deepeval_scores(
     items: Sequence[dict[str, Any]],
     scenarios: dict[str, datasets.Scenario],
     spend: Spend,
     task_completion_ids: Sequence[str],
     settings: Settings | None = None,
-) -> dict[str, dict[str, float | None]]:
+) -> tuple[dict[str, dict[str, float | None]], dict[str, str]]:
     """Tool correctness (deterministic, names only) on every scenario that must write, and the
-    LLM-judged task completion on the chosen subset."""
+    LLM-judged task completion on the chosen subset. Returns (scores, judge reasons by id)."""
     from deepeval.metrics import TaskCompletionMetric, ToolCorrectnessMetric
     from deepeval.test_case import LLMTestCase, ToolCall
 
+    from medagent.evals import telemetry
+
+    telemetry.assert_off()
     settings = settings or get_settings()
     handler = UsageMetadataCallbackHandler()
     judge = make_deepeval_judge(settings, handler)
     out: dict[str, dict[str, float | None]] = {}
+    reasons: dict[str, str] = {}
     for item in items:
         sc = scenarios[item["id"]]
         want = expected_tools(sc)
         users = [t["text"] for t in item["transcript"] if t["role"] == "user"]
-        replies = [t["text"] for t in item["transcript"] if t["role"] == "assistant"]
         case = LLMTestCase(
             input="\n".join(users),
-            actual_output=replies[-1] if replies else "",
+            actual_output=_conversation(item["transcript"]),
             tools_called=[ToolCall(name=c["name"]) for c in item["tools_called"]],
             expected_tools=[ToolCall(name=n) for n in want],
         )
@@ -279,11 +311,14 @@ def deepeval_scores(
             tool = ToolCorrectnessMetric(model=judge, async_mode=False, include_reason=False)
             scores["tool_correctness"] = _clean(tool.measure(case, _show_indicator=False))
         if item["id"] in task_completion_ids:
-            task = TaskCompletionMetric(model=judge, async_mode=False, include_reason=False)
+            task = TaskCompletionMetric(
+                model=judge, async_mode=False, include_reason=True, task=TASKS.get(item["id"])
+            )
             scores["task_completion"] = _clean(task.measure(case, _show_indicator=False))
+            reasons[item["id"]] = str(task.reason)
         out[item["id"]] = scores
     spend.add(estimate_cost(dict(handler.usage_metadata)))
-    return out
+    return out, reasons
 
 
 # -- result files ---------------------------------------------------------------------------
@@ -336,6 +371,18 @@ def _load_run(path: str) -> dict[str, Any]:
     return data
 
 
+def _fresh_async_clients() -> None:
+    """langchain-anthropic caches one async HTTP client per process. ragas runs on its own event
+    loop in a worker thread, which closes when it finishes; a cached client created there fails
+    later with "Event loop is closed" when the main loop reuses it. Drop the cache between them."""
+    try:
+        from langchain_anthropic._client_utils import _get_default_async_httpx_client
+
+        _get_default_async_httpx_client.cache_clear()
+    except ImportError:  # a future version without the cache: nothing to reset
+        pass
+
+
 async def judge_rag_file(path: str, spend: Spend) -> EvalResult:
     """ragas on the answered in-scope questions (English and German scored separately) and the
     referral rubric on the `refer` questions, from a `rag` result file."""
@@ -355,7 +402,9 @@ async def judge_rag_file(path: str, spend: Spend) -> EvalResult:
                     "reference": q.reference,
                 }
             )
+    _fresh_async_clients()
     scores, retried = await asyncio.to_thread(ragas_scores, rows, spend, settings)
+    _fresh_async_clients()
     en = {k: v for k, v in scores.items() if by_id[k].kind == "in_scope"}
     de = {k: v for k, v in scores.items() if by_id[k].kind == "in_scope_de"}
     extra: dict[str, Any] = {f"de_{k}": v for k, v in mean_by_metric(de).items()}
@@ -387,10 +436,15 @@ async def judge_booking_file(
     settings = get_settings()
     run = _load_run(path)
     scenarios = {s.id: s for s in datasets.load_booking()[0].items}
-    scores = await asyncio.to_thread(
+    scores, reasons = await asyncio.to_thread(
         deepeval_scores, run["items"], scenarios, spend, task_completion_ids, settings
     )
     scores = {k: v for k, v in scores.items() if v}
-    return judged_result(
+    result = judged_result(
         "booking_judged", run["run_id"], ("booking_scenarios",), scores, 0, spend, settings
     )
+    result.params["task_input"] = "full_transcript+task"
+    for item in result.items:
+        if item["id"] in reasons:
+            item["task_completion_reason"] = reasons[item["id"]]
+    return result

@@ -9,7 +9,9 @@
     uv run python scripts/run_evals.py judge-rag --source evals/results/runs/rag-....json
     uv run python scripts/run_evals.py judge-booking --source evals/results/runs/booking-....json
 
-(the judge-* suites need `uv sync --group evals`)
+(the judge-* suites need the isolated environment: `uv sync --project evals`, then run them with
+`uv run --project evals python scripts/run_evals.py judge-rag ...`; telemetry of ragas and DeepEval
+is switched off in medagent/evals/telemetry.py)
 Every LLM suite stops starting new calls once --max-usd is reached and still writes its file.
 Content is never sent to Langfuse (these runs are untraced).
 """

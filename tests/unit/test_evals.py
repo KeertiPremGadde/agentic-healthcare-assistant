@@ -407,3 +407,46 @@ def test_a_suite_that_was_not_run_is_not_checked() -> None:
     only = [r for r in _baseline_runs() if r["suite"] == "routing"]
     suites = {c.suite for c in gate.evaluate(gate.load_thresholds(), only)}  # type: ignore[arg-type]
     assert suites == {"routing"}
+
+
+# -- telemetry ------------------------------------------------------------------------------
+
+
+def test_importing_the_harness_forces_the_telemetry_opt_outs() -> None:
+    """A value set in the shell must not win: a fresh process with the opposite settings."""
+    import os
+    import subprocess
+    import sys
+
+    env = {
+        **os.environ,
+        "RAGAS_DO_NOT_TRACK": "false",
+        "DEEPEVAL_TELEMETRY_OPT_OUT": "NO",
+        "DEEPEVAL_DISABLE_DOTENV": "0",
+    }
+    code = (
+        "import os, medagent.evals;"
+        "print(os.environ['RAGAS_DO_NOT_TRACK'], os.environ['DEEPEVAL_TELEMETRY_OPT_OUT'],"
+        " os.environ['DEEPEVAL_DISABLE_DOTENV'])"
+    )
+    out = subprocess.run(
+        [sys.executable, "-c", code], capture_output=True, text=True, env=env, check=True
+    )
+    assert out.stdout.split() == ["true", "YES", "1"]
+
+
+def test_assert_off_raises_when_a_library_would_still_report(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import sys
+    import types
+
+    from medagent.evals import telemetry
+
+    telemetry.assert_off()  # nothing imported, nothing to report
+    fake = types.ModuleType("ragas._analytics")
+    fake.do_not_track = lambda: False  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "ragas", types.ModuleType("ragas"))
+    monkeypatch.setitem(sys.modules, "ragas._analytics", fake)
+    with pytest.raises(RuntimeError, match="ragas telemetry is on"):
+        telemetry.assert_off()

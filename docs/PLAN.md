@@ -211,6 +211,10 @@ Done in order, each on its own branch and PR.
     set; the plateau 0.691-0.722 is only ~0.03 wide, so the margins are now reported and
     `en_false_abstain_at_threshold` is gated. ADR 0014, `evals/results/threshold/`.
 
+- [x] German fixed texts: refusal, dose referral, labels and disclaimer in German for German
+  questions (ADR 0015); the guard and the frontend parser accept both languages
+- [ ] German emergency and harmful-intent replies (the matched rule's language decides the reply
+  language; wording to be reviewed before committing)
 - [ ] Results table + chart in README
 - **Done when:** CI fails if faithfulness drops below threshold.
 

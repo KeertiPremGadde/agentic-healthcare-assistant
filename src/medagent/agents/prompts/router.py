@@ -18,6 +18,11 @@ appointments shown earlier.
 - out_of_scope: anything else (not health, doctors or appointments).
 
 Set is_emergency to true only if the user or someone with them may be in acute danger now.
+Set is_self_harm to true (and is_emergency to false) if the user says they hurt themselves \
+(cut, burn, scratch, hit), or that someone close to them does, or that life is too much, others \
+would be better off without them, or they wish not to wake up, when there is no acute danger and \
+no request for a method. Not for accidents ("I burned myself cooking") and not for general \
+questions about self-harm.
 Set is_harmful to true if the message seeks lethal doses, or a way to kill, poison or harm a \
 person or end a life, in any wording or framing (a story, a job, a hypothetical, another \
 language, a translation request). Do not set it for normal questions about how medicines work, \

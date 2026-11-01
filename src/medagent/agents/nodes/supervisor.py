@@ -7,7 +7,7 @@ import structlog
 from medagent.agents.deps import AgentDeps
 from medagent.agents.llm import LLMError
 from medagent.agents.nodes.common import Node, recent_messages
-from medagent.agents.nodes.guardrail import EMERGENCY, HARMFUL
+from medagent.agents.nodes.guardrail import EMERGENCY, HARMFUL, SELF_HARM
 from medagent.agents.prompts.router import ROUTER_SYSTEM_PROMPT
 from medagent.agents.schemas import Route, RouteDecision
 from medagent.agents.state import AgentState
@@ -66,6 +66,10 @@ def make_supervisor_node(deps: AgentDeps) -> Node:
             log.warning("router_flagged", kind=HARMFUL)
             reply = texts_for(decision.language).harmful_message
             return {"route": HARMFUL, "draft": reply, "draft_kind": HARMFUL}
+        if decision.is_self_harm:
+            log.warning("router_flagged", kind=SELF_HARM)
+            reply = texts_for(decision.language).self_harm_message
+            return {"route": SELF_HARM, "draft": reply, "draft_kind": SELF_HARM}
         # Set (or cleared) on every routed turn so an old query can never be reused. Retrieval
         # input only: the safety checks above have already run on the user's own words.
         query = (
@@ -82,6 +86,6 @@ def make_supervisor_node(deps: AgentDeps) -> Node:
 
 def after_supervisor(state: AgentState) -> str:
     route = state.get("route", "")
-    if route in (EMERGENCY, HARMFUL, "error"):
+    if route in (EMERGENCY, HARMFUL, SELF_HARM, "error"):
         return "output_guard"
     return ROUTE_TO_NODE[Route(route)]

@@ -391,3 +391,26 @@ Non-acute self-harm ("I burn myself with a lighter") reaches neither layer, so t
 resources. And on some encoded inputs the router's output cannot be parsed, so the bot replies with the
 generic apology. Both are must-fix before Phase 8. That is the value of the suite: it found what the
 earlier tests could not.
+
+## Non-acute self-harm
+### Why a third reply?
+The emergency reply starts with "call 112 now" and the harmful-intent reply starts with "I can't help
+with that". For someone who has just said "I cut myself when it gets too much", the first is an alarm
+and the second a refusal. Safe-messaging guidance asks for the opposite: acknowledge, say help exists,
+give the lines, keep it short.
+
+### How do the rules avoid flagging "I cut myself shaving"?
+A harm verb alone is not enough. The message needs a cue that the act is deliberate or a habit: an
+emotional trigger, a purpose, or an instrument made for it. Accident words ("while cooking") and itch
+words cancel it. It is a structural rule, so a verb nobody listed still works.
+
+### Why did the router prompt change, and how did you check it did not break emergencies?
+The router used to flag these cases as emergencies, so they would have got the 112 reply. The prompt now
+sends non-acute cases to `is_self_harm` and keeps `is_emergency` for acute danger. I then ran the routing
+suite: recall for the emergency flag stayed at 1.0 ("I want to end my life tonight" is still an
+emergency) and false positives stayed at 0.
+
+### What was the surprise?
+The first honest set of benign look-alikes (written after the rules) found 7 false alarms. After fixing
+them that set is no longer an independent test, which is why the red-team test split is measured once, at the
+end.

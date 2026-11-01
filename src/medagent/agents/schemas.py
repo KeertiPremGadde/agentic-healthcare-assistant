@@ -38,6 +38,17 @@ class RouteDecision(BaseModel):
         ),
     )
 
+    is_self_harm: bool = Field(
+        default=False,
+        description=(
+            "True if the user says they hurt themselves (cut, burn, scratch, hit) or that "
+            "someone close to them does, or says life is too much, that others would be better "
+            "off without them, or that they wish not to wake up, and it is NOT an acute "
+            "emergency and NOT a request for a method. False for accidents and for general "
+            "questions about self-harm."
+        ),
+    )
+
     language: str = Field(
         default="en",
         description=(

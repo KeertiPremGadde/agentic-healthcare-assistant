@@ -17,7 +17,7 @@ export interface Segment {
 
 const POISON_NUMBERS = POISON_CENTRES.map((centre) => centre.number).join("|");
 const NUMBER = new RegExp(
-  `(\\b0800 111 0 111\\b|\\b1-800-222-1222\\b|\\b116 1(?:17|23)\\b|\\b(?:${POISON_NUMBERS})\\b|` +
+  `(\\b0800 111 0 111\\b|\\b0800 111 0550\\b|\\b1-800-222-1222\\b|\\b116 1(?:11|17|23)\\b|\\b(?:${POISON_NUMBERS})\\b|` +
     "\\b(?:112|911|988)\\b)",
   "g",
 );

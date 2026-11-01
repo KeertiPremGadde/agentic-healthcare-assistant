@@ -16,3 +16,4 @@ One file per significant decision: `NNNN-short-title.md` with Context, Decision,
 | [0010](0010-public-holidays-per-city.md) | Public holidays per doctor's city |
 | [0011](0011-frontend.md) | Frontend: custom stream reader, token storage, one user per tab |
 | [0012](0012-langfuse-tracing-and-privacy.md) | Langfuse tracing with content redacted by default |
+| [0013](0013-evaluation-harness-and-gates.md) | Evaluation harness: frozen golden sets, DB-state judging, exact safety gates |

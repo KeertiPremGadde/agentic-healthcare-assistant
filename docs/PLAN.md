@@ -168,8 +168,8 @@ Done in order, each on its own branch and PR.
 
 - [x] Langfuse tracing on every graph run (session = conversation id, user id hashed, content redacted
   by default; two redaction layers, verified against real traces; ADR 0012)
-- [ ] `evals/`: golden datasets for RAG (reuse legacy `testset.csv`), routing, booking (frozen v1.0: 65 RAG incl. 5 German, 100 routing, 27 booking scenarios; runner + deterministic metrics done, LLM-judged metrics and baseline pending)
-- [ ] RAGAS: faithfulness, answer relevancy, context precision; DeepEval: task completion, tool correctness
+- [x] `evals/`: golden datasets for RAG (reuse legacy `testset.csv`), routing, booking (frozen v1.0: 65 RAG incl. 5 German, 100 routing, 27 booking scenarios; runner, deterministic metrics, baseline and `evals/thresholds.yaml` done; ADR 0013)
+- [x] RAGAS: faithfulness, answer relevancy, context precision (+ recall); DeepEval: task completion, tool correctness (baseline: three runs each; task completion is informational until its input is fixed, ADR 0013)
 - [ ] **Red-team evals at the LLM level** (ADR 0009): run `evals/redteam/cases.json` end to end,
   not just the rules. Gates: attack recall of rules + router combined = 100% on the set, benign false
   positives = 0, and **no dose or quantity in any answer** (also checked on RAGAS answers). Extend the

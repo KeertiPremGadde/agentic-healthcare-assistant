@@ -338,3 +338,72 @@ def test_ragas_import_shim_and_pin() -> None:
 
     ns = judge.import_ragas()  # raises if another ragas version is installed
     assert set(ns.metrics()) == set(judge.RAGAS_METRICS)
+
+
+# -- the gate -------------------------------------------------------------------------------
+
+BASELINES = ("baseline-deterministic", "baseline-judged")
+
+
+def _baseline_runs() -> list[dict[str, object]]:
+    from medagent.evals import gate
+    from medagent.evals.results import RESULTS_DIR
+
+    return [r for d in BASELINES for r in gate.load_runs(RESULTS_DIR / d)]
+
+
+def test_the_committed_baseline_passes_its_own_thresholds() -> None:
+    from medagent.evals import gate
+
+    runs = _baseline_runs()
+    assert {r["suite"] for r in runs} >= {"routing", "booking", "rag", "retrieval", "rag_judged"}
+    checks = gate.evaluate(gate.load_thresholds(), runs)  # type: ignore[arg-type]
+    assert checks
+    assert [c for c in checks if not c.ok] == []
+
+
+def _mutated(suite: str, metric: str, value: float | None) -> list[dict[str, object]]:
+    runs = _baseline_runs()
+    for r in runs:
+        if r["suite"] == suite:
+            r["metrics"] = {**r["metrics"], metric: value}  # type: ignore[dict-item]
+    return runs
+
+
+@pytest.mark.parametrize(
+    ("suite", "metric", "value"),
+    [
+        ("rag", "dose_leak_count", 1.0),  # hard: a single dose leak fails
+        ("routing", "flag_recall_emergency", 0.99),  # hard: exact 100%
+        ("routing", "flag_false_positive_harmful", 0.01),
+        ("booking", "hard_violation_count", 1),
+        ("rag_judged", "faithfulness", 0.70),  # gate: below baseline minus margin
+        ("rag_judged", "judge_nan_rate", 0.06),  # hard: too many unscored cells
+        ("rag", "in_scope_answer_rate", None),  # a missing metric is a failure, not a pass
+    ],
+)
+def test_gate_fails_when_a_rule_is_broken(suite: str, metric: str, value: float | None) -> None:
+    from medagent.evals import gate
+
+    checks = gate.evaluate(gate.load_thresholds(), _mutated(suite, metric, value))  # type: ignore[arg-type]
+    assert any(c.metric == metric and not c.ok for c in checks)
+
+
+def test_one_bad_run_fails_a_hard_rule_but_not_a_mean_rule() -> None:
+    from medagent.evals import gate
+
+    runs = [
+        {"suite": "rag", "metrics": {"dose_leak_count": 0.0, "in_scope_answer_rate": 1.0}},
+        {"suite": "rag", "metrics": {"dose_leak_count": 1.0, "in_scope_answer_rate": 0.97}},
+    ]
+    checks = {c.metric: c for c in gate.evaluate(gate.load_thresholds(), runs)}
+    assert not checks["dose_leak_count"].ok  # hard rule: every run
+    assert checks["in_scope_answer_rate"].ok  # gate rule: mean 0.985 >= 0.95
+
+
+def test_a_suite_that_was_not_run_is_not_checked() -> None:
+    from medagent.evals import gate
+
+    only = [r for r in _baseline_runs() if r["suite"] == "routing"]
+    suites = {c.suite for c in gate.evaluate(gate.load_thresholds(), only)}  # type: ignore[arg-type]
+    assert suites == {"routing"}

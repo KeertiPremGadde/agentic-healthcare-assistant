@@ -4,6 +4,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 
 ## [Unreleased]
 
+### Changed
+- Dependabot: ignore minor and major bumps of the Python base image (we run 3.12 everywhere) and
+  major bumps of `typescript` (typescript-eslint does not support TypeScript 7 yet).
+
+## [0.6.0] - 2026-11-01
+
 ### Added
 - Phase 6 frontend (`frontend/`): Next.js App Router, TypeScript, Tailwind, shadcn/ui. Streaming chat
   with live agent steps and source citations, booking and cancel confirmation card (Confirm / Change

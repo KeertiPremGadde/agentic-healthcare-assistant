@@ -16,9 +16,10 @@ updates:
     directory: "/infra/docker"
     schedule: { interval: "weekly" }
     ignore:
-      # The project supports Python >=3.12,<3.14 (pyproject.toml); don't bump the image past it.
+      # We run Python 3.12 everywhere (image, CI, local). Take patch updates only; a minor or
+      # major bump is a deliberate change (pyproject.toml, CI and the image together).
       - dependency-name: "python"
-        versions: [">=3.14"]
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule: { interval: "weekly" }
@@ -27,4 +28,7 @@ updates:
     ignore:
       # CI and .nvmrc use Node 22 LTS; keep the Node typings in step with it.
       - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # typescript-eslint doesn't support TypeScript 7 yet (the lint step fails); lift when it does.
+      - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]

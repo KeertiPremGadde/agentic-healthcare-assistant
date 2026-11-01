@@ -85,7 +85,7 @@ Done in order, each on its own branch and PR.
 - [x] Docs: README, PLAN, ARCHITECTURE (diagrams), SETUP, ADRs, CLAUDE.md
 - [x] `uv sync`, `pre-commit install`, first commit, create GitHub repo, push
 - [x] Put your GitHub username in `.github/CODEOWNERS`
-- [ ] Enable branch protection on `main` (require CI) – in GitHub settings, after CI has run once
+- [x] Enable branch protection on `main`: on, with 3 required checks (Secret scan; Lint · Type-check · Test; Frontend · Lint · Type-check · Test · Build · E2E)
 
 ## Phase 1 – Data layer ✅
 

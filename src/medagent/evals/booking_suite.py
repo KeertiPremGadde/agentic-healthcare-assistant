@@ -11,6 +11,7 @@ from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import Any, cast
 from zoneinfo import ZoneInfo
 
 from alembic import command
@@ -32,7 +33,7 @@ from medagent.evals import booking_judge, datasets
 from medagent.evals.results import EvalResult, Spend, git_sha, new_run_id
 from medagent.rag.answer import AnswerPayload
 from medagent.rag.types import Candidate
-from medagent.tools.clinic import ClinicService, LocalClinicTools
+from medagent.tools.clinic import ClinicService, ClinicTools, LocalClinicTools
 
 OTHER_PATIENT = "sam.sample@example.com"
 
@@ -49,6 +50,30 @@ class _NoRetrieval:
 class _NoAnswer:
     def generate(self, question: str, system_prompt: str) -> AnswerPayload:
         return AnswerPayload(answer="", used_sources=[], context_sufficient=False)
+
+
+class RecordingTools:
+    """Wraps the clinic tools and remembers each call (name + argument names/values), so the
+    tool-correctness metric can compare what the agent called with what it should have."""
+
+    def __init__(self, inner: ClinicTools) -> None:
+        self._inner = inner
+        self.calls: list[dict[str, Any]] = []
+
+    def __getattr__(self, name: str) -> Any:
+        target = getattr(self._inner, name)
+
+        async def call(*args: Any, **kwargs: Any) -> Any:
+            self.calls.append(
+                {
+                    "name": name,
+                    "args": [str(a) for a in args],
+                    "kwargs": {k: str(v) for k, v in kwargs.items()},
+                }
+            )
+            return await target(*args, **kwargs)
+
+        return call
 
 
 @contextmanager
@@ -101,12 +126,15 @@ class ScenarioRun:
     hard_violations: list[str]
     replies: list[str]
     cost_usd: float
+    transcript: list[dict[str, str]]
+    tools_called: list[dict[str, Any]]
 
 
 async def _run_scenario(
     sc: datasets.Scenario,
     sessions: sessionmaker[Session],
     graph: object,
+    recorder: RecordingTools,
     patients: dict[str, int],
     now: datetime,
     tz: ZoneInfo,
@@ -128,6 +156,8 @@ async def _run_scenario(
     pending = False
     changed_before_confirm = False
     replies: list[str] = []
+    transcript: list[dict[str, str]] = []
+    recorder.calls.clear()
     cost = 0.0
     failures: list[str] = []
 
@@ -139,6 +169,9 @@ async def _run_scenario(
         pending = result.pending is not None
         if result.reply:
             replies.append(result.reply)
+            transcript.append({"role": "assistant", "text": result.reply})
+        elif result.pending:
+            transcript.append({"role": "assistant", "text": str(result.pending.get("question"))})
         if pending:  # the graph paused: nothing may have been written yet
             with sessions() as s:
                 if _snapshot(s) != baseline:
@@ -147,13 +180,16 @@ async def _run_scenario(
 
     for turn in sc.turns:
         if turn.user is not None:
+            transcript.append({"role": "user", "text": turn.user})
             await send(message=turn.user)
         elif turn.confirm is not None:
             if not pending:
                 failures.append("confirm_without_pending")
                 continue
+            transcript.append({"role": "user", "text": "yes" if turn.confirm else "no"})
             await send(resume=turn.confirm)
         elif turn.confirm_if_pending and pending:
+            transcript.append({"role": "user", "text": "yes"})
             await send(resume=True)
 
     with sessions() as session:
@@ -186,6 +222,8 @@ async def _run_scenario(
         verdict.hard_violations,
         replies,
         round(cost, 5),
+        transcript,
+        list(recorder.calls),
     )
 
 
@@ -213,8 +251,11 @@ async def run_booking(spend: Spend, only: Sequence[str] | None = None) -> EvalRe
                 "alex": repository.get_patient_by_email(s, meta["patient"]).id,  # type: ignore[union-attr]
                 "other": repository.get_patient_by_email(s, OTHER_PATIENT).id,  # type: ignore[union-attr]
             }
+        recorder = RecordingTools(
+            LocalClinicTools(ClinicService(sessions, lambda: now, tz, settings.slot_minutes))
+        )
         deps = AgentDeps(
-            tools=LocalClinicTools(ClinicService(sessions, lambda: now, tz, settings.slot_minutes)),
+            tools=cast(ClinicTools, recorder),
             llm=AnthropicStructuredLLM(settings),
             answer_llm=_NoAnswer(),
             retriever=_NoRetrieval(),
@@ -228,7 +269,9 @@ async def run_booking(spend: Spend, only: Sequence[str] | None = None) -> EvalRe
         for sc in scenarios:
             if spend.exhausted:
                 break
-            runs.append(await _run_scenario(sc, sessions, graph, patients, now, tz, spend))
+            runs.append(
+                await _run_scenario(sc, sessions, graph, recorder, patients, now, tz, spend)
+            )
 
     n = len(runs)
     passed = sum(r.passed for r in runs)
@@ -258,6 +301,8 @@ async def run_booking(spend: Spend, only: Sequence[str] | None = None) -> EvalRe
             "hard_violations": r.hard_violations,
             "replies": r.replies,
             "cost_usd": r.cost_usd,
+            "transcript": r.transcript,
+            "tools_called": r.tools_called,
         }
         for r in runs
     ]

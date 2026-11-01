@@ -287,3 +287,50 @@ def test_spend_cap_stops_new_work() -> None:
 @pytest.mark.parametrize("name", datasets.NAMES)
 def test_datasets_are_frozen_at_one_point_zero(name: str) -> None:
     assert datasets.current_hashes()[name]["version"] == "1.0"
+
+
+# -- judged layer (pure parts) --------------------------------------------------------------
+
+
+def test_nan_rate_and_means() -> None:
+    from medagent.evals import judge
+
+    scores: dict[str, dict[str, float | None]] = {
+        "a": {"faithfulness": 1.0, "context_recall": None},
+        "b": {"faithfulness": 0.5, "context_recall": 1.0},
+    }
+    assert judge.nan_rate(scores) == 0.25
+    assert judge.mean_by_metric(scores) == {"context_recall": 1.0, "faithfulness": 0.75}
+    assert judge.nan_rate({}) == 0.0
+
+
+def test_expected_write_tool_follows_the_expected_database_state() -> None:
+    from medagent.evals import judge
+
+    by_id = {s.id: s for s in datasets.load_booking()[0].items}
+    assert judge.expected_tools(by_id["b01"]) == ["book_appointment"]
+    assert judge.expected_tools(by_id["b23"]) == ["cancel_appointment"]
+    assert judge.expected_tools(by_id["b13"]) == []  # declined: no write tool expected
+
+
+def test_nan_gate_fails_the_run_above_five_percent() -> None:
+    from medagent.core.config import get_settings
+    from medagent.evals import judge
+
+    bad: dict[str, dict[str, float | None]] = {"a": {"m": None}, "b": {"m": 1.0}}
+    ok: dict[str, dict[str, float | None]] = {"a": {"m": 1.0}, "b": {"m": 1.0}}
+    r_bad = judge.judged_result("x", "run", ("rag_golden",), bad, 1, Spend(1.0), get_settings())
+    r_ok = judge.judged_result("x", "run", ("rag_golden",), ok, 0, Spend(1.0), get_settings())
+    assert r_bad.hard_violations and "judge_nan_rate" in r_bad.hard_violations[0]
+    assert not r_ok.hard_violations
+
+
+def test_ragas_import_shim_and_pin() -> None:
+    import importlib.util
+
+    if importlib.util.find_spec("ragas") is None:  # optional `evals` group not installed
+        pytest.skip("ragas not installed")
+    from medagent.evals import judge
+
+    ns = judge.import_ragas()  # raises if another ragas version is installed
+    assert set(ns.metrics()) == set(judge.RAGAS_METRICS)

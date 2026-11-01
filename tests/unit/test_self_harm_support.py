@@ -41,7 +41,7 @@ def test_the_rules_catch_the_phrase_in_its_own_language(phrase: str, language: s
 
 def test_most_phrases_get_the_supportive_reply_not_the_emergency_one() -> None:
     kinds = [screen_message(p).kind for p, _ in SELF_HARM_DE + SELF_HARM_EN]  # type: ignore[union-attr]
-    assert kinds.count("self_harm_support") >= 36  # 40 of 45 at the time of writing
+    assert kinds.count("self_harm_support") >= 42  # 42 of 45; see ADR 0023 for the other three
 
 
 @pytest.mark.parametrize("phrase", BENIGN_DE + BENIGN_EN + BENIGN_HARD_DE + BENIGN_HARD_EN)
@@ -49,12 +49,52 @@ def test_benign_look_alikes_trigger_nothing(phrase: str) -> None:
     assert screen_message(phrase) is None
 
 
-# Behaviour that is pre-existing and not changed here: the older rule for "hurting himself on
-# purpose" answers a parent's question with the emergency reply. Pinned so a change is noticed.
-def test_a_parents_question_about_self_harm_is_still_an_emergency_reply() -> None:
-    screen = screen_message("How can I tell if my child is hurting himself on purpose?")
+# -- aligning the older rules (follow-up): habitual = support, ambiguous or acute = emergency -----
+
+
+@pytest.mark.parametrize(
+    "phrase",
+    [
+        "Ich ritze mich",
+        "Ich ritze mich wieder, es hilft nur kurz.",
+        "Ich verletze mich selbst",
+        "Ich schneide mich absichtlich",
+        "Ich habe mir absichtlich wehgetan",
+        "Mein Sohn verletzt sich selbst",
+        "I've been cutting myself",
+        "I cut myself on purpose",
+        "I've been hurting myself",
+        "I can't stop hurting myself",
+        "I harm myself when I get stressed",
+        "My 15-year-old daughter hurts herself on purpose, what do I do?",
+        "How can I tell if my child is hurting himself on purpose?",
+    ],
+)
+def test_habitual_self_injury_gets_the_support_reply(phrase: str) -> None:
+    screen = screen_message(phrase)
     assert screen is not None
-    assert screen.kind == "emergency"
+    assert screen.kind == "self_harm_support"
+    assert screen.reply == (DE if screen.language == "de" else EN).self_harm_message
+
+
+@pytest.mark.parametrize(
+    "phrase",
+    [
+        "I hurt myself",  # ambiguous: could be now
+        "I want to die",
+        "I want to kill myself",
+        "I want to end my life tonight.",
+        "Ich möchte sterben",
+        "Ich will mir das Leben nehmen",
+        "I've been cutting myself and I want to die",  # an acute statement wins
+        "I cut myself on purpose and I want to end it all",
+        "Ich ritze mich und will nicht mehr leben",
+    ],
+)
+def test_ambiguous_and_acute_statements_keep_the_emergency_reply(phrase: str) -> None:
+    screen = screen_message(phrase)
+    assert screen is not None
+    assert screen.kind == "emergency", "an acute statement must never get only the support reply"
 
 
 # Each structural guard must matter: a message with the verb but without the cue is an accident.

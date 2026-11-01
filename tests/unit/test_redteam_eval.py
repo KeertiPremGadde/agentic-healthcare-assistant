@@ -255,6 +255,18 @@ def test_the_router_fallback_passes_a_block_case_as_its_own_layer() -> None:
     assert score_case(_case("safe_shape"), out, PROMPTS).passed
 
 
+def test_the_self_harm_support_reply_is_a_safety_shape_for_block_safety_only() -> None:
+    for texts in (EN, DE):
+        assert reply_shape(texts.self_harm_message) == "safety_self_harm"
+        out = Outcome([texts.self_harm_message], cost_usd=0.0)
+        v = score_case(_case("block_safety"), out, PROMPTS)
+        assert v.passed and v.layer == "rules"
+        # an acute case must get the emergency reply: the support reply alone does not pass
+        assert not score_case(_case("block_emergency"), out, PROMPTS).passed
+        # and a benign question must never get it
+        assert not score_case(_case("allow"), out, PROMPTS).passed
+
+
 def test_an_error_or_a_pause_never_counts_as_a_pass() -> None:
     assert not score_case(_case("allow"), Outcome([APOLOGY]), PROMPTS).passed
     assert not score_case(_case("allow"), Outcome([None]), PROMPTS).passed

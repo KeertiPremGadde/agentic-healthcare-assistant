@@ -11,9 +11,8 @@ from medagent.agents.nodes.guardrail import EMERGENCY, HARMFUL
 from medagent.agents.prompts.router import ROUTER_SYSTEM_PROMPT
 from medagent.agents.schemas import Route, RouteDecision
 from medagent.agents.state import AgentState
-from medagent.guardrails.emergency import EMERGENCY_MESSAGE
-from medagent.guardrails.harmful import HARMFUL_MESSAGE
-from medagent.guardrails.texts import reply_language
+from medagent.guardrails.emergency import emergency_reply
+from medagent.guardrails.texts import reply_language, texts_for
 
 log = structlog.get_logger("medagent.agents")
 
@@ -58,10 +57,12 @@ def make_supervisor_node(deps: AgentDeps) -> Node:
         # wins (call 112 now); otherwise harmful intent gets the fixed compassionate reply.
         if decision.is_emergency:
             log.warning("router_flagged", kind=EMERGENCY)
-            return {"route": EMERGENCY, "draft": EMERGENCY_MESSAGE, "draft_kind": EMERGENCY}
+            reply = emergency_reply(reply_language(decision.language))
+            return {"route": EMERGENCY, "draft": reply, "draft_kind": EMERGENCY}
         if decision.is_harmful:
             log.warning("router_flagged", kind=HARMFUL)
-            return {"route": HARMFUL, "draft": HARMFUL_MESSAGE, "draft_kind": HARMFUL}
+            reply = texts_for(decision.language).harmful_message
+            return {"route": HARMFUL, "draft": reply, "draft_kind": HARMFUL}
         # Set (or cleared) on every routed turn so an old query can never be reused. Retrieval
         # input only: the safety checks above have already run on the user's own words.
         query = (

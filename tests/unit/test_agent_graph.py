@@ -22,6 +22,7 @@ from medagent.agents.schemas import Route, RouteDecision
 from medagent.guardrails.disclaimer import DISCLAIMER
 from medagent.guardrails.dose import DOSE_REFERRAL
 from medagent.guardrails.emergency import EMERGENCY_MESSAGE, SAFETY_NOTICE
+from medagent.guardrails.texts import DE
 from medagent.observability.cost import estimate_cost
 from medagent.observability.tracing import TraceContext
 from medagent.rag.answer import NO_ANSWER, AnswerPayload
@@ -78,13 +79,16 @@ def _thread() -> str:
 
 
 @pytest.mark.parametrize(
-    "message",
-    ["I have crushing chest pain and can't breathe", "Mein Vater ist bewusstlos"],
+    ("message", "expected"),
+    [
+        ("I have crushing chest pain and can't breathe", EMERGENCY_MESSAGE),
+        ("Mein Vater ist bewusstlos", DE.emergency_message),  # the rule's language: German
+    ],
 )
-async def test_emergency_short_circuits_without_any_llm_call(message: str) -> None:
+async def test_emergency_short_circuits_without_any_llm_call(message: str, expected: str) -> None:
     llm = FakeStructuredLLM()  # no script: any LLM call would fail the test
     result = await run_turn(_graph(llm, db=False), _thread(), 1, message=message)
-    assert result.reply == EMERGENCY_MESSAGE
+    assert result.reply == expected
     assert result.route == "emergency"
     assert llm.calls == []
     assert result.cost.usd == 0

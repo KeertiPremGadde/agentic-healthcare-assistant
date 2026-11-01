@@ -1,3 +1,5 @@
+import { POISON_CENTRES } from "@/lib/poison-centres";
+
 /**
  * Make the phone numbers in a fixed safety reply tappable (tel: links).
  *
@@ -13,9 +15,9 @@ export interface Segment {
   tel?: string;
 }
 
-const POISON_CENTRES = "(?:030|0228|0761|0551|06131|089) 19240|0361 730730";
+const POISON_NUMBERS = POISON_CENTRES.map((centre) => centre.number).join("|");
 const NUMBER = new RegExp(
-  `(\\b0800 111 0 111\\b|\\b1-800-222-1222\\b|\\b116 1(?:17|23)\\b|\\b(?:${POISON_CENTRES})\\b|` +
+  `(\\b0800 111 0 111\\b|\\b1-800-222-1222\\b|\\b116 1(?:17|23)\\b|\\b(?:${POISON_NUMBERS})\\b|` +
     "\\b(?:112|911|988)\\b)",
   "g",
 );

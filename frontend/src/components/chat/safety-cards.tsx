@@ -1,5 +1,6 @@
 import { HeartHandshake, Phone, ShieldAlert } from "lucide-react";
 import { linkifyPhones } from "@/lib/phone";
+import { POISON_CENTRES, POISON_DIRECTORY } from "@/lib/poison-centres";
 import { Notice } from "./notice";
 
 const callButton =
@@ -39,18 +40,8 @@ export function EmergencyCard({ text }: { text: string }) {
   );
 }
 
-// Poison information centres (Giftnotruf). Source: the official directory of the Federal Institute
-// for Risk Assessment (BfR), "Giftinformationszentren in Deutschland", marked "Stand: 22.07.2026",
-// emergency lines (Notruf) read from that page on 2026-11-01. Germany has several regional centres
-// and no single number, so only numbers confirmed there are shown; every other region is sent to
-// the official directory. Re-check against the directory before adding or changing a number.
-const POISON_CENTRES = [
-  { city: "Berlin", label: "030 19240" },
-  { city: "München", label: "089 19240" },
-];
-const POISON_DIRECTORY =
-  "https://www.bfr.bund.de/deutsches-produktregister-de-pro/giftinformationszentren-in-deutschland/";
-
+// Poison information centres (Giftnotruf): all seven lines of the official BfR directory, see
+// lib/poison-centres.ts for the source and the rules for changing a number.
 const tel = (label: string) => `tel:${label.replace(/\s/g, "")}`;
 
 /** Self-harm or harm to others: calm and supportive, not an alarm. Numbers are one tap away. */
@@ -89,14 +80,14 @@ export function CrisisCard({ text }: { text: string }) {
               {POISON_CENTRES.map((centre) => (
                 <li key={centre.city}>
                   {centre.city}:{" "}
-                  <a href={tel(centre.label)} className={textLink}>
-                    {centre.label}
+                  <a href={tel(centre.number)} className={textLink}>
+                    {centre.number}
                   </a>
                 </li>
               ))}
             </ul>
             <p>
-              Other regions: see the{" "}
+              Any centre takes your call from anywhere. Source: the{" "}
               <a
                 href={POISON_DIRECTORY}
                 target="_blank"

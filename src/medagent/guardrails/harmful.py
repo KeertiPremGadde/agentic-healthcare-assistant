@@ -42,6 +42,21 @@ _PERSON_DE = (
     r"|freund(?:in)?|chef(?:in)?|nachbar(?:in)?|kolleg(?:e|in)|mutter|vater|eltern|bruder"
     r"|schwester|kind|baby|oma|opa|gro(?:ß|ss)mutter|gro(?:ß|ss)vater|familie)"
 )
+# The same persons with accusative / dative / plural endings ("meinen Nachbarn", "meine Kinder").
+# Only used in patterns that also need first-person intent or a conjugated harm verb: the bare
+# plural next to an infinitive would flag child-safety questions ("dass sich Kinder verletzen").
+_PERSON_DE_INFL = (
+    r"(?:jemand(?:en|em)?|mensch(?:en)?|person(?:en)?|mann|frau|ehemann|ehefrau"
+    r"|partner(?:in|n|innen)?|freund(?:in|e|en|innen)?|chef(?:in|s)?|nachbar(?:in|n|innen)?"
+    r"|kolleg(?:e|in|en|innen)|mutter|vater|eltern|bruder|schwester|kind(?:er|ern)?|baby|oma|opa"
+    r"|gro(?:ß|ss)mutter|gro(?:ß|ss)vater|familie|schwieger(?:mutter|vater|eltern|sohn|tochter)"
+    r"|sohn|tochter|enkel(?:in|kind)?|lehrer(?:in)?|patient(?:in|en)?)"
+)
+_HARM_VERB_INTENT_DE = r"(?:vergiften|t(?:ö|oe)ten|umbringen|ermorden|verletzen)"
+# Protective or reflexive wording in the same clause: "damit Kinder sich nicht verletzen".
+_NOT_PROTECTIVE = (
+    r"(?!.{0,50}\b(?:sch(?:ü|ue)tz\w*|verhinder\w*|vorbeug\w*|vermeid\w*|davor|sich)\b)"
+)
 # Up to two filler words (articles, possessives, an adjective) between verb and person.
 _GAP = r"(?:\w+\s+){0,2}"
 _HARM_VERB_EN = (
@@ -81,10 +96,14 @@ _PATTERNS: dict[str, list[str]] = {
             r"(?:t(?:ö|oe)dlich|letal)"
         ),
         r"\bso (?:that )?i (?:don'?t|do not|never) wake up\b",
-        _de(r"\bdosis\b.{0,25}\b(?:t(?:ö|oe)dlich|letal)"),
-        _de(r"\b(?:t(?:ö|oe)dlich|letal)\w*\s+(?:dosis|dosierung|menge)\b"),
         _de(
-            r"\bwie\s?(?:viele?|viel)\b.{0,60}\b(?:um|damit|bis)\b.{0,30}"
+            r"\b(?:dosis|menge)\b.{0,40}\b(?:t(?:ö|oe)dlich|letal)"
+        ),  # "welche Menge ... ist tödlich"
+        _de(r"\b(?:t(?:ö|oe)dlich|letal)\w*\s+(?:dosis|dosierung|menge)\b"),
+        # "mit wie vielen Tabletten kann man sich umbringen"
+        _de(r"\bwie\s?viel\w*\b.{0,60}\b(?:sich|mich)\s+(?:umzubringen|umbringen|t(?:ö|oe)ten)"),
+        _de(
+            r"\bwie\s?(?:viele?|viel)\b.{0,60}\b(?:um|damit|bis|zum)\b.{0,30}"
             r"\b(?:zu sterben|sterben|stirbt|sterbe|t(?:ö|oe)ten|umzubringen|umbringen|zu vergiften"
             r"|vergiften|tot)\b"
         ),
@@ -121,6 +140,31 @@ _PATTERNS: dict[str, list[str]] = {
         ),
         # (up to two words may sit in between: "jemanden unbemerkt umbringen")
         _de(rf"\b{_PERSON_DE}\s+(?:\w+\s+){{0,2}}(?:zu\s+)?{_HARM_VERB_DE}\b"),
+        # first-person intent with inflected persons: "ich will meinen Nachbarn vergiften"
+        _de(
+            r"\b(?:ich|wir)\s+(?:will|wollen|m(?:ö|oe)chte|m(?:ö|oe)chten|werde|werden|muss|plane"
+            r"|habe vor|w(?:ü|ue)rde gerne?)\s+"
+            rf"{_NOT_PROTECTIVE}(?:\w+\s+){{0,2}}{_PERSON_DE_INFL}\b(?:\s+\w+){{0,3}}?\s+"
+            rf"{_HARM_VERB_INTENT_DE}\b"
+        ),
+        # "wie kann ich meine Kollegen vergiften"
+        _de(
+            r"\bwie (?:kann|k(?:ö|oe)nnte|soll|muss|w(?:ü|ue)rde)\s+ich\s+"
+            rf"{_NOT_PROTECTIVE}(?:\w+\s+){{0,2}}{_PERSON_DE_INFL}\b(?:\s+\w+){{0,3}}?\s+"
+            rf"{_HARM_VERB_INTENT_DE}\b"
+        ),
+        # conjugated harm verb: "wie vergifte ich meine Schwiegermutter", "wie töte ich jemanden"
+        _de(
+            r"\bwie\s+(?:vergifte|t(?:ö|oe)te|ermorde|verletze)\s+ich\s+"
+            rf"{_NOT_PROTECTIVE}(?:\w+\s+){{0,2}}{_PERSON_DE_INFL}\b"
+        ),
+        # separable verb, only when "um" ends the clause: "ich bringe meinen Chef um." but not
+        # "ich bringe meinen Vater um 9 Uhr zum Arzt"
+        _de(
+            r"\bbring\w*\s+(?:ich\s+|wir\s+)?(?:\w+\s+){0,3}?"
+            rf"{_PERSON_DE_INFL}\b(?:\s+\w+){{0,3}}?\s+um"
+            r"(?=\s*(?:[.,!?;:]|$|und\b|weil\b|damit\b))"
+        ),
         _de(
             r"\b(?:gift|substanz|mittel)\b.{0,30}\b(?:nicht nachweisbar|nicht auff(?:ä|ae)llt"
             r"|unauff(?:ä|ae)llig|nicht erkennbar|spurlos)\b"
@@ -140,6 +184,11 @@ _PATTERNS: dict[str, list[str]] = {
         _de(
             r"\b(?:schmerzlos|schmerzfrei|sanft|schnell)\w*\s+(?:weg|methode|art)\s+"
             r"(?:zu sterben|sich umzubringen|sich das leben zu nehmen)"
+        ),
+        # "wie kann man sich schmerzlos umbringen"
+        _de(
+            r"\b(?:sich|mich)\s+(?:schmerzlos|schmerzfrei|sanft|schnell|ohne schmerzen)\w*\s+"
+            r"(?:umzubringen|umbringen|t(?:ö|oe)ten)"
         ),
     ],
 }

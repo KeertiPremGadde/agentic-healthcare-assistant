@@ -23,6 +23,7 @@ class RawDocument:
     attribution: str
     is_public: bool  # False = local dev only; excluded when KB_PUBLIC_ONLY=true
     url: str | None = None
+    synonyms: tuple[str, ...] = ()  # "Also called" names, used in the chunk header
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,6 +49,7 @@ class Candidate:
     text_rank: int | None = None  # 1-based rank in the full-text list, None if absent
     fused_score: float = 0.0  # reciprocal-rank-fusion score
     final_score: float = field(default=0.0)  # set by the reranker
+    context_header: str = ""  # topic title + synonyms; read by rerankers, never shown or cited
 
     @property
     def citation(self) -> str:

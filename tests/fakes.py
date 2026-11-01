@@ -133,10 +133,12 @@ class FakeStructuredLLM:
 class FakeRetriever:
     def __init__(self, candidates: list[Candidate] | None = None) -> None:
         self.candidates = candidates or []
+        self.queries: list[str] = []  # what retrieval was asked, in order
 
     def search(
         self, session: Session, query: str, k: int = 5, public_only: bool = False
     ) -> list[Candidate]:
+        self.queries.append(query)
         return self.candidates[:k]
 
 

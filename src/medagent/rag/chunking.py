@@ -8,11 +8,24 @@ from collections.abc import Iterable
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from medagent.rag.types import Chunk, PageText
+from medagent.rag.types import Chunk, PageText, RawDocument
 
 CHUNK_SIZE = 1200
 CHUNK_OVERLAP = 150
 MIN_CHUNK_CHARS = 40  # drop page numbers, headers and other noise
+
+
+def context_header(doc: RawDocument) -> str:
+    """One line naming the topic, prepended to every chunk before embedding and full-text indexing.
+
+    A mid-topic chunk says nothing about which topic it belongs to ("symptoms of diabetes" then
+    matches a risk-factors chunk of another page). Paged sources (PDF titles are file names): none.
+    """
+    if any(p.page is not None for p in doc.pages):
+        return ""
+    if doc.synonyms:
+        return f"{doc.title} (also called: {', '.join(doc.synonyms)})"
+    return doc.title
 
 
 def chunk_pages(

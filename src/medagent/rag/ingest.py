@@ -18,7 +18,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from medagent.db.models import KbChunk, KbDocument
-from medagent.rag.chunking import chunk_pages
+from medagent.rag.chunking import chunk_pages, context_header
 from medagent.rag.embeddings import Embedder, get_embedder
 from medagent.rag.loaders import DocumentLoader, MedlinePlusLoader, PdfLoader
 from medagent.rag.types import RawDocument
@@ -27,6 +27,7 @@ log = logging.getLogger(__name__)
 
 RAW_DIR = Path("data/raw")
 EMBED_BATCH = 64
+HEADER_VERSION = 1  # bump when the header format changes: the hash then forces a re-ingest
 
 
 @dataclass
@@ -51,7 +52,12 @@ def document_hash(doc: RawDocument) -> str:
         h.update(b"\x00")
     for page in doc.pages:
         h.update(f"{page.page}\x00{page.text}\x00".encode())
+    h.update(f"header:{HEADER_VERSION}\x00{context_header(doc)}".encode())
     return h.hexdigest()
+
+
+def _embedding_text(header: str, text: str) -> str:
+    return f"{header}\n\n{text}" if header else text
 
 
 def ingest_documents(
@@ -70,13 +76,16 @@ def ingest_documents(
             continue
 
         chunks = chunk_pages(doc.pages)
+        header = context_header(doc)
         if not chunks:
             report.skipped += 1
             continue
         vectors: list[list[float]] = []
         for start in range(0, len(chunks), EMBED_BATCH):
             batch = chunks[start : start + EMBED_BATCH]
-            vectors.extend(embedder.embed_documents([c.text for c in batch]))
+            vectors.extend(
+                embedder.embed_documents([_embedding_text(header, c.text) for c in batch])
+            )
 
         if existing is None:
             existing = KbDocument(source_key=doc.source_key, external_id=doc.external_id)
@@ -93,7 +102,13 @@ def ingest_documents(
         existing.is_public = doc.is_public
         existing.content_hash = digest
         existing.chunks = [
-            KbChunk(chunk_index=c.index, page=c.page, content=c.text, embedding=v)
+            KbChunk(
+                chunk_index=c.index,
+                page=c.page,
+                content=c.text,
+                context_header=header,
+                embedding=v,
+            )
             for c, v in zip(chunks, vectors, strict=True)
         ]
         report.chunks += len(chunks)

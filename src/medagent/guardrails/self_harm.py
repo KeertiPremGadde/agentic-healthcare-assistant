@@ -26,7 +26,7 @@ they are answered with a safety notice, like the other red-flag questions.
 import re
 from dataclasses import dataclass
 
-from medagent.guardrails.emergency import _is_informational, _normalise
+from medagent.guardrails.emergency import WISH_NOT_WAKE_EN, _is_informational, _normalise
 
 
 class _German(str):
@@ -89,6 +89,7 @@ _PASSIVE_EN = [
     rf"\b(?:can'?t|cannot) (?:take|bear|stand|do) (?:this|my) (?:life|existence)"
     rf"(?=\s*(?:anymore|any more|much longer)|{_END_INNER})",
     r"\bdisappear\w* (?:for good|forever)\b",
+    *WISH_NOT_WAKE_EN,  # "I wish I could go to sleep and not wake up", "hoping I won't wake up"
 ]
 _EXPLICIT_EN = [
     rf"\bmak(?:e|es|ing|made) {_REFL} bleed\b",
@@ -136,6 +137,10 @@ _PASSIVE_DE = [
     r"\b(?:eine|ne) last für (?:alle|andere|jeden|meine (?:familie|eltern|freunde|kinder))\b",
     r"\b(?:halte|ertrage|schaffe)\b.{0,12}\b(?:dieses|mein) leben nicht mehr\b",
     r"\bfür immer verschwinden\b",
+    # a wish not to wake up ("... würde ich nicht mehr aufwachen", "ich wache nicht mehr auf"); a
+    # PURPOSE ("damit ich nicht mehr aufwache") is a method question and is answered by harmful.py
+    r"\bnicht mehr aufwach\w*|\bnicht mehr aufzuwachen\b",
+    r"\bhoffe\b.{0,30}\bwache\b(?:\s+\w+){0,2}\s+nicht mehr auf\b",
 ]
 _EXPLICIT_DE = [
     # "fügt sich Schnitte am Arm zu", "dass sich meine Schwester selbst Schmerzen zufügt"

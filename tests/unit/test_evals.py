@@ -287,6 +287,15 @@ def test_spend_cap_stops_new_work() -> None:
     assert spend.as_dict()["calls"] == 2
 
 
+def test_threshold_dev_set_does_not_overlap_the_golden_set() -> None:
+    dev, golden = datasets.load_threshold_dev().items, datasets.load_rag().items
+    assert {q.question.lower() for q in dev}.isdisjoint({q.question.lower() for q in golden})
+    dev_topics = {t for q in dev if q.kind == "in_scope" for t in q.expected_topics}
+    golden_topics = {t for q in golden for t in q.expected_topics}
+    assert dev_topics.isdisjoint(golden_topics), "tuning on a topic the golden set confirms on"
+    assert {q.kind for q in dev} == {"in_scope", "near_miss", "off_topic"}
+
+
 @pytest.mark.parametrize("name", datasets.NAMES)
 def test_datasets_are_frozen_at_one_point_zero(name: str) -> None:
     assert datasets.current_hashes()[name]["version"] == "1.0"
@@ -379,6 +388,7 @@ def _mutated(suite: str, metric: str, value: float | None) -> list[dict[str, obj
         ("rag_judged", "faithfulness", 0.70),  # gate: below baseline minus margin
         ("rag_judged", "judge_nan_rate", 0.06),  # hard: too many unscored cells
         ("rag", "in_scope_answer_rate", None),  # a missing metric is a failure, not a pass
+        ("retrieval", "en_false_abstain_at_threshold", 0.05),  # two in-scope questions refused
     ],
 )
 def test_gate_fails_when_a_rule_is_broken(suite: str, metric: str, value: float | None) -> None:
@@ -449,3 +459,120 @@ def test_assert_off_raises_when_a_library_would_still_report(
     monkeypatch.setitem(sys.modules, "ragas._analytics", fake)
     with pytest.raises(RuntimeError, match="ragas telemetry is on"):
         telemetry.assert_off()
+
+
+# -- German answers and the translated query (change 3) -------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("answer", "expected"),
+    [
+        ("Typische Symptome sind starker Durst und Müdigkeit [MedlinePlus: Diabetes].", True),
+        (
+            "Die Symptome können bei Kindern und Erwachsenen sehr verschieden sein, auch "
+            "nicht immer eindeutig [MedlinePlus: Diabetes].",
+            True,
+        ),
+        (
+            "Symptoms include thirst and tiredness, and they can be mild [MedlinePlus: Diabetes].",
+            False,
+        ),
+        # the citation label alone must not decide: an English answer with a German-looking title
+        ("The page [MedlinePlus: Der die das und ist] says it is common and may recur.", False),
+        ("I don't know: the knowledge base doesn't contain enough relevant information.", False),
+        ("", False),
+    ],
+)
+def test_answer_is_german(answer: str, expected: bool) -> None:
+    assert metrics.answer_is_german(answer) is expected
+
+
+def test_rag_metrics_report_translation_and_answer_language_for_german() -> None:
+    qs = [q for q in datasets.load_rag().items if q.kind == "in_scope_de"][:3]
+    recs = [
+        metrics.RagRecord(
+            qs[0].id,
+            "in_scope_de",
+            True,
+            ("Diabetes",),
+            False,
+            translated=True,
+            answered_in_german=True,
+        ),
+        metrics.RagRecord(
+            qs[1].id,
+            "in_scope_de",
+            True,
+            ("Gout",),
+            False,
+            translated=True,
+            answered_in_german=False,
+        ),
+        metrics.RagRecord(qs[2].id, "in_scope_de", False, (), False, translated=False),
+    ]
+    m = metrics.rag_metrics(qs, recs)
+    assert m["de_translation_rate"] == pytest.approx(0.6667, abs=1e-4)
+    assert m["de_answered_in_german_rate"] == 0.5  # of the two answered; the refusal is not counted
+    assert m["de_answer_rate"] == pytest.approx(0.6667, abs=1e-4)
+
+
+@pytest.mark.parametrize(
+    ("decision", "expected"),
+    [
+        (
+            dict(route=Route.MEDICAL_QUESTION, language="de", search_query_en="gout symptoms"),
+            ("gout symptoms", "medical_question"),
+        ),
+        (
+            dict(route=Route.MEDICAL_QUESTION, language="en", search_query_en="paraphrase"),
+            (None, "medical_question"),
+        ),
+        (
+            dict(route=Route.FIND_DOCTOR, language="de", search_query_en="gout symptoms"),
+            (None, "find_doctor"),
+        ),  # the app only translates for the medical route
+    ],
+)
+async def test_the_eval_applies_the_apps_translation_rule(
+    decision: dict[str, object], expected: tuple[str | None, str]
+) -> None:
+    from medagent.agents.schemas import RouteDecision
+    from medagent.evals.suites import _english_query
+    from tests.fakes import FakeStructuredLLM
+
+    llm = FakeStructuredLLM({RouteDecision: [RouteDecision(is_emergency=False, **decision)]})  # type: ignore[arg-type]
+    assert await _english_query(llm, Spend(1.0), "Was ist Gicht?") == expected  # type: ignore[arg-type]
+
+
+# -- RAG_MIN_SCORE plateau (change 4) ---------------------------------------------------------
+
+
+def _rec(id_: str, kind: str, sim: float, expect: str | None = None) -> metrics.RetrievalRecord:
+    return metrics.RetrievalRecord(id_, kind, 1, sim, (), expect)
+
+
+def test_threshold_plateau_margins_and_unrefusable_negatives() -> None:
+    records = [
+        _rec("i1", "in_scope", 0.80),
+        _rec("i2", "in_scope", 0.72),  # the lowest in-scope question
+        _rec("n1", "near_miss", 0.69, "abstain"),  # the highest negative a threshold can refuse
+        _rec("n2", "near_miss", 0.60, "abstain"),
+        _rec("n3", "near_miss", 0.78, "abstain"),  # above the lowest in-scope: no threshold helps
+        _rec("r1", "near_miss", 0.74, "refer"),  # may be answered with a referral: ignored
+        _rec("o1", "off_topic", 0.50),
+    ]
+    p = metrics.threshold_plateau(records, 0.70)
+    assert p["lowest_in_scope"] == 0.72
+    assert p["highest_refusable_negative"] == 0.69
+    assert p["unrefusable_negatives"] == ["n3"]
+    assert p["margin_to_in_scope"] == pytest.approx(0.02)
+    assert p["margin_to_negative"] == pytest.approx(0.01)
+
+
+def test_threshold_plateau_goes_negative_when_the_threshold_is_outside_it() -> None:
+    records = [_rec("i1", "in_scope", 0.72), _rec("n1", "near_miss", 0.69, "abstain")]
+    too_high = metrics.threshold_plateau(records, 0.75)
+    assert too_high["margin_to_in_scope"] == pytest.approx(-0.03)  # would refuse i1
+    too_low = metrics.threshold_plateau(records, 0.65)
+    assert too_low["margin_to_negative"] == pytest.approx(-0.04)  # would answer n1
+    assert metrics.threshold_plateau([_rec("i1", "in_scope", 0.8)], 0.7) == {}

@@ -16,7 +16,7 @@ from medagent.agents.schemas import Route
 
 DATASET_DIR = Path(__file__).resolve().parents[3] / "evals" / "datasets"
 LOCK_FILE = DATASET_DIR / "datasets.lock.json"
-NAMES = ("rag_golden", "routing_golden", "booking_scenarios")
+NAMES = ("rag_golden", "routing_golden", "booking_scenarios", "threshold_dev")
 
 RagKind = Literal["in_scope", "in_scope_de", "near_miss", "off_topic"]
 
@@ -111,6 +111,13 @@ def current_hashes() -> dict[str, dict[str, str]]:
 
 def load_rag() -> Dataset[RagQuestion]:
     data, digest = _read("rag_golden")
+    items = [RagQuestion.model_validate(q) for q in data["questions"]]  # type: ignore[attr-defined]
+    return Dataset(version=str(data["version"]), items=items, sha256=digest)
+
+
+def load_threshold_dev() -> Dataset[RagQuestion]:
+    """The RAG_MIN_SCORE tuning set: same schema as the golden set, never part of its score."""
+    data, digest = _read("threshold_dev")
     items = [RagQuestion.model_validate(q) for q in data["questions"]]  # type: ignore[attr-defined]
     return Dataset(version=str(data["version"]), items=items, sha256=digest)
 

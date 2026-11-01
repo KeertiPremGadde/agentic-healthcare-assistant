@@ -1,6 +1,7 @@
 """Pure scoring functions: no LLM, no database, no clock. Everything here is unit-tested."""
 
 import math
+import re
 from collections import Counter, defaultdict
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
@@ -49,6 +50,7 @@ class RetrievalRecord:
     rank: int | None
     max_sim: float
     top_titles: tuple[str, ...]
+    expect: str | None = None  # near-miss label: "abstain" or "refer" (see the golden set)
 
 
 def retrieval_metrics(
@@ -87,6 +89,36 @@ def threshold_sweep(
             }
         )
     return rows
+
+
+def threshold_plateau(records: Sequence[RetrievalRecord], threshold: float) -> dict[str, object]:
+    """How much room `RAG_MIN_SCORE` has on this question set.
+
+    Any threshold between the highest negative it can still refuse and the lowest in-scope
+    question gives identical outcomes (the "plateau"). A negative scoring above the lowest in-scope
+    question cannot be refused by any threshold (only the LLM's own check can) and is listed
+    separately. `refer` near-misses are excluded: they may be answered with a referral.
+    A margin of 0 or less on either side means the current threshold already misclassifies
+    something here.
+    """
+    in_scope = [r.max_sim for r in records if r.kind == "in_scope"]
+    negatives = [
+        r
+        for r in records
+        if r.kind == "off_topic" or (r.kind == "near_miss" and r.expect == "abstain")
+    ]
+    if not in_scope or not negatives:
+        return {}
+    floor = min(in_scope)
+    refusable = [r.max_sim for r in negatives if r.max_sim < floor]
+    ceiling = max(refusable, default=0.0)
+    return {
+        "lowest_in_scope": round(floor, 4),
+        "highest_refusable_negative": round(ceiling, 4),
+        "unrefusable_negatives": sorted(r.id for r in negatives if r.max_sim >= floor),
+        "margin_to_in_scope": round(floor - threshold, 4),
+        "margin_to_negative": round(threshold - ceiling, 4),
+    }
 
 
 # -- routing --------------------------------------------------------------------------------
@@ -158,6 +190,8 @@ class RagRecord:
     cited_titles: tuple[str, ...]
     answer_has_dose: bool
     route: str | None = None  # off-topic questions are routed, not answered
+    translated: bool = False  # German: the router produced an English search query
+    answered_in_german: bool = False  # German: the answer text is German (citations stay English)
 
 
 def rag_metrics(
@@ -181,11 +215,98 @@ def rag_metrics(
         "in_scope_citation_hit": rate(sum(r.grounded and cited_ok(r) for r in ins), len(ins)),
         "de_answer_rate": rate(sum(r.grounded for r in de), len(de)),
         "de_citation_hit": rate(sum(r.grounded and cited_ok(r) for r in de), len(de)),
+        "de_translation_rate": rate(sum(r.translated for r in de), len(de)),
+        "de_answered_in_german_rate": rate(
+            sum(r.answered_in_german for r in de if r.grounded), sum(r.grounded for r in de)
+        ),
         "near_miss_abstain_rate": rate(sum(not r.grounded for r in near), len(near)),
         "hard_negative_abstain_rate": rate(sum(not r.grounded for r in hard), len(hard)),
         "off_topic_redirect_rate": rate(sum(r.route == "out_of_scope" for r in off), len(off)),
         "dose_leak_count": float(sum(r.answer_has_dose for r in records)),
     }
+
+
+_GERMAN_WORDS = frozenset(
+    [
+        "der",
+        "die",
+        "das",
+        "und",
+        "ist",
+        "sind",
+        "nicht",
+        "mit",
+        "von",
+        "zu",
+        "den",
+        "dem",
+        "ein",
+        "eine",
+        "bei",
+        "auch",
+        "oder",
+        "für",
+        "auf",
+        "kann",
+        "können",
+        "werden",
+        "wird",
+        "sich",
+        "als",
+        "zum",
+        "zur",
+        "im",
+        "des",
+        "einer",
+        "eines",
+        "sowie",
+        "wenn",
+        "oft",
+        "häufig",
+    ]
+)
+_ENGLISH_WORDS = frozenset(
+    [
+        "the",
+        "and",
+        "is",
+        "are",
+        "of",
+        "to",
+        "with",
+        "in",
+        "for",
+        "can",
+        "or",
+        "may",
+        "not",
+        "a",
+        "an",
+        "that",
+        "this",
+        "be",
+        "by",
+        "on",
+        "as",
+        "it",
+        "from",
+        "you",
+        "which",
+        "often",
+        "usually",
+    ]
+)
+
+
+def answer_is_german(answer: str) -> bool:
+    """Is the answer text written in German? Counts common function words after dropping the
+    citation labels, which stay English on purpose. Crude, deterministic, eval-only; the fixed
+    English texts ("I don't know", the disclaimer) are what it is meant to tell apart."""
+    body = re.sub(r"\[[^\]]*\]", " ", answer).lower()
+    words = re.findall(r"[a-zäöüß]+", body)
+    german = sum(w in _GERMAN_WORDS for w in words)
+    english = sum(w in _ENGLISH_WORDS for w in words)
+    return german >= 2 and german > english
 
 
 def mean_and_range(values: Mapping[int, float | None]) -> dict[str, float | None]:

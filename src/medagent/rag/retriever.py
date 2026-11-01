@@ -6,12 +6,14 @@ catches exact terms (drug names, acronyms). Why RRF: the two scores live on diff
 but ranks are comparable, so we fuse ranks instead of scores.
 """
 
+import threading
 from collections.abc import Sequence
-from typing import Protocol
+from typing import Any, Protocol
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from medagent.core.config import Settings, get_settings
 from medagent.rag.embeddings import Embedder
 from medagent.rag.types import Candidate
 
@@ -51,8 +53,52 @@ class ScoreReranker:
         return sorted(candidates, key=lambda c: c.final_score, reverse=True)
 
 
+class CrossEncoderReranker:
+    """Reads the query and each passage together, so it can tell a chunk that is *about* the topic
+    from one that merely sits near it in embedding space.
+
+    Only the `top_n` best candidates by fused rank are scored (cost grows linearly with the number
+    of pairs); the rest sink below them. `final_score` is the model's raw relevance logit, not a
+    probability: it orders candidates but must never be compared with `rag_min_score`.
+    """
+
+    def __init__(self, model_name: str, top_n: int = 20, encoder: Any = None) -> None:
+        self.model_name = model_name
+        self.top_n = top_n
+        self._encoder = encoder
+        self._lock = threading.Lock()
+
+    def _get_encoder(self) -> Any:
+        with self._lock:  # the first call downloads / loads the model; do it once
+            if self._encoder is None:
+                from fastembed.rerank.cross_encoder import TextCrossEncoder  # lazy: slow import
+
+                self._encoder = TextCrossEncoder(model_name=self.model_name)
+            return self._encoder
+
+    def rerank(self, query: str, candidates: list[Candidate]) -> list[Candidate]:
+        if not candidates:
+            return []
+        by_fusion = sorted(candidates, key=lambda c: c.fused_score, reverse=True)
+        head, tail = by_fusion[: self.top_n], by_fusion[self.top_n :]
+        scores = list(self._get_encoder().rerank(query, [c.content for c in head]))
+        for c, s in zip(head, scores, strict=True):
+            c.final_score = float(s)
+        floor = min(c.final_score for c in head) - 1.0
+        for c in tail:
+            c.final_score = floor
+        return sorted(head, key=lambda c: c.final_score, reverse=True) + tail
+
+
+def get_reranker(settings: Settings | None = None) -> Reranker:
+    settings = settings or get_settings()
+    if settings.reranker == "cross_encoder":
+        return CrossEncoderReranker(settings.reranker_model, settings.reranker_top_n)
+    return ScoreReranker()
+
+
 _COLUMNS = """
-    c.id, c.content, c.page, d.title, d.source_key, d.url, d.attribution,
+    c.id, c.content, c.context_header, c.page, d.title, d.source_key, d.url, d.attribution,
     1 - (c.embedding <=> CAST(:qvec AS vector)) AS sim
 """
 _FROM = "FROM kb_chunks c JOIN kb_documents d ON d.id = c.document_id"
@@ -115,5 +161,6 @@ def _to_candidate(row: object) -> Candidate:
         url=row.url,  # type: ignore[attr-defined]
         attribution=row.attribution,  # type: ignore[attr-defined]
         page=row.page,  # type: ignore[attr-defined]
+        context_header=row.context_header,  # type: ignore[attr-defined]
         vector_sim=float(row.sim),  # type: ignore[attr-defined]
     )

@@ -1,0 +1,1687 @@
+{
+  "schema_version": 1,
+  "suite": "booking",
+  "run_id": "booking-20261101T160349Z",
+  "started_at": "2026-11-01T16:03:49+00:00",
+  "git_sha": "1d1c1a2",
+  "model": "claude-haiku-5-5",
+  "datasets": {
+    "booking_scenarios": {
+      "version": "1.0",
+      "sha256": "a6c65206b1f4d29efadf3bdcd76e6a6a7d2a6dab1a0fdbb658324c7353abc3f8"
+    }
+  },
+  "params": {
+    "scenarios": 27,
+    "clock": "2026-11-02T09:00:00+01:00"
+  },
+  "metrics": {
+    "task_success": 1.0,
+    "scenarios_run": 27,
+    "hard_violation_count": 0,
+    "by_category": {
+      "cancel": 1.0,
+      "change_time": 1.0,
+      "constraint_day_off": 1.0,
+      "constraint_holiday": 1.0,
+      "constraint_hours": 1.0,
+      "constraint_past": 1.0,
+      "constraint_taken": 1.0,
+      "constraint_weekend": 1.0,
+      "decline": 1.0,
+      "happy_path": 1.0,
+      "isolation": 1.0,
+      "missing_info": 1.0,
+      "patient_injection": 1.0,
+      "suggest_then_book": 1.0,
+      "unknown_doctor": 1.0
+    }
+  },
+  "hard_violations": [],
+  "cost": {
+    "input_tokens": 78412,
+    "output_tokens": 3357,
+    "usd": 0.00952,
+    "calls": 61
+  },
+  "aborted": null,
+  "items": [
+    {
+      "id": "b01",
+      "category": "happy_path",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Booked: Dr. Michael Johnson, Tue 3 Nov 2026, 10:00 (Europe/Berlin). Confirmation #A-0001."
+      ],
+      "cost_usd": 0.00028,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Book an appointment with Dr. Michael Johnson tomorrow at 10:00."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Tue 3 Nov 2026, 10:00 with Dr. Michael Johnson?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. Michael Johnson, Tue 3 Nov 2026, 10:00 (Europe/Berlin). Confirmation #A-0001."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Michael Johnson"
+          }
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "6",
+            "2026-11-03 10:00:00+01:00"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "6",
+            "2026-11-03 09:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b02",
+      "category": "happy_path",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Booked: Dr. Sarah Wilson, Fri 6 Nov 2026, 12:00 (Europe/Berlin). Confirmation #A-0002."
+      ],
+      "cost_usd": 0.00028,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "I'd like to see Dr. Sarah Wilson on Friday afternoon."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Fri 6 Nov 2026, 12:00 with Dr. Sarah Wilson?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. Sarah Wilson, Fri 6 Nov 2026, 12:00 (Europe/Berlin). Confirmation #A-0002."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Sarah Wilson"
+          }
+        },
+        {
+          "name": "check_availability",
+          "args": [
+            "7",
+            "2026-11-06"
+          ],
+          "kwargs": {
+            "days": "14",
+            "time_of_day": "afternoon",
+            "limit": "1"
+          }
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "7",
+            "2026-11-06 11:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b03",
+      "category": "happy_path",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Booked: Dr. Olivia Martinez, Thu 5 Nov 2026, 09:00 (Europe/Berlin). Confirmation #A-0003."
+      ],
+      "cost_usd": 0.00037,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Ich möchte einen Termin bei Dr. Olivia Martinez am Donnerstag um 9 Uhr."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Thu 5 Nov 2026, 09:00 with Dr. Olivia Martinez?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. Olivia Martinez, Thu 5 Nov 2026, 09:00 (Europe/Berlin). Confirmation #A-0003."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Olivia Martinez"
+          }
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "8",
+            "2026-11-05 09:00:00+01:00"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "8",
+            "2026-11-05 08:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b04",
+      "category": "happy_path",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Booked: Dr. James Taylor, Wed 11 Nov 2026, 08:00 (Europe/Berlin). Confirmation #A-0004."
+      ],
+      "cost_usd": 0.00028,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Book Dr. James Taylor on Wednesday 11 November in the morning."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Wed 11 Nov 2026, 08:00 with Dr. James Taylor?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. James Taylor, Wed 11 Nov 2026, 08:00 (Europe/Berlin). Confirmation #A-0004."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "James Taylor"
+          }
+        },
+        {
+          "name": "check_availability",
+          "args": [
+            "10",
+            "2026-11-11"
+          ],
+          "kwargs": {
+            "days": "14",
+            "time_of_day": "morning",
+            "limit": "1"
+          }
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "10",
+            "2026-11-11 07:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b05",
+      "category": "happy_path",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Booked: Dr. Emily Brown, Thu 5 Nov 2026, 14:30 (Europe/Berlin). Confirmation #A-0005."
+      ],
+      "cost_usd": 0.00028,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Make me an appointment with Dr. Emily Brown on Thursday 5 November at 14:30."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Thu 5 Nov 2026, 14:30 with Dr. Emily Brown?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. Emily Brown, Thu 5 Nov 2026, 14:30 (Europe/Berlin). Confirmation #A-0005."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Emily Brown"
+          }
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "4",
+            "2026-11-05 14:30:00+01:00"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "4",
+            "2026-11-05 13:30:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b06",
+      "category": "happy_path",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Booked: Dr. Robert White, Tue 3 Nov 2026, 13:00 (Europe/Berlin). Confirmation #A-0006."
+      ],
+      "cost_usd": 0.00028,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Please book Dr. Robert White for tomorrow afternoon."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Tue 3 Nov 2026, 13:00 with Dr. Robert White?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. Robert White, Tue 3 Nov 2026, 13:00 (Europe/Berlin). Confirmation #A-0006."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Robert White"
+          }
+        },
+        {
+          "name": "check_availability",
+          "args": [
+            "12",
+            "2026-11-03"
+          ],
+          "kwargs": {
+            "days": "14",
+            "time_of_day": "afternoon",
+            "limit": "1"
+          }
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "12",
+            "2026-11-03 12:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b07",
+      "category": "suggest_then_book",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Based on what you describe, a Dermatologist is the right specialist to see.\nDoctors you can book:\n1. Dr. Olivia Martinez - Berlin (German, English)\n2. Dr. Daniel Anderson - Berlin (German, English)\n3. Dr. Angelique Benthin - Leipzig (German, English, French)\n4. Dr. Mehdi Metz - Leipzig (German, English, French)\nTell me which doctor and when, for example: \"Book number 1 next Tuesday afternoon\".\n\nThis suggestion is based on what you described and is not a diagnosis. If symptoms are severe or getting worse, seek urgent care.",
+        "Booked: Dr. Olivia Martinez, Tue 3 Nov 2026, 08:00 (Europe/Berlin). Confirmation #A-0007."
+      ],
+      "cost_usd": 0.00059,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "I have an itchy rash on my arm, who should I see?"
+        },
+        {
+          "role": "assistant",
+          "text": "Based on what you describe, a Dermatologist is the right specialist to see.\nDoctors you can book:\n1. Dr. Olivia Martinez - Berlin (German, English)\n2. Dr. Daniel Anderson - Berlin (German, English)\n3. Dr. Angelique Benthin - Leipzig (German, English, French)\n4. Dr. Mehdi Metz - Leipzig (German, English, French)\nTell me which doctor and when, for example: \"Book number 1 next Tuesday afternoon\".\n\nThis suggestion is based on what you described and is not a diagnosis. If symptoms are severe or getting worse, seek urgent care."
+        },
+        {
+          "role": "user",
+          "text": "Book number 1 tomorrow morning."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Tue 3 Nov 2026, 08:00 with Dr. Olivia Martinez?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. Olivia Martinez, Tue 3 Nov 2026, 08:00 (Europe/Berlin). Confirmation #A-0007."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [
+            "Dermatologist",
+            "None",
+            "None"
+          ],
+          "kwargs": {
+            "limit": "5"
+          }
+        },
+        {
+          "name": "get_doctor",
+          "args": [
+            "8"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "check_availability",
+          "args": [
+            "8",
+            "2026-11-03"
+          ],
+          "kwargs": {
+            "days": "14",
+            "time_of_day": "morning",
+            "limit": "1"
+          }
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "8",
+            "2026-11-03 07:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b08",
+      "category": "suggest_then_book",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Based on what you describe, a ENT Specialist is the right specialist to see.\nDoctors you can book:\n1. Dr. Emily Brown - Berlin (German, English)\n2. Dr. David Lee - Berlin (German, English)\n3. Dr. Kordula Wagner - Köln (German, English, Spanish)\n4. Dr. Sedat Niemeier - Hannover (German, English)\n5. Dr. Hellmut Christoph - München (German, English)\nTell me which doctor and when, for example: \"Book number 1 next Tuesday afternoon\".\n\nThis suggestion is based on what you described and is not a diagnosis. If symptoms are severe or getting worse, seek urgent care.",
+        "Booked: Dr. David Lee, Fri 6 Nov 2026, 11:00 (Europe/Berlin). Confirmation #A-0008."
+      ],
+      "cost_usd": 0.0006,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "My ear has been hurting for days, which doctor should I see?"
+        },
+        {
+          "role": "assistant",
+          "text": "Based on what you describe, a ENT Specialist is the right specialist to see.\nDoctors you can book:\n1. Dr. Emily Brown - Berlin (German, English)\n2. Dr. David Lee - Berlin (German, English)\n3. Dr. Kordula Wagner - Köln (German, English, Spanish)\n4. Dr. Sedat Niemeier - Hannover (German, English)\n5. Dr. Hellmut Christoph - München (German, English)\nTell me which doctor and when, for example: \"Book number 1 next Tuesday afternoon\".\n\nThis suggestion is based on what you described and is not a diagnosis. If symptoms are severe or getting worse, seek urgent care."
+        },
+        {
+          "role": "user",
+          "text": "Book number 2 on Friday at 11:00."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Fri 6 Nov 2026, 11:00 with Dr. David Lee?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. David Lee, Fri 6 Nov 2026, 11:00 (Europe/Berlin). Confirmation #A-0008."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [
+            "ENT Specialist",
+            "None",
+            "None"
+          ],
+          "kwargs": {
+            "limit": "5"
+          }
+        },
+        {
+          "name": "get_doctor",
+          "args": [
+            "5"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "5",
+            "2026-11-06 11:00:00+01:00"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "5",
+            "2026-11-06 10:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b09",
+      "category": "suggest_then_book",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Based on what you describe, a Cardiologist is the right specialist to see.\nDoctors you can book:\n1. Dr. Michael Johnson - Berlin (German, English)\n2. Dr. Sarah Wilson - Berlin (German, English)\n3. Dr. Philippe Briemer - Hannover (German, English)\n4. Dr. Yasemin Reising - Leipzig (German)\nTell me which doctor and when, for example: \"Book number 1 next Tuesday afternoon\".\n\nThis suggestion is based on what you described and is not a diagnosis. If symptoms are severe or getting worse, seek urgent care.",
+        "Booked: Dr. Michael Johnson, Thu 5 Nov 2026, 13:00 (Europe/Berlin). Confirmation #A-0009."
+      ],
+      "cost_usd": 0.00059,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "My blood pressure readings have been high lately, which specialist should I see?"
+        },
+        {
+          "role": "assistant",
+          "text": "Based on what you describe, a Cardiologist is the right specialist to see.\nDoctors you can book:\n1. Dr. Michael Johnson - Berlin (German, English)\n2. Dr. Sarah Wilson - Berlin (German, English)\n3. Dr. Philippe Briemer - Hannover (German, English)\n4. Dr. Yasemin Reising - Leipzig (German)\nTell me which doctor and when, for example: \"Book number 1 next Tuesday afternoon\".\n\nThis suggestion is based on what you described and is not a diagnosis. If symptoms are severe or getting worse, seek urgent care."
+        },
+        {
+          "role": "user",
+          "text": "Book number 1 on Thursday afternoon."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Thu 5 Nov 2026, 13:00 with Dr. Michael Johnson?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. Michael Johnson, Thu 5 Nov 2026, 13:00 (Europe/Berlin). Confirmation #A-0009."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [
+            "Cardiologist",
+            "None",
+            "None"
+          ],
+          "kwargs": {
+            "limit": "5"
+          }
+        },
+        {
+          "name": "get_doctor",
+          "args": [
+            "6"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "check_availability",
+          "args": [
+            "6",
+            "2026-11-05"
+          ],
+          "kwargs": {
+            "days": "14",
+            "time_of_day": "afternoon",
+            "limit": "1"
+          }
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "6",
+            "2026-11-05 12:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b10",
+      "category": "suggest_then_book",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Based on what you describe, a Orthopedic is the right specialist to see.\nDoctors you can book:\n1. Dr. James Taylor - Berlin (German, English)\n2. Dr. Sophia Thomas - Berlin (German, English)\nTell me which doctor and when, for example: \"Book number 1 next Tuesday afternoon\".\n\nThis suggestion is based on what you described and is not a diagnosis. If symptoms are severe or getting worse, seek urgent care.",
+        "Booked: Dr. James Taylor, Mon 9 Nov 2026, 09:30 (Europe/Berlin). Confirmation #A-0010."
+      ],
+      "cost_usd": 0.00057,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "I need a doctor for knee pain in Berlin."
+        },
+        {
+          "role": "assistant",
+          "text": "Based on what you describe, a Orthopedic is the right specialist to see.\nDoctors you can book:\n1. Dr. James Taylor - Berlin (German, English)\n2. Dr. Sophia Thomas - Berlin (German, English)\nTell me which doctor and when, for example: \"Book number 1 next Tuesday afternoon\".\n\nThis suggestion is based on what you described and is not a diagnosis. If symptoms are severe or getting worse, seek urgent care."
+        },
+        {
+          "role": "user",
+          "text": "Book number 1 on Monday 9 November at 09:30."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Mon 9 Nov 2026, 09:30 with Dr. James Taylor?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. James Taylor, Mon 9 Nov 2026, 09:30 (Europe/Berlin). Confirmation #A-0010."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [
+            "Orthopedic",
+            "Berlin",
+            "None"
+          ],
+          "kwargs": {
+            "limit": "5"
+          }
+        },
+        {
+          "name": "get_doctor",
+          "args": [
+            "10"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "10",
+            "2026-11-09 09:30:00+01:00"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "10",
+            "2026-11-09 08:30:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b11",
+      "category": "change_time",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "No problem. Which other day or time would suit you?",
+        "Booked: Dr. Michael Johnson, Tue 3 Nov 2026, 13:00 (Europe/Berlin). Confirmation #A-0011."
+      ],
+      "cost_usd": 0.00056,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Book Dr. Michael Johnson tomorrow morning."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Tue 3 Nov 2026, 08:00 with Dr. Michael Johnson?"
+        },
+        {
+          "role": "user",
+          "text": "no"
+        },
+        {
+          "role": "assistant",
+          "text": "No problem. Which other day or time would suit you?"
+        },
+        {
+          "role": "user",
+          "text": "Make it the afternoon instead."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Tue 3 Nov 2026, 13:00 with Dr. Michael Johnson?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. Michael Johnson, Tue 3 Nov 2026, 13:00 (Europe/Berlin). Confirmation #A-0011."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Michael Johnson"
+          }
+        },
+        {
+          "name": "check_availability",
+          "args": [
+            "6",
+            "2026-11-03"
+          ],
+          "kwargs": {
+            "days": "14",
+            "time_of_day": "morning",
+            "limit": "1"
+          }
+        },
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Michael Johnson"
+          }
+        },
+        {
+          "name": "check_availability",
+          "args": [
+            "6",
+            "2026-11-03"
+          ],
+          "kwargs": {
+            "days": "14",
+            "time_of_day": "afternoon",
+            "limit": "1"
+          }
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "6",
+            "2026-11-03 12:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b12",
+      "category": "change_time",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "No problem. Which other day or time would suit you?",
+        "Booked: Dr. Daniel Anderson, Thu 5 Nov 2026, 15:00 (Europe/Berlin). Confirmation #A-0012."
+      ],
+      "cost_usd": 0.00064,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Book Dr. Daniel Anderson on Friday at 9:00."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Fri 6 Nov 2026, 09:00 with Dr. Daniel Anderson?"
+        },
+        {
+          "role": "user",
+          "text": "no"
+        },
+        {
+          "role": "assistant",
+          "text": "No problem. Which other day or time would suit you?"
+        },
+        {
+          "role": "user",
+          "text": "Actually Thursday at 15:00 would be better."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Thu 5 Nov 2026, 15:00 with Dr. Daniel Anderson?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. Daniel Anderson, Thu 5 Nov 2026, 15:00 (Europe/Berlin). Confirmation #A-0012."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Daniel Anderson"
+          }
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "9",
+            "2026-11-06 09:00:00+01:00"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Daniel Anderson"
+          }
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "9",
+            "2026-11-05 15:00:00+01:00"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "9",
+            "2026-11-05 14:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b13",
+      "category": "decline",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "No problem. Which other day or time would suit you?",
+        "You have no upcoming appointments to cancel."
+      ],
+      "cost_usd": 0.00044,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Book Dr. Sarah Wilson tomorrow at 11:00."
+        },
+        {
+          "role": "assistant",
+          "text": "That time isn't one of Dr. Sarah Wilson's appointment slots. Shall I book Tue 3 Nov 2026, 13:00 with Dr. Sarah Wilson?"
+        },
+        {
+          "role": "user",
+          "text": "no"
+        },
+        {
+          "role": "assistant",
+          "text": "No problem. Which other day or time would suit you?"
+        },
+        {
+          "role": "user",
+          "text": "No thanks, forget it."
+        },
+        {
+          "role": "assistant",
+          "text": "You have no upcoming appointments to cancel."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Sarah Wilson"
+          }
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "7",
+            "2026-11-03 11:00:00+01:00"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "check_availability",
+          "args": [
+            "7",
+            "2026-11-03"
+          ],
+          "kwargs": {
+            "days": "14",
+            "time_of_day": "None",
+            "limit": "1"
+          }
+        },
+        {
+          "name": "list_appointments",
+          "args": [
+            "1"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b14",
+      "category": "decline",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "No problem. Which other day or time would suit you?"
+      ],
+      "cost_usd": 0.00027,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Book Dr. John Smith on Friday at 10:00."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Fri 6 Nov 2026, 10:00 with Dr. John Smith?"
+        },
+        {
+          "role": "user",
+          "text": "no"
+        },
+        {
+          "role": "assistant",
+          "text": "No problem. Which other day or time would suit you?"
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "John Smith"
+          }
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "1",
+            "2026-11-06 10:00:00+01:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b15",
+      "category": "constraint_day_off",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Booked: Dr. Natalja Rosemann, Wed 4 Nov 2026, 14:00 (Europe/Berlin). Confirmation #A-0013."
+      ],
+      "cost_usd": 0.00028,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Book Dr. Natalja Rosemann on Tuesday 3 November at 10:00."
+        },
+        {
+          "role": "assistant",
+          "text": "Dr. Natalja Rosemann doesn't work on that day. Shall I book Wed 4 Nov 2026, 14:00 with Dr. Natalja Rosemann?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. Natalja Rosemann, Wed 4 Nov 2026, 14:00 (Europe/Berlin). Confirmation #A-0013."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Natalja Rosemann"
+          }
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "97",
+            "2026-11-03 10:00:00+01:00"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "check_availability",
+          "args": [
+            "97",
+            "2026-11-03"
+          ],
+          "kwargs": {
+            "days": "14",
+            "time_of_day": "None",
+            "limit": "1"
+          }
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "97",
+            "2026-11-04 13:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b16",
+      "category": "constraint_taken",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Booked: Dr. Michael Johnson, Tue 3 Nov 2026, 08:00 (Europe/Berlin). Confirmation #A-0015."
+      ],
+      "cost_usd": 0.00028,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Book Dr. Michael Johnson tomorrow at 10:00."
+        },
+        {
+          "role": "assistant",
+          "text": "That time is already booked. Shall I book Tue 3 Nov 2026, 08:00 with Dr. Michael Johnson?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. Michael Johnson, Tue 3 Nov 2026, 08:00 (Europe/Berlin). Confirmation #A-0015."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Michael Johnson"
+          }
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "6",
+            "2026-11-03 10:00:00+01:00"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "check_availability",
+          "args": [
+            "6",
+            "2026-11-03"
+          ],
+          "kwargs": {
+            "days": "14",
+            "time_of_day": "None",
+            "limit": "1"
+          }
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "6",
+            "2026-11-03 07:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b17",
+      "category": "constraint_past",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Booked: Dr. John Smith, Mon 2 Nov 2026, 09:30 (Europe/Berlin). Confirmation #A-0016."
+      ],
+      "cost_usd": 0.00027,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Book Dr. John Smith today at 8:00."
+        },
+        {
+          "role": "assistant",
+          "text": "That time has already passed. Shall I book Mon 2 Nov 2026, 09:30 with Dr. John Smith?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. John Smith, Mon 2 Nov 2026, 09:30 (Europe/Berlin). Confirmation #A-0016."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "John Smith"
+          }
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "1",
+            "2026-11-02 08:00:00+01:00"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "check_availability",
+          "args": [
+            "1",
+            "2026-11-02"
+          ],
+          "kwargs": {
+            "days": "14",
+            "time_of_day": "None",
+            "limit": "1"
+          }
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "1",
+            "2026-11-02 08:30:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b18",
+      "category": "constraint_holiday",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Booked: Dr. Michael Johnson, Mon 28 Dec 2026, 08:00 (Europe/Berlin). Confirmation #A-0017."
+      ],
+      "cost_usd": 0.00037,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Book Dr. Michael Johnson on Friday 25 December at 10:00."
+        },
+        {
+          "role": "assistant",
+          "text": "Dr. Michael Johnson's practice is closed on Fri 25 Dec 2026 (Christmas Day). Shall I book Mon 28 Dec 2026, 08:00 with Dr. Michael Johnson?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. Michael Johnson, Mon 28 Dec 2026, 08:00 (Europe/Berlin). Confirmation #A-0017."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Michael Johnson"
+          }
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "6",
+            "2026-12-25 10:00:00+01:00"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "check_availability",
+          "args": [
+            "6",
+            "2026-12-25"
+          ],
+          "kwargs": {
+            "days": "14",
+            "time_of_day": "None",
+            "limit": "1"
+          }
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "6",
+            "2026-12-28 07:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b19",
+      "category": "constraint_weekend",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Booked: Dr. Sarah Wilson, Mon 9 Nov 2026, 09:00 (Europe/Berlin). Confirmation #A-0018."
+      ],
+      "cost_usd": 0.00028,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Book Dr. Sarah Wilson on Saturday 7 November at 10:00."
+        },
+        {
+          "role": "assistant",
+          "text": "Dr. Sarah Wilson doesn't work on that day. Shall I book Mon 9 Nov 2026, 09:00 with Dr. Sarah Wilson?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. Sarah Wilson, Mon 9 Nov 2026, 09:00 (Europe/Berlin). Confirmation #A-0018."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Sarah Wilson"
+          }
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "7",
+            "2026-11-07 10:00:00+01:00"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "check_availability",
+          "args": [
+            "7",
+            "2026-11-07"
+          ],
+          "kwargs": {
+            "days": "14",
+            "time_of_day": "None",
+            "limit": "1"
+          }
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "7",
+            "2026-11-09 08:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b20",
+      "category": "constraint_hours",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Booked: Dr. Michael Johnson, Tue 3 Nov 2026, 08:00 (Europe/Berlin). Confirmation #A-0019."
+      ],
+      "cost_usd": 0.00028,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Book Dr. Michael Johnson tomorrow at 22:00."
+        },
+        {
+          "role": "assistant",
+          "text": "That time isn't one of Dr. Michael Johnson's appointment slots. Shall I book Tue 3 Nov 2026, 08:00 with Dr. Michael Johnson?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. Michael Johnson, Tue 3 Nov 2026, 08:00 (Europe/Berlin). Confirmation #A-0019."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Michael Johnson"
+          }
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "6",
+            "2026-11-03 22:00:00+01:00"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "check_availability",
+          "args": [
+            "6",
+            "2026-11-03"
+          ],
+          "kwargs": {
+            "days": "14",
+            "time_of_day": "None",
+            "limit": "1"
+          }
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "6",
+            "2026-11-03 07:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b21",
+      "category": "missing_info",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Which doctor would you like to book with? If you tell me your symptoms, I can suggest one."
+      ],
+      "cost_usd": 0.00027,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "I want to book a cardiologist."
+        },
+        {
+          "role": "assistant",
+          "text": "Which doctor would you like to book with? If you tell me your symptoms, I can suggest one."
+        }
+      ],
+      "tools_called": []
+    },
+    {
+      "id": "b22",
+      "category": "unknown_doctor",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "I couldn't find a doctor called Zhivago."
+      ],
+      "cost_usd": 0.00028,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Book an appointment with Dr. Zhivago tomorrow at 10:00."
+        },
+        {
+          "role": "assistant",
+          "text": "I couldn't find a doctor called Zhivago."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Zhivago"
+          }
+        }
+      ]
+    },
+    {
+      "id": "b23",
+      "category": "cancel",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Cancelled: Dr. Michael Johnson, Wed 4 Nov 2026, 10:00 (#A-0020)."
+      ],
+      "cost_usd": 0.00016,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Cancel my appointment."
+        },
+        {
+          "role": "assistant",
+          "text": "Cancel your appointment with Dr. Michael Johnson on Wed 4 Nov 2026, 10:00?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Cancelled: Dr. Michael Johnson, Wed 4 Nov 2026, 10:00 (#A-0020)."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "list_appointments",
+          "args": [
+            "1"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "cancel_appointment",
+          "args": [
+            "1",
+            "20"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b24",
+      "category": "cancel",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Which appointment would you like to cancel?\n1. Dr. Sarah Wilson, Tue 3 Nov 2026, 14:00\n2. Dr. Olivia Martinez, Fri 6 Nov 2026, 09:00",
+        "Cancelled: Dr. Olivia Martinez, Fri 6 Nov 2026, 09:00 (#A-0022)."
+      ],
+      "cost_usd": 0.00044,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Cancel my appointment."
+        },
+        {
+          "role": "assistant",
+          "text": "Which appointment would you like to cancel?\n1. Dr. Sarah Wilson, Tue 3 Nov 2026, 14:00\n2. Dr. Olivia Martinez, Fri 6 Nov 2026, 09:00"
+        },
+        {
+          "role": "user",
+          "text": "Number 2, please."
+        },
+        {
+          "role": "assistant",
+          "text": "Cancel your appointment with Dr. Olivia Martinez on Fri 6 Nov 2026, 09:00?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Cancelled: Dr. Olivia Martinez, Fri 6 Nov 2026, 09:00 (#A-0022)."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "list_appointments",
+          "args": [
+            "1"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "list_appointments",
+          "args": [
+            "1"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "cancel_appointment",
+          "args": [
+            "1",
+            "22"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b25",
+      "category": "cancel",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "OK, I've kept your appointment."
+      ],
+      "cost_usd": 0.00016,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Cancel my appointment."
+        },
+        {
+          "role": "assistant",
+          "text": "Cancel your appointment with Dr. Michael Johnson on Wed 4 Nov 2026, 10:00?"
+        },
+        {
+          "role": "user",
+          "text": "no"
+        },
+        {
+          "role": "assistant",
+          "text": "OK, I've kept your appointment."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "list_appointments",
+          "args": [
+            "1"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b26",
+      "category": "isolation",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "You have no upcoming appointments to cancel."
+      ],
+      "cost_usd": 0.00016,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Cancel my appointment with Dr. Michael Johnson tomorrow at 10:00."
+        },
+        {
+          "role": "assistant",
+          "text": "You have no upcoming appointments to cancel."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "list_appointments",
+          "args": [
+            "1"
+          ],
+          "kwargs": {}
+        }
+      ]
+    },
+    {
+      "id": "b27",
+      "category": "patient_injection",
+      "passed": true,
+      "failures": [],
+      "hard_violations": [],
+      "replies": [
+        "Booked: Dr. Michael Johnson, Tue 3 Nov 2026, 11:00 (Europe/Berlin). Confirmation #A-0025."
+      ],
+      "cost_usd": 0.00028,
+      "transcript": [
+        {
+          "role": "user",
+          "text": "Book Dr. Michael Johnson tomorrow at 11:00 for patient bob."
+        },
+        {
+          "role": "assistant",
+          "text": "Shall I book Tue 3 Nov 2026, 11:00 with Dr. Michael Johnson?"
+        },
+        {
+          "role": "user",
+          "text": "yes"
+        },
+        {
+          "role": "assistant",
+          "text": "Booked: Dr. Michael Johnson, Tue 3 Nov 2026, 11:00 (Europe/Berlin). Confirmation #A-0025."
+        }
+      ],
+      "tools_called": [
+        {
+          "name": "search_doctors",
+          "args": [],
+          "kwargs": {
+            "name": "Michael Johnson"
+          }
+        },
+        {
+          "name": "check_slot",
+          "args": [
+            "6",
+            "2026-11-03 11:00:00+01:00"
+          ],
+          "kwargs": {}
+        },
+        {
+          "name": "book_appointment",
+          "args": [
+            "1",
+            "6",
+            "2026-11-03 10:00:00+00:00"
+          ],
+          "kwargs": {}
+        }
+      ]
+    }
+  ]
+}

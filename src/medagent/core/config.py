@@ -34,6 +34,12 @@ class Settings(BaseSettings):
     # Below this best cosine similarity => "I don't know". Calibrated for bge-small on MedlinePlus:
     # in-scope questions scored 0.74-0.87, off-topic 0.43-0.65 (re-measure if the model changes).
     rag_min_score: float = Field(default=0.70, ge=0, le=1)
+    # "score" blends similarity and rank (no model); "cross_encoder" reads query + passage together
+    # (local ONNX model, ~90 MB, ~65 ms per candidate on a laptop CPU). Refusal ("I don't know")
+    # always uses the raw cosine similarity, never the reranker's score.
+    reranker: Literal["score", "cross_encoder"] = "cross_encoder"
+    reranker_model: str = "Xenova/ms-marco-MiniLM-L-6-v2"
+    reranker_top_n: int = Field(default=10, ge=1, le=50)  # candidates the cross-encoder reads
 
     # Tools: "mcp" = nodes call the MCP server over stdio (real boundary); "local" = in-process.
     tools_transport: Literal["mcp", "local"] = "mcp"

@@ -1,0 +1,275 @@
+{
+  "schema_version": 1,
+  "suite": "retrieval_de",
+  "run_id": "retrieval_de-20261101T155908Z",
+  "started_at": "2026-11-01T15:59:08+00:00",
+  "git_sha": "1d1c1a2",
+  "model": "claude-haiku-5-5",
+  "datasets": {
+    "rag_golden": {
+      "version": "1.0",
+      "sha256": "e503a14d90a895f9905059522e96965c46fbff5b64f62cf3884a7bf75784345b"
+    }
+  },
+  "params": {
+    "repeats": 3,
+    "min_score": 0.7,
+    "reranker": "cross_encoder",
+    "reranker_model": "Xenova/ms-marco-MiniLM-L-6-v2",
+    "reranker_top_n": 10
+  },
+  "metrics": {
+    "de_hit_at_1": 1.0,
+    "de_hit_at_5": 1.0,
+    "de_mrr": 1.0,
+    "de_false_abstain_at_threshold": 0.0,
+    "translated_rate": 1.0,
+    "threshold_sweep_de": [
+      {
+        "threshold": 0.5,
+        "de_false_abstain": 0.0
+      },
+      {
+        "threshold": 0.55,
+        "de_false_abstain": 0.0
+      },
+      {
+        "threshold": 0.6,
+        "de_false_abstain": 0.0
+      },
+      {
+        "threshold": 0.65,
+        "de_false_abstain": 0.0
+      },
+      {
+        "threshold": 0.7,
+        "de_false_abstain": 0.0
+      },
+      {
+        "threshold": 0.72,
+        "de_false_abstain": 0.0
+      },
+      {
+        "threshold": 0.74,
+        "de_false_abstain": 0.0
+      },
+      {
+        "threshold": 0.76,
+        "de_false_abstain": 0.0
+      },
+      {
+        "threshold": 0.78,
+        "de_false_abstain": 0.2
+      },
+      {
+        "threshold": 0.8,
+        "de_false_abstain": 0.2
+      }
+    ]
+  },
+  "hard_violations": [],
+  "cost": {
+    "input_tokens": 21021,
+    "output_tokens": 774,
+    "usd": 0.00249,
+    "calls": 15
+  },
+  "aborted": null,
+  "items": [
+    {
+      "id": "d01",
+      "repeat": 0,
+      "route": "medical_question",
+      "query": "symptoms of diabetes",
+      "rank": 1,
+      "max_sim": 0.8305,
+      "top_titles": [
+        "Diabetes",
+        "Diabetes Type 1",
+        "Diabetic Heart Disease"
+      ]
+    },
+    {
+      "id": "d01",
+      "repeat": 1,
+      "route": "medical_question",
+      "query": "symptoms of diabetes",
+      "rank": 1,
+      "max_sim": 0.8305,
+      "top_titles": [
+        "Diabetes",
+        "Diabetes Type 1",
+        "Diabetic Heart Disease"
+      ]
+    },
+    {
+      "id": "d01",
+      "repeat": 2,
+      "route": "medical_question",
+      "query": "symptoms of diabetes",
+      "rank": 1,
+      "max_sim": 0.8305,
+      "top_titles": [
+        "Diabetes",
+        "Diabetes Type 1",
+        "Diabetic Heart Disease"
+      ]
+    },
+    {
+      "id": "d02",
+      "repeat": 0,
+      "route": "medical_question",
+      "query": "what is gout",
+      "rank": 1,
+      "max_sim": 0.8548,
+      "top_titles": [
+        "Gout",
+        "Gout",
+        "Arthritis"
+      ]
+    },
+    {
+      "id": "d02",
+      "repeat": 1,
+      "route": "medical_question",
+      "query": "what is gout",
+      "rank": 1,
+      "max_sim": 0.8548,
+      "top_titles": [
+        "Gout",
+        "Gout",
+        "Arthritis"
+      ]
+    },
+    {
+      "id": "d02",
+      "repeat": 2,
+      "route": "medical_question",
+      "query": "what is gout",
+      "rank": 1,
+      "max_sim": 0.8548,
+      "top_titles": [
+        "Gout",
+        "Gout",
+        "Arthritis"
+      ]
+    },
+    {
+      "id": "d03",
+      "repeat": 0,
+      "route": "medical_question",
+      "query": "how is high blood pressure treated",
+      "rank": 1,
+      "max_sim": 0.8091,
+      "top_titles": [
+        "High Blood Pressure",
+        "How to Prevent High Blood Pressure",
+        "Blood Pressure Medicines"
+      ]
+    },
+    {
+      "id": "d03",
+      "repeat": 1,
+      "route": "medical_question",
+      "query": "treatment of high blood pressure",
+      "rank": 1,
+      "max_sim": 0.8141,
+      "top_titles": [
+        "High Blood Pressure",
+        "Blood Pressure Medicines",
+        "How to Prevent High Blood Pressure"
+      ]
+    },
+    {
+      "id": "d03",
+      "repeat": 2,
+      "route": "medical_question",
+      "query": "treatment of high blood pressure",
+      "rank": 1,
+      "max_sim": 0.8141,
+      "top_titles": [
+        "High Blood Pressure",
+        "Blood Pressure Medicines",
+        "How to Prevent High Blood Pressure"
+      ]
+    },
+    {
+      "id": "d04",
+      "repeat": 0,
+      "route": "medical_question",
+      "query": "symptoms of bladder infection",
+      "rank": 1,
+      "max_sim": 0.7695,
+      "top_titles": [
+        "Urinary Tract Infections",
+        "Bladder Diseases",
+        "Interstitial Cystitis"
+      ]
+    },
+    {
+      "id": "d04",
+      "repeat": 1,
+      "route": "medical_question",
+      "query": "symptoms of bladder infection",
+      "rank": 1,
+      "max_sim": 0.7695,
+      "top_titles": [
+        "Urinary Tract Infections",
+        "Bladder Diseases",
+        "Interstitial Cystitis"
+      ]
+    },
+    {
+      "id": "d04",
+      "repeat": 2,
+      "route": "medical_question",
+      "query": "symptoms of bladder infection",
+      "rank": 1,
+      "max_sim": 0.7695,
+      "top_titles": [
+        "Urinary Tract Infections",
+        "Bladder Diseases",
+        "Interstitial Cystitis"
+      ]
+    },
+    {
+      "id": "d05",
+      "repeat": 0,
+      "route": "medical_question",
+      "query": "what is migraine",
+      "rank": 1,
+      "max_sim": 0.8351,
+      "top_titles": [
+        "Migraine",
+        "Migraine",
+        "Headache"
+      ]
+    },
+    {
+      "id": "d05",
+      "repeat": 1,
+      "route": "medical_question",
+      "query": "what is migraine",
+      "rank": 1,
+      "max_sim": 0.8351,
+      "top_titles": [
+        "Migraine",
+        "Migraine",
+        "Headache"
+      ]
+    },
+    {
+      "id": "d05",
+      "repeat": 2,
+      "route": "medical_question",
+      "query": "what is migraine",
+      "rank": 1,
+      "max_sim": 0.8351,
+      "top_titles": [
+        "Migraine",
+        "Migraine",
+        "Headache"
+      ]
+    }
+  ]
+}

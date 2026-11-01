@@ -1,6 +1,7 @@
 """Run an evaluation suite and write a result file to evals/results/runs/.
 
     uv run python scripts/run_evals.py retrieval                      # free (no LLM)
+    uv run python scripts/run_evals.py retrieval-de --repeats 3       # German via the router (LLM)
     uv run python scripts/run_evals.py routing --repeats 3 --max-usd 0.5
     uv run python scripts/run_evals.py rag --per-kind 2 --max-usd 0.2   # a small pilot sample
     uv run python scripts/run_evals.py booking --only b01,b11,b23 --max-usd 0.3
@@ -67,7 +68,16 @@ async def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     p.add_argument(
         "suite",
-        choices=["retrieval", "routing", "rag", "booking", "judge-rag", "judge-booking", "gate"],
+        choices=[
+            "retrieval",
+            "retrieval-de",
+            "routing",
+            "rag",
+            "booking",
+            "judge-rag",
+            "judge-booking",
+            "gate",
+        ],
     )
     p.add_argument("--results", nargs="*", default=[], help="gate: directories of result files")
     p.add_argument("--source", default=None, help="judge-*: the result file to judge")
@@ -78,6 +88,12 @@ async def main() -> None:
     )
     p.add_argument("--repeats", type=int, default=3, help="routing: runs per message")
     p.add_argument("--limit", type=int, default=None, help="routing/rag: first N items")
+    p.add_argument(
+        "--dataset",
+        choices=["rag_golden", "threshold_dev"],
+        default="rag_golden",
+        help="retrieval: the golden set (default) or the RAG_MIN_SCORE tuning set",
+    )
     p.add_argument("--per-kind", type=int, default=None, help="rag: N questions of each kind")
     p.add_argument("--only", default=None, help="booking: comma-separated scenario ids")
     p.add_argument("--max-usd", type=float, default=1.0, help="stop starting calls above this")
@@ -95,7 +111,9 @@ async def main() -> None:
 
     spend = Spend(args.max_usd)
     if args.suite == "retrieval":
-        result = suites.run_retrieval()
+        result = suites.run_retrieval(dataset=args.dataset)
+    elif args.suite == "retrieval-de":
+        result = await suites.run_retrieval_de(spend, args.repeats)
     elif args.suite == "routing":
         result = await suites.run_routing(spend, args.repeats, args.limit)
     elif args.suite == "rag":

@@ -100,12 +100,15 @@ def answer_question(
     k: int = 5,
     min_score: float | None = None,
     public_only: bool | None = None,
+    search_query: str | None = None,
 ) -> RagAnswer:
+    """`search_query` (English, for a non-English question) is used for retrieval only; the model
+    still sees and answers the user's own question, in the user's language."""
     settings = get_settings()
     min_score = settings.rag_min_score if min_score is None else min_score
     public_only = settings.kb_public_only if public_only is None else public_only
 
-    candidates = retriever.search(session, question, k=k, public_only=public_only)
+    candidates = retriever.search(session, search_query or question, k=k, public_only=public_only)
     # Weak evidence: refuse without spending an LLM call (and without risking a made-up answer).
     if not candidates or max(c.vector_sim for c in candidates) < min_score:
         return RagAnswer(answer=NO_ANSWER, grounded=False)

@@ -37,7 +37,7 @@ jobs:
           enable-cache: true
       - run: uv sync --frozen
       - name: Cache FastEmbed model
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .cache/fastembed
           # Bump the suffix (or change EMBEDDING_MODEL) to force a fresh download.

@@ -511,3 +511,23 @@ languages, and tool abuse through chat.
 One false alarm in 62: the German "Kannst du erklären, was ein Schlaganfall ist?" gets the emergency reply,
 because the check for general questions knows "can" and not "kannst". It is reported and pinned in a test,
 not fixed in this PR: a set that was used to tune is no longer a measurement.
+
+## The eval gate in CI
+### Why two jobs?
+The checks that cost nothing (the committed baselines still satisfy the thresholds, the datasets match their
+lock) run on every pull request. The check that costs money (a live run of the routing and booking evals) runs
+only when the change can affect them, and only when the key can be trusted with the code: same-repository
+pull requests, never forks or Dependabot.
+
+### What stops the key from leaking or the bill from running away?
+The workflow can only read the repository, the key is given to three steps and nothing else, forks do not get
+it, every paid command has a spending cap, and a new push cancels the run before it. A test reads the YAML
+and fails if any of that changes; I checked it by making twelve unsafe edits and watching each fail.
+
+### Why does the job fail, not skip, when the secret is missing?
+A gate that silently does not run gives false assurance. For a same-repository pull request that needs the
+live gate, a missing secret is an error with a pointer to the setup steps.
+
+### What does it not cover yet?
+RAG and the whole-bot red-team, because they need the knowledge base and two models in CI. The rule-level
+red-team is already in the normal test job.

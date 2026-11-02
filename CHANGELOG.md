@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- Eval gate in CI (Phase 7, ADR 0028): `.github/workflows/eval-gate.yml`. A free job on every pull request
+  checks that the committed baselines satisfy `evals/thresholds.yaml` and that the datasets match their lock
+  file. A paid job runs the routing and booking evals against the real model (about $0.07, capped) and gates
+  them with the same thresholds; it runs only for same-repository pull requests that touch the agent,
+  guardrails, RAG, evals or dependencies, and fails with a pointer to docs/SETUP.md if the
+  `ANTHROPIC_API_KEY` secret is missing. Read-only permissions, `pull_request` never
+  `pull_request_target`, the key only in the steps that call the API, a spending cap on every paid
+  command; 27 tests read the workflow YAML, and 12 unsafe edits each fail one.
 - The final red-team run of the Phase 7 must-fix series (ADR 0027): all 195 cases pass in every repeat,
   dev 49 of 49 and test 96 of 96 (baseline 46 and 92), the original 50 at 100%, no dose, prompt, canary or
   tool-call leak, no judge-flagged answer ($0.241). The seven known gaps of the baseline all pass, so

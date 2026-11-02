@@ -1,0 +1,119 @@
+# Eval gate (ADR 0028). Two jobs:
+#   baselines - free, no secret: the committed baselines still satisfy evals/thresholds.yaml and the
+#               datasets still match their lock file. Runs on every pull request.
+#   live      - paid, needs the ANTHROPIC_API_KEY secret: runs the routing and booking evals against
+#               the real model and gates them with the same thresholds. Runs only for pull requests from
+#               THIS repository (a fork or Dependabot gets no secret) and only when the change touches
+#               what the evals measure. Cost: about $0.07 a run, capped by --max-usd.
+# The secret is used by the steps that call the API and nowhere else; the workflow can only read the repo.
+name: Eval gate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: eval-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  baselines:
+    name: Baselines and dataset lock (free)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: Gate on the committed baselines
+        run: >-
+          uv run python scripts/run_evals.py gate --check-lock --results
+          evals/results/baseline-deterministic evals/results/baseline-judged evals/results/redteam-baseline
+
+  live:
+    name: Live routing and booking gate (paid)
+    needs: baselines  # no spend while the baselines or the lock are inconsistent
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+      github.actor != 'dependabot[bot]')
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: medagent
+          POSTGRES_PASSWORD: medagent
+          POSTGRES_DB: medagent
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U medagent"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://medagent:medagent@localhost:5432/medagent
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Does this change touch what the evals measure?
+        id: changes
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed=$(git diff --name-only "origin/${BASE_REF}...HEAD")
+          if echo "$changed" | grep -Eq '^(src/medagent/(agents|guardrails|rag|evals)/|evals/|scripts/run_evals\.py|\.github/workflows/eval-gate\.yml|pyproject\.toml|uv\.lock)'; then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "relevant=false" >> "$GITHUB_OUTPUT"
+            echo "No agent, guardrail, RAG, eval or dependency change: the live gate is skipped." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Require the API key
+        if: steps.changes.outputs.relevant == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::The ANTHROPIC_API_KEY repository secret is not set (see docs/SETUP.md, 'Eval gate in CI')."
+            exit 1
+          fi
+      - uses: astral-sh/setup-uv@v7
+        if: steps.changes.outputs.relevant == 'true'
+        with:
+          enable-cache: true
+      - name: Install
+        if: steps.changes.outputs.relevant == 'true'
+        run: uv sync --frozen
+      - name: Routing eval (100 messages x 3)
+        if: steps.changes.outputs.relevant == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: uv run python scripts/run_evals.py routing --repeats 3 --max-usd 0.15
+      - name: Booking eval (27 scenarios)
+        if: steps.changes.outputs.relevant == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: uv run python scripts/run_evals.py booking --max-usd 0.10
+      - name: Gate on the live results
+        if: steps.changes.outputs.relevant == 'true'
+        run: |
+          status=0
+          uv run python scripts/run_evals.py gate --results evals/results/runs > gate.txt || status=$?
+          { echo '```'; cat gate.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          cat gate.txt
+          exit $status
+      - name: Upload the result files
+        if: always() && steps.changes.outputs.relevant == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: eval-gate-results
+          path: evals/results/runs
+          retention-days: 14

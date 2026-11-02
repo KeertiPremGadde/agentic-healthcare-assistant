@@ -177,7 +177,7 @@ Done in order, each on its own branch and PR.
   obfuscated spellings, other languages, prompt-injection inside retrieved passages, and the
   `llm`-category cases (system-prompt extraction, role-play). Repeat router runs to measure its
   non-determinism, and record the rules-only vs router-only vs both table in the README results.
-- [ ] CI eval gate on PRs that touch `agents/`, `rag/`, prompts (thresholds in `evals/thresholds.yaml`)
+- [x] CI eval gate on PRs that touch `agents/`, `rag/`, prompts (thresholds in `evals/thresholds.yaml`): free baseline and lock job always, live routing and booking job with a capped secret key (ADR 0028); RAG and red-team stay manual
 - [x] **RAG improvements, each measured before/after with RAGAS** (record a baseline on the Phase 2
   pipeline first, then change one thing at a time and keep a results table):
   - **Contextual chunk headers:** prepend the topic title and its "Also called" synonyms to every chunk

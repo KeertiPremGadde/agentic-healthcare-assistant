@@ -207,3 +207,29 @@ Every LLM suite takes `--max-usd` and stops starting calls at the cap. The telem
 libraries is switched off in code (`src/medagent/evals/telemetry.py`) and a test pins it.
 Windows note: close the VS Code mypy/Python language server before `uv sync` in the main
 environment, or it holds `.pyd` files open ("Access is denied").
+
+## Eval gate in CI (Phase 7)
+
+`.github/workflows/eval-gate.yml` has two jobs (ADR 0028). The free one needs nothing. The paid one runs the
+routing and booking evals against the real model on pull requests from this repository that touch the agent,
+guardrails, RAG, evals or dependencies, and needs one repository secret. It costs about $0.07 a run.
+
+Set it up once, in your own terminal (never paste the key into a chat or a file):
+
+1. **Create a separate key with a spend limit.** In the Anthropic Console, make a workspace for CI (for
+   example `medagent-ci`), set its monthly spend limit to a few dollars, and create an API key inside it
+   named `medagent-ci-eval`. Do not reuse the key in your `.env`.
+2. **Store it as a repository secret** (the command asks for the value and does not echo it):
+   ```powershell
+   gh secret set ANTHROPIC_API_KEY --repo KeertiPremGadde/agentic-healthcare-assistant
+   ```
+3. **Check it exists** (shows the name and date, never the value):
+   ```powershell
+   gh secret list --repo KeertiPremGadde/agentic-healthcare-assistant
+   ```
+4. **Run it once by hand** to see it work: Actions, "Eval gate", "Run workflow" on a branch, or
+   `gh workflow run eval-gate.yml --ref <branch>`. The job summary shows the gate output.
+
+Until the secret exists, a pull request that needs the live gate fails with a message that points here.
+Pull requests from forks and Dependabot skip the paid job (they get no secret). To rotate the key, create a new
+one, run step 2 again and delete the old key in the Console.

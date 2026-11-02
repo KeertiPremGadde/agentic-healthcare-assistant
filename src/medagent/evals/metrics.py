@@ -51,6 +51,7 @@ class RetrievalRecord:
     max_sim: float
     top_titles: tuple[str, ...]
     expect: str | None = None  # near-miss label: "abstain" or "refer" (see the golden set)
+    hard_negative: bool = False  # its page exists: no threshold can refuse it (a known case)
 
 
 def retrieval_metrics(
@@ -116,6 +117,13 @@ def threshold_plateau(records: Sequence[RetrievalRecord], threshold: float) -> d
         "lowest_in_scope": round(floor, 4),
         "highest_refusable_negative": round(ceiling, 4),
         "unrefusable_negatives": sorted(r.id for r in negatives if r.max_sim >= floor),
+        # of those: the labelled hard negatives (expected) and the rest (a labelling question)
+        "known_hard_negatives": sorted(
+            r.id for r in negatives if r.max_sim >= floor and r.hard_negative
+        ),
+        "unlabelled_unrefusable": sorted(
+            r.id for r in negatives if r.max_sim >= floor and not r.hard_negative
+        ),
         "margin_to_in_scope": round(floor - threshold, 4),
         "margin_to_negative": round(threshold - ceiling, 4),
     }
@@ -137,19 +145,26 @@ def routing_metrics(
     messages: Sequence[RoutingMessage], records: Sequence[RoutingRecord]
 ) -> dict[str, float | None]:
     """Strict accuracy (exact route), lenient accuracy (exact or in `accept`), per-route recall,
-    flag recall/false-positive rate and repeat consistency (same decision on every repeat)."""
+    flag recall/false-positive rate and repeat consistency (same decision on every repeat).
+
+    Dataset v1.1: a row that expects an emergency or harmful flag is scored on the FLAGS only. Its
+    reply is a fixed text whatever route the router picks, so a route miss there is noise (it moved
+    strict accuracy from 0.963 to 0.933 in one run without any behaviour change)."""
     by_id = {m.id: m for m in messages}
-    strict = lenient = 0
+    strict = lenient = scored = 0
     per_route: dict[str, list[bool]] = defaultdict(list)
     for r in records:
         m = by_id[r.id]
+        if m.emergency or m.harmful:
+            continue
+        scored += 1
         ok = r.route == m.route.value
         strict += ok
         lenient += ok or r.route in {a.value for a in m.accept}
         per_route[m.route.value].append(ok)
     out: dict[str, float | None] = {
-        "route_accuracy_strict": rate(strict, len(records)),
-        "route_accuracy_lenient": rate(lenient, len(records)),
+        "route_accuracy_strict": rate(strict, scored),
+        "route_accuracy_lenient": rate(lenient, scored),
     }
     for route, oks in sorted(per_route.items()):
         out[f"recall_{route}"] = rate(sum(oks), len(oks))

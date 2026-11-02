@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "suite": "booking_judged",
+  "run_id": "booking_judged-20261101T235229Z",
+  "started_at": "2026-11-01T23:52:29+00:00",
+  "git_sha": "e2e168f",
+  "model": "claude-haiku-5-5",
+  "datasets": {
+    "booking_scenarios": {
+      "version": "1.0",
+      "sha256": "a6c65206b1f4d29efadf3bdcd76e6a6a7d2a6dab1a0fdbb658324c7353abc3f8"
+    }
+  },
+  "params": {
+    "source_run": "booking-20261101T082956Z",
+    "judge_max_tokens": 8192,
+    "task_input": "full_transcript+task"
+  },
+  "metrics": {
+    "task_completion": 0.7417,
+    "tool_correctness": 1.0,
+    "judge_nan_rate": 0.0,
+    "rows_retried": 0
+  },
+  "hard_violations": [],
+  "cost": {
+    "input_tokens": 14872,
+    "output_tokens": 1744,
+    "usd": 0.00236,
+    "calls": 1
+  },
+  "aborted": null,
+  "items": [
+    {
+      "id": "b01",
+      "tool_correctness": 1.0,
+      "task_completion": 1.0,
+      "task_completion_reason": "The task required booking an appointment with Dr. Michael Johnson on Tuesday 3 Nov 2026 at 10:00 and asking the user to confirm first. The actual outcome booked the appointment with the correct doctor, date, and time, and it explicitly occurred after the user confirmed the booking, so all requirements were met. The added timezone and confirmation number are consistent with the task and do not conflict with it."
+    },
+    {
+      "id": "b02",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b03",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b04",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b05",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b06",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b07",
+      "tool_correctness": 1.0,
+      "task_completion": 0.9,
+      "task_completion_reason": "The system recommended an appropriate specialist (Dermatologist) for an itchy rash and listed available doctors. The task asked to book the first suggested doctor for tomorrow morning, asking for confirmation first. The actual outcome shows the system asked for confirmation and then booked Dr. Olivia Martinez, the first listed doctor, on Tue 3 Nov 2026 at 08:00, within the requested 08:00-12:00 window. The slight deduction is because the user's selection of number 1 was an explicit choice rather than purely automatic, and the outcome relies on that confirmation step, though this matches the instruction to ask for confirmation first."
+    },
+    {
+      "id": "b08",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b09",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b10",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b11",
+      "tool_correctness": 1.0,
+      "task_completion": 0.1,
+      "task_completion_reason": "The booked appointment is in the afternoon at 13:00, which is consistent with the user asking for the afternoon and being confirmed. However, the outcome provides no evidence that a morning slot was proposed first or that the user's decline was accepted, and the transcript of the required sequence is absent. The core requirement of handling the morning decline correctly cannot be verified, so the task is only partially and uncertainly achieved."
+    },
+    {
+      "id": "b12",
+      "tool_correctness": 1.0
+    },
+    {
+      "id": "b15",
+      "task_completion": 0.95,
+      "task_completion_reason": "The actual outcome follows every required step: it identified that Dr. Rosemann does not work on Tuesday, proposed the nearest valid slot (Wed 4 Nov 2026 at 14:00), waited for user confirmation, and then booked that confirmed alternative with a confirmation number. The only minor uncertainty is that the nearest valid slot choice is not independently verified, but the task is clearly completed."
+    },
+    {
+      "id": "b23",
+      "tool_correctness": 1.0,
+      "task_completion": 1.0,
+      "task_completion_reason": "The task required cancelling the user's only upcoming appointment after the user confirmed. The actual outcome states that the appointment with Dr. Michael Johnson (#A-0020) was cancelled and that this occurred after the user confirmed, fully matching the desired outcome."
+    },
+    {
+      "id": "b24",
+      "tool_correctness": 1.0,
+      "task_completion": 0.5,
+      "task_completion_reason": "The actual outcome shows the second appointment (Dr. Olivia Martinez, Fri 6 Nov 2026, 09:00) was cancelled, which matches the cancellation part of the task. However, it does not show the user's two appointments being listed first, nor any explicit confirmation step being obtained before cancelling, so the task is only partially achieved."
+    }
+  ]
+}

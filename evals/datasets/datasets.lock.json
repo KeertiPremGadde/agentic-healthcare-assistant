@@ -12,11 +12,11 @@
     "version": "1.0"
   },
   "routing_golden": {
-    "sha256": "48d9a6b1bd43acca7abbc1c842b425045c05931690e4661f72b5f43417c07557",
-    "version": "1.0"
+    "sha256": "1ef693cd8ae69fe083336e2ceb34c3a253284071a18dd4557a868a15d4513516",
+    "version": "1.1"
   },
   "threshold_dev": {
-    "sha256": "65abf942e0b42e6db91bdf4fbe452d0305c8e87c531e81504ddf9ca82a71d115",
-    "version": "1.0"
+    "sha256": "c7dccb50ed040609f3bf072337becf1add263cacafd2bd8a6e6b197657e6dab4",
+    "version": "1.1"
   }
 }

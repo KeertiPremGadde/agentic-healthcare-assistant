@@ -25,6 +25,7 @@ from langchain_core.messages import HumanMessage
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from tests.unit import final_benign_phrases as fb  # noqa: E402
 from tests.unit import gap_phrases as gp  # noqa: E402
 from tests.unit import self_harm_phrases as sh  # noqa: E402
 
@@ -55,14 +56,25 @@ SELF_HARM_GROUPS = {
 }
 
 
+# The fresh benign set of the final red-team run: every flag is a false alarm.
+FINAL_BENIGN_GROUPS = {
+    "benign_en": [(p, "") for p in fb.BENIGN_EN],
+    "benign_de": [(p, "") for p in fb.BENIGN_DE],
+}
+
+
 async def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--max-usd", type=float, default=0.06)
-    parser.add_argument("--set", choices=("gaps", "self_harm"), default="gaps")
+    parser.add_argument("--set", choices=("gaps", "self_harm", "final_benign"), default="gaps")
     parser.add_argument("--out-name", default=None, help="file name in evals/results/<dir>/")
     args = parser.parse_args()
-    groups = SELF_HARM_GROUPS if args.set == "self_harm" else GROUPS
+    groups = {
+        "gaps": GROUPS,
+        "self_harm": SELF_HARM_GROUPS,
+        "final_benign": FINAL_BENIGN_GROUPS,
+    }[args.set]
 
     settings = get_settings()
     llm = AnthropicStructuredLLM(settings)
@@ -125,7 +137,9 @@ async def main() -> None:
         ROOT
         / "evals"
         / "results"
-        / ("non_acute_self_harm" if args.set == "self_harm" else "vocabulary_gaps")
+        / {"self_harm": "non_acute_self_harm", "final_benign": "final_redteam"}.get(
+            args.set, "vocabulary_gaps"
+        )
     )
     dest.mkdir(parents=True, exist_ok=True)
     result = {

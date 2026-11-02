@@ -12,6 +12,7 @@ from typing import Literal
 
 from medagent.guardrails.emergency import detect_red_flag, emergency_reply
 from medagent.guardrails.harmful import detect_harmful_intent
+from medagent.guardrails.normalise import variants
 from medagent.guardrails.self_harm import detect_self_harm_support
 from medagent.guardrails.texts import texts_for
 
@@ -24,12 +25,7 @@ class Screen:
     language: str = "en"
 
 
-def screen_message(text: str) -> Screen | None:
-    """A fixed safety reply if the message needs one, else None.
-
-    General questions about emergencies ("what are the signs of a stroke?") return None here:
-    they are answered normally, with a safety notice (see the guardrail node).
-    """
+def _screen_one(text: str) -> Screen | None:
     harmful = detect_harmful_intent(text)
     if harmful is not None:
         return Screen(
@@ -58,4 +54,21 @@ def screen_message(text: str) -> Screen | None:
             texts_for(support.language).self_harm_message,
             support.language,
         )
+    return None
+
+
+def screen_message(text: str) -> Screen | None:
+    """A fixed safety reply if the message needs one, else None.
+
+    General questions about emergencies ("what are the signs of a stroke?") return None here:
+    they are answered normally, with a safety notice (see the guardrail node).
+
+    The message is screened as written first and then in its folded spellings (zero-width
+    characters, spaced letters, leetspeak, look-alike letters, curly apostrophes: ADR 0026). The
+    first variant with a hit decides, so folding only ever adds a safety reply.
+    """
+    for variant in variants(text):
+        screen = _screen_one(variant)
+        if screen is not None:
+            return screen
     return None

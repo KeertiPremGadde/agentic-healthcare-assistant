@@ -12,6 +12,7 @@ import structlog
 from medagent.agents.nodes.common import last_user_text
 from medagent.agents.state import AgentState
 from medagent.guardrails.emergency import detect_red_flag
+from medagent.guardrails.normalise import variants
 from medagent.guardrails.screen import screen_message
 
 EMERGENCY = "emergency"
@@ -37,7 +38,8 @@ def guardrail_node(state: AgentState) -> dict[str, Any]:
         # Category only: never the message, which may describe a person's crisis.
         log.warning("guardrail_triggered", kind=screen.kind, category=screen.category)
         return {**update, "route": screen.kind, "draft": screen.reply, "draft_kind": screen.kind}
-    flag = detect_red_flag(text)
+    # a general question about an emergency gets a safety notice, in its folded spellings too
+    flag = next((f for v in variants(text) if (f := detect_red_flag(v)) is not None), None)
     if flag is not None and flag.informational:
         return {**update, "safety_notice": True}  # answer it, with a notice in front
     return update

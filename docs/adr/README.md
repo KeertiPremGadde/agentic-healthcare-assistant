@@ -28,3 +28,4 @@ One file per significant decision: `NNNN-short-title.md` with Context, Decision,
 | [0022](0022-dose-guard-units.md) | Dose guard: amounts per kilogram and per day, and grams |
 | [0023](0023-align-self-harm-replies.md) | Habitual self-harm statements get the support reply, not the emergency reply |
 | [0024](0024-passive-ideation-wake-up.md) | A wish not to wake up gets the support reply, never the refusal |
+| [0025](0025-dataset-v1-1.md) | Dataset v1.1: flag-only scoring, one reworded row, one hard negative |

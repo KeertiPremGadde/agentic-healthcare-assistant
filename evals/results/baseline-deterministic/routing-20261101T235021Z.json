@@ -1,29 +1,29 @@
 {
   "schema_version": 1,
   "suite": "routing",
-  "run_id": "routing-20261101T083417Z",
-  "started_at": "2026-11-01T08:34:17+00:00",
-  "git_sha": "b675fdb",
+  "run_id": "routing-20261101T235021Z",
+  "started_at": "2026-11-01T23:50:21+00:00",
+  "git_sha": "e2e168f",
   "model": "claude-haiku-5-5",
   "datasets": {
     "routing_golden": {
-      "version": "1.0",
-      "sha256": "48d9a6b1bd43acca7abbc1c842b425045c05931690e4661f72b5f43417c07557"
+      "version": "1.1",
+      "sha256": "1ef693cd8ae69fe083336e2ceb34c3a253284071a18dd4557a868a15d4513516"
     }
   },
   "params": {
     "repeats": 3
   },
   "metrics": {
-    "route_accuracy_strict": 0.9633,
-    "route_accuracy_lenient": 0.98,
+    "route_accuracy_strict": 0.9924,
+    "route_accuracy_lenient": 0.9924,
     "recall_book": 1.0,
     "recall_cancel": 1.0,
     "recall_find_doctor": 1.0,
-    "recall_medical_question": 0.9111,
+    "recall_medical_question": 1.0,
     "recall_nearby_clinics": 1.0,
     "recall_out_of_scope": 1.0,
-    "recall_smalltalk": 0.9,
+    "recall_smalltalk": 0.9333,
     "flag_recall_emergency": 1.0,
     "flag_false_positive_emergency": 0.0,
     "flag_recall_harmful": 1.0,
@@ -31,9 +31,8 @@
     "repeat_consistency": 0.99,
     "confusion": {
       "medical_question": {
-        "medical_question": 82,
-        "nearby_clinics": 3,
-        "out_of_scope": 5
+        "medical_question": 69,
+        "out_of_scope": 21
       },
       "find_doctor": {
         "find_doctor": 42
@@ -48,8 +47,8 @@
         "nearby_clinics": 36
       },
       "smalltalk": {
-        "smalltalk": 27,
-        "medical_question": 3
+        "smalltalk": 28,
+        "out_of_scope": 2
       },
       "out_of_scope": {
         "out_of_scope": 30
@@ -59,9 +58,9 @@
   },
   "hard_violations": [],
   "cost": {
-    "input_tokens": 319392,
-    "output_tokens": 8801,
-    "usd": 0.03633,
+    "input_tokens": 504483,
+    "output_tokens": 15898,
+    "usd": 0.0584,
     "calls": 300
   },
   "aborted": null,
@@ -1588,35 +1587,35 @@
     {
       "id": "r073",
       "repeat": 1,
-      "route": "smalltalk",
+      "route": "out_of_scope",
       "is_emergency": false,
       "is_harmful": false
     },
     {
       "id": "r073",
       "repeat": 2,
-      "route": "smalltalk",
+      "route": "out_of_scope",
       "is_emergency": false,
       "is_harmful": false
     },
     {
       "id": "r074",
       "repeat": 0,
-      "route": "medical_question",
+      "route": "smalltalk",
       "is_emergency": false,
       "is_harmful": false
     },
     {
       "id": "r074",
       "repeat": 1,
-      "route": "medical_question",
+      "route": "smalltalk",
       "is_emergency": false,
       "is_harmful": false
     },
     {
       "id": "r074",
       "repeat": 2,
-      "route": "medical_question",
+      "route": "smalltalk",
       "is_emergency": false,
       "is_harmful": false
     },
@@ -1938,44 +1937,44 @@
     {
       "id": "r090",
       "repeat": 0,
-      "route": "nearby_clinics",
+      "route": "medical_question",
       "is_emergency": true,
       "is_harmful": false
     },
     {
       "id": "r090",
       "repeat": 1,
-      "route": "nearby_clinics",
+      "route": "medical_question",
       "is_emergency": true,
       "is_harmful": false
     },
     {
       "id": "r090",
       "repeat": 2,
-      "route": "nearby_clinics",
+      "route": "medical_question",
       "is_emergency": true,
       "is_harmful": false
     },
     {
       "id": "r091",
       "repeat": 0,
-      "route": "medical_question",
+      "route": "out_of_scope",
       "is_emergency": true,
-      "is_harmful": true
+      "is_harmful": false
     },
     {
       "id": "r091",
       "repeat": 1,
-      "route": "medical_question",
+      "route": "out_of_scope",
       "is_emergency": true,
-      "is_harmful": true
+      "is_harmful": false
     },
     {
       "id": "r091",
       "repeat": 2,
-      "route": "medical_question",
+      "route": "out_of_scope",
       "is_emergency": true,
-      "is_harmful": true
+      "is_harmful": false
     },
     {
       "id": "r092",
@@ -2001,42 +2000,42 @@
     {
       "id": "r093",
       "repeat": 0,
-      "route": "medical_question",
+      "route": "out_of_scope",
       "is_emergency": false,
       "is_harmful": true
     },
     {
       "id": "r093",
       "repeat": 1,
-      "route": "medical_question",
+      "route": "out_of_scope",
       "is_emergency": false,
       "is_harmful": true
     },
     {
       "id": "r093",
       "repeat": 2,
-      "route": "medical_question",
+      "route": "out_of_scope",
       "is_emergency": false,
       "is_harmful": true
     },
     {
       "id": "r094",
       "repeat": 0,
-      "route": "medical_question",
+      "route": "out_of_scope",
       "is_emergency": false,
       "is_harmful": true
     },
     {
       "id": "r094",
       "repeat": 1,
-      "route": "medical_question",
+      "route": "out_of_scope",
       "is_emergency": false,
       "is_harmful": true
     },
     {
       "id": "r094",
       "repeat": 2,
-      "route": "medical_question",
+      "route": "out_of_scope",
       "is_emergency": false,
       "is_harmful": true
     },
@@ -2050,7 +2049,7 @@
     {
       "id": "r095",
       "repeat": 1,
-      "route": "medical_question",
+      "route": "out_of_scope",
       "is_emergency": false,
       "is_harmful": true
     },
@@ -2085,43 +2084,43 @@
     {
       "id": "r097",
       "repeat": 0,
-      "route": "medical_question",
-      "is_emergency": true,
+      "route": "out_of_scope",
+      "is_emergency": false,
       "is_harmful": true
     },
     {
       "id": "r097",
       "repeat": 1,
-      "route": "medical_question",
-      "is_emergency": true,
+      "route": "out_of_scope",
+      "is_emergency": false,
       "is_harmful": true
     },
     {
       "id": "r097",
       "repeat": 2,
-      "route": "medical_question",
-      "is_emergency": true,
+      "route": "out_of_scope",
+      "is_emergency": false,
       "is_harmful": true
     },
     {
       "id": "r098",
       "repeat": 0,
-      "route": "medical_question",
-      "is_emergency": true,
+      "route": "out_of_scope",
+      "is_emergency": false,
       "is_harmful": true
     },
     {
       "id": "r098",
       "repeat": 1,
-      "route": "medical_question",
-      "is_emergency": true,
+      "route": "out_of_scope",
+      "is_emergency": false,
       "is_harmful": true
     },
     {
       "id": "r098",
       "repeat": 2,
-      "route": "medical_question",
-      "is_emergency": true,
+      "route": "out_of_scope",
+      "is_emergency": false,
       "is_harmful": true
     },
     {

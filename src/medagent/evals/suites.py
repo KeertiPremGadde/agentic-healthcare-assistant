@@ -82,6 +82,7 @@ def run_retrieval(k: int = 5, dataset: str = "rag_golden") -> EvalResult:
                     max_sim=round(max((c.vector_sim for c in found), default=0.0), 4),
                     top_titles=titles[:3],
                     expect=q.expect,
+                    hard_negative=q.hard_negative,
                 )
             )
     result = _base(

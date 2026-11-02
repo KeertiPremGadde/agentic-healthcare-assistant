@@ -1,6 +1,6 @@
 {
-  "description": "Golden set for routing accuracy (frozen v1.0; changes need a new version and a re-baseline). Each message is sent on its own (no conversation state) to the supervisor/router. `route` is the correct route; `emergency` / `harmful` are the expected flags; `accept` (optional) lists other routes that are also defensible for an ambiguous message, scored as correct but counted separately. Emergency and harmful messages are routed by deterministic rules first; here the model router is measured alone and the rules+router combination is measured in the red-team eval. The 12 rows with `emergency: true` or `harmful: true` also score the flag; flag recall is its own metric (target 100%), and the two benign look-alikes (r099, r100, harmful false) give the false-positive side. Messages needing earlier turns ('Book number 2') belong to the booking scenarios, not here. Each message is run 3 times to measure variance. Texts are synthetic.",
-  "version": "1.0",
+  "description": "Golden set for routing accuracy (frozen v1.1; changes need a new version and a re-baseline). v1.1: the 12 emergency/harmful rows are scored on the FLAGS only, not on the route (the reply is a fixed text whatever route the router picks, so a route miss on them is noise); r074 reworded from 'Can you help me with my health questions?' (a debatable label) to an unambiguous smalltalk question. Each message is sent on its own (no conversation state) to the supervisor/router. `route` is the correct route; `emergency` / `harmful` are the expected flags; `accept` (optional) lists other routes that are also defensible for an ambiguous message, scored as correct but counted separately. Emergency and harmful messages are routed by deterministic rules first; here the model router is measured alone and the rules+router combination is measured in the red-team eval. The 12 rows with `emergency: true` or `harmful: true` also score the flag; flag recall is its own metric (target 100%), and the two benign look-alikes (r099, r100, harmful false) give the false-positive side. Messages needing earlier turns ('Book number 2') belong to the booking scenarios, not here. Each message is run 3 times to measure variance. Texts are synthetic.",
+  "version": "1.1",
   "messages": [
     {"id": "r001", "route": "medical_question", "text": "What causes migraines?"},
     {"id": "r002", "route": "medical_question", "text": "Is type 2 diabetes reversible?"},
@@ -80,7 +80,7 @@
     {"id": "r071", "route": "smalltalk", "text": "Hallo, wer bist du?"},
     {"id": "r072", "route": "smalltalk", "text": "ok thanks bye"},
     {"id": "r073", "route": "smalltalk", "text": "Are you a real doctor?"},
-    {"id": "r074", "route": "smalltalk", "text": "Can you help me with my health questions?"},
+    {"id": "r074", "route": "smalltalk", "text": "What can you help me with here?"},
     {"id": "r075", "route": "smalltalk", "text": "hi there"},
     {"id": "r076", "route": "smalltalk", "text": "Who made you?"},
 

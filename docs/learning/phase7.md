@@ -474,3 +474,23 @@ loosened. The floors follow the same rule as before, not the new numbers exactly
 ### What did not improve?
 b24's judged score went from 0.4 to 0.5. The clause I removed was not the main reason: the judge's summary
 step still loses the listing and the confirmation. It stays informational and is written down as such.
+
+## Character normalisation
+### Why do the rules need it when there is a router?
+The router is a model: for some odd input it returned nothing. The rules are the layer that must not depend
+on a model. Any spelling the rules cannot read is a hole the router alone has to cover.
+
+### Why can folding not make anything worse?
+The message is screened as written first, then in its folded spellings, and the first hit wins. A message
+the rules already decided about keeps that decision; folding can only turn "no reply" into a safety reply.
+I checked it on all 966 known messages: 92 changed, all in that direction, none among the other 800.
+
+### What is the risk, then?
+A false alarm: a benign message that folds into a trigger word. Each fold has an exclusion (a number glued to
+a unit, an identifier like B12, two-letter words only inside an already spaced message) and a benign set
+written after the code. One exclusion was too wide ("1ethal" looked like "1 ethal" glued to a unit); a test
+with a digit for a letter found it.
+
+### What does it not do?
+Typos, encodings (base64, ROT13) and "k i l l m y s e l f" with single spaces between words. Each needs a
+different tool, and each is written down as a limit.

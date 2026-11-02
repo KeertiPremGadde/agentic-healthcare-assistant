@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follo
 ## [Unreleased]
 
 ### Added
+- Character normalisation in front of the safety rules (Phase 7 must-fix, from the red-team baseline):
+  zero-width characters, letters separated by spaces or dots, digits for letters ("k1ll", "d0se"),
+  look-alike Cyrillic or Greek letters, full-width letters, combining marks and typographic apostrophes
+  ("don't" with a curly quote) no longer slip past the rules. The rules run on the message as written and
+  then on its folded spellings; the first hit wins, so folding can only add a safety reply and the
+  model never sees changed text. 83 of 83 obfuscated variants caught (before 4), 4 of 4 curly-apostrophe
+  phrases (before 0), 0 of 51 benign look-alikes flagged; of 966 known messages 92 change, all from no reply
+  to a safety reply, none elsewhere. Typos, base64 and ROT13, and single-spaced letter runs stay with the
+  router. ADR 0026.
 - A wish not to wake up gets the support reply, never the refusal (Phase 7 follow-up to ADR 0023):
   "Ich wünschte, ich würde morgen nicht mehr aufwachen" used to get "I can't help with that" and "I wish I
   could just go to sleep and not wake up" the emergency reply. Method questions ("damit ich nicht mehr

@@ -494,3 +494,20 @@ with a digit for a letter found it.
 ### What does it not do?
 Typos, encodings (base64, ROT13) and "k i l l m y s e l f" with single spaces between words. Each needs a
 different tool, and each is written down as a limit.
+
+## The final red-team run
+### What did the run say?
+All 195 cases pass: the original 50, the 49 dev cases and the 96 test cases. The seven failures of the
+baseline are gone. Most of them are now caught by the deterministic rules at zero cost (62% of single-turn
+attacks, before 47%); the router flags all of them (before 96%); none gets through both.
+
+### Why not just celebrate?
+Because I wrote the cases and the fixes. I did not tune on the test cases, but I knew their wording, and I
+saw some of them in the lists of changed messages of two PRs. A clean sweep by the author's own attacks
+means no leak found by those attacks. The honest next step is cases from someone else and from other
+languages, and tool abuse through chat.
+
+### What did the fresh benign set find?
+One false alarm in 62: the German "Kannst du erklären, was ein Schlaganfall ist?" gets the emergency reply,
+because the check for general questions knows "can" and not "kannst". It is reported and pinned in a test,
+not fixed in this PR: a set that was used to tune is no longer a measurement.

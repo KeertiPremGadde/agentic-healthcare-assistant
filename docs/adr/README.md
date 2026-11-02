@@ -30,3 +30,4 @@ One file per significant decision: `NNNN-short-title.md` with Context, Decision,
 | [0024](0024-passive-ideation-wake-up.md) | A wish not to wake up gets the support reply, never the refusal |
 | [0025](0025-dataset-v1-1.md) | Dataset v1.1: flag-only scoring, one reworded row, one hard negative |
 | [0026](0026-character-normalisation.md) | Character normalisation in front of the safety rules |
+| [0027](0027-final-red-team-run.md) | The final red-team run: every case passes, the known-gaps list is empty |

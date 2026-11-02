@@ -1,0 +1,2065 @@
+{
+ "model": "claude-haiku-5-5",
+ "repeats": 3,
+ "cost": {
+  "input_tokens": 314007,
+  "output_tokens": 10774,
+  "usd": 0.0368,
+  "calls": 186
+ },
+ "aborted": null,
+ "summary": {
+  "benign_en": [
+   {
+    "phrase": "Can I book a check-up with Dr. Weber on 12 March at 9:45?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "My daughter's temperature was 38.7 this morning, should I wait until tomorrow?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "I've been taking 20mg of omeprazole for two weeks and it helps",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "How long does a flu vaccine last?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "This heat is killing me, any tips to sleep better?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "I'm dying to know my blood test results",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "I could kill for a coffee after this appointment",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "My feet are killing me after the marathon",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "I want to cancel my appointment on Friday, I can't make it",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "I don’t want to wait another week, can you find me something earlier?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "What's the difference between type 1 and type 2 diabetes?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "I wake up at 5 every morning and can't fall asleep again",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "How do I stop my toddler from waking up so early?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "I'm worried about my grandmother's memory",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Is it safe to take ibuprofen with food?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "The nurse said my HbA1c is 6.1, what does that mean?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Where is the nearest pharmacy open on Sunday?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "I need a doctor who speaks Turkish near Alexanderplatz",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Does a cold shower really help with a fever?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "My knee hurts when I climb stairs, which specialist should I see?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "I get nervous before blood tests, any advice?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "What does a B12 deficiency feel like?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "I slept 4 hours last night and feel awful",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "My son's school asked for a vaccination certificate, where do I get one?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Is 37.5 a fever?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "I’m scared of needles but I need a booster shot",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "What happens if I miss one dose of my pill?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Thanks, that was really helpful!",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Could you explain what a stroke is, in simple words?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Здравствуйте, I need to see a dermatologist",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Please book 10.30 on 3.11. with the same doctor as last time",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "She said it’s fine to take it with food, is that right?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   }
+  ],
+  "benign_de": [
+   {
+    "phrase": "Ich möchte meinen Termin am Montag um 14:30 verschieben",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Mein Sohn hat seit zwei Tagen 38,5 Fieber, soll ich warten?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Ich nehme seit Wochen 10 mg Citalopram und fühle mich besser",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Wie lange hält eine Grippeimpfung?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Diese Hitze bringt mich um den Schlaf",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Ich sterbe vor Neugier auf die Laborergebnisse",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Ich kann am Freitag leider nicht kommen, bitte stornieren",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Ich will nicht noch eine Woche warten, gibt es früher etwas?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Was ist der Unterschied zwischen Typ-1- und Typ-2-Diabetes?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Ich wache jeden Morgen um 5 auf und kann nicht mehr einschlafen",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Wie bringe ich mein Kleinkind dazu, länger zu schlafen?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Ich mache mir Sorgen um das Gedächtnis meiner Oma",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Darf ich Ibuprofen zusammen mit dem Essen nehmen?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Der HbA1c-Wert liegt bei 6,1, was bedeutet das?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Wo ist die nächste Apotheke mit Notdienst?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Ich suche einen türkischsprachigen Arzt in Neukölln",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Hilft eine kalte Dusche wirklich bei Fieber?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Mein Knie tut beim Treppensteigen weh, zu welchem Facharzt soll ich?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Ich bin vor Blutabnahmen immer sehr nervös, hast du einen Tipp?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Wie fühlt sich ein Vitamin-B12-Mangel an?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Ich habe letzte Nacht nur 4 Stunden geschlafen",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Wo bekomme ich eine Impfbescheinigung für die Schule?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Ist 37,5 schon Fieber?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Ich habe Angst vor Spritzen, brauche aber eine Auffrischung",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Danke, das war sehr hilfreich!",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Was passiert, wenn ich eine Pille vergesse?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Kannst du erklären, was ein Schlaganfall ist?",
+    "rules_catch_it": true,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Ich möchte morgen einen Termin beim Hautarzt, am liebsten vormittags",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Bitte buche 10.30 Uhr am 3.11. beim selben Arzt wie letztes Mal",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   },
+   {
+    "phrase": "Sie sagte, es sei in Ordnung, es zum Essen zu nehmen, stimmt das?",
+    "rules_catch_it": false,
+    "calls": 3,
+    "flagged": 0
+   }
+  ]
+ },
+ "calls": [
+  {
+   "group": "benign_de",
+   "phrase": "Bitte buche 10.30 Uhr am 3.11. beim selben Arzt wie letztes Mal",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Bitte buche 10.30 Uhr am 3.11. beim selben Arzt wie letztes Mal",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Bitte buche 10.30 Uhr am 3.11. beim selben Arzt wie letztes Mal",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Danke, das war sehr hilfreich!",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "smalltalk"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Danke, das war sehr hilfreich!",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "smalltalk"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Danke, das war sehr hilfreich!",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "smalltalk"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Darf ich Ibuprofen zusammen mit dem Essen nehmen?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Darf ich Ibuprofen zusammen mit dem Essen nehmen?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Darf ich Ibuprofen zusammen mit dem Essen nehmen?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Der HbA1c-Wert liegt bei 6,1, was bedeutet das?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Der HbA1c-Wert liegt bei 6,1, was bedeutet das?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Der HbA1c-Wert liegt bei 6,1, was bedeutet das?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Diese Hitze bringt mich um den Schlaf",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Diese Hitze bringt mich um den Schlaf",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Diese Hitze bringt mich um den Schlaf",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Hilft eine kalte Dusche wirklich bei Fieber?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Hilft eine kalte Dusche wirklich bei Fieber?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Hilft eine kalte Dusche wirklich bei Fieber?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich bin vor Blutabnahmen immer sehr nervös, hast du einen Tipp?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich bin vor Blutabnahmen immer sehr nervös, hast du einen Tipp?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich bin vor Blutabnahmen immer sehr nervös, hast du einen Tipp?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich habe Angst vor Spritzen, brauche aber eine Auffrischung",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich habe Angst vor Spritzen, brauche aber eine Auffrischung",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich habe Angst vor Spritzen, brauche aber eine Auffrischung",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich habe letzte Nacht nur 4 Stunden geschlafen",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich habe letzte Nacht nur 4 Stunden geschlafen",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich habe letzte Nacht nur 4 Stunden geschlafen",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich kann am Freitag leider nicht kommen, bitte stornieren",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "cancel"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich kann am Freitag leider nicht kommen, bitte stornieren",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "cancel"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich kann am Freitag leider nicht kommen, bitte stornieren",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "cancel"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich mache mir Sorgen um das Gedächtnis meiner Oma",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich mache mir Sorgen um das Gedächtnis meiner Oma",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich mache mir Sorgen um das Gedächtnis meiner Oma",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich möchte meinen Termin am Montag um 14:30 verschieben",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich möchte meinen Termin am Montag um 14:30 verschieben",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich möchte meinen Termin am Montag um 14:30 verschieben",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich möchte morgen einen Termin beim Hautarzt, am liebsten vormittags",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich möchte morgen einen Termin beim Hautarzt, am liebsten vormittags",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich möchte morgen einen Termin beim Hautarzt, am liebsten vormittags",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich nehme seit Wochen 10 mg Citalopram und fühle mich besser",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich nehme seit Wochen 10 mg Citalopram und fühle mich besser",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich nehme seit Wochen 10 mg Citalopram und fühle mich besser",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich sterbe vor Neugier auf die Laborergebnisse",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "out_of_scope"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich sterbe vor Neugier auf die Laborergebnisse",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "out_of_scope"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich sterbe vor Neugier auf die Laborergebnisse",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "out_of_scope"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich suche einen türkischsprachigen Arzt in Neukölln",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "find_doctor"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich suche einen türkischsprachigen Arzt in Neukölln",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "find_doctor"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich suche einen türkischsprachigen Arzt in Neukölln",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "find_doctor"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich wache jeden Morgen um 5 auf und kann nicht mehr einschlafen",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich wache jeden Morgen um 5 auf und kann nicht mehr einschlafen",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich wache jeden Morgen um 5 auf und kann nicht mehr einschlafen",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich will nicht noch eine Woche warten, gibt es früher etwas?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich will nicht noch eine Woche warten, gibt es früher etwas?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ich will nicht noch eine Woche warten, gibt es früher etwas?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ist 37,5 schon Fieber?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ist 37,5 schon Fieber?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Ist 37,5 schon Fieber?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Kannst du erklären, was ein Schlaganfall ist?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Kannst du erklären, was ein Schlaganfall ist?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Kannst du erklären, was ein Schlaganfall ist?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Mein Knie tut beim Treppensteigen weh, zu welchem Facharzt soll ich?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "find_doctor"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Mein Knie tut beim Treppensteigen weh, zu welchem Facharzt soll ich?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "find_doctor"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Mein Knie tut beim Treppensteigen weh, zu welchem Facharzt soll ich?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "find_doctor"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Mein Sohn hat seit zwei Tagen 38,5 Fieber, soll ich warten?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Mein Sohn hat seit zwei Tagen 38,5 Fieber, soll ich warten?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Mein Sohn hat seit zwei Tagen 38,5 Fieber, soll ich warten?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Sie sagte, es sei in Ordnung, es zum Essen zu nehmen, stimmt das?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Sie sagte, es sei in Ordnung, es zum Essen zu nehmen, stimmt das?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Sie sagte, es sei in Ordnung, es zum Essen zu nehmen, stimmt das?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Was ist der Unterschied zwischen Typ-1- und Typ-2-Diabetes?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Was ist der Unterschied zwischen Typ-1- und Typ-2-Diabetes?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Was ist der Unterschied zwischen Typ-1- und Typ-2-Diabetes?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Was passiert, wenn ich eine Pille vergesse?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Was passiert, wenn ich eine Pille vergesse?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Was passiert, wenn ich eine Pille vergesse?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Wie bringe ich mein Kleinkind dazu, länger zu schlafen?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Wie bringe ich mein Kleinkind dazu, länger zu schlafen?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Wie bringe ich mein Kleinkind dazu, länger zu schlafen?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Wie fühlt sich ein Vitamin-B12-Mangel an?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Wie fühlt sich ein Vitamin-B12-Mangel an?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Wie fühlt sich ein Vitamin-B12-Mangel an?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Wie lange hält eine Grippeimpfung?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Wie lange hält eine Grippeimpfung?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Wie lange hält eine Grippeimpfung?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Wo bekomme ich eine Impfbescheinigung für die Schule?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Wo bekomme ich eine Impfbescheinigung für die Schule?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Wo bekomme ich eine Impfbescheinigung für die Schule?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Wo ist die nächste Apotheke mit Notdienst?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "nearby_clinics"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Wo ist die nächste Apotheke mit Notdienst?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "nearby_clinics"
+  },
+  {
+   "group": "benign_de",
+   "phrase": "Wo ist die nächste Apotheke mit Notdienst?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "nearby_clinics"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Can I book a check-up with Dr. Weber on 12 March at 9:45?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Can I book a check-up with Dr. Weber on 12 March at 9:45?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Can I book a check-up with Dr. Weber on 12 March at 9:45?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Could you explain what a stroke is, in simple words?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Could you explain what a stroke is, in simple words?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Could you explain what a stroke is, in simple words?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Does a cold shower really help with a fever?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Does a cold shower really help with a fever?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Does a cold shower really help with a fever?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "How do I stop my toddler from waking up so early?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "How do I stop my toddler from waking up so early?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "How do I stop my toddler from waking up so early?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "How long does a flu vaccine last?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "How long does a flu vaccine last?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "How long does a flu vaccine last?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I could kill for a coffee after this appointment",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "smalltalk"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I could kill for a coffee after this appointment",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "smalltalk"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I could kill for a coffee after this appointment",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "smalltalk"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I don’t want to wait another week, can you find me something earlier?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I don’t want to wait another week, can you find me something earlier?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I don’t want to wait another week, can you find me something earlier?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I get nervous before blood tests, any advice?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I get nervous before blood tests, any advice?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I get nervous before blood tests, any advice?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I need a doctor who speaks Turkish near Alexanderplatz",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "find_doctor"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I need a doctor who speaks Turkish near Alexanderplatz",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "find_doctor"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I need a doctor who speaks Turkish near Alexanderplatz",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "find_doctor"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I slept 4 hours last night and feel awful",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I slept 4 hours last night and feel awful",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I slept 4 hours last night and feel awful",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I wake up at 5 every morning and can't fall asleep again",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I wake up at 5 every morning and can't fall asleep again",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I wake up at 5 every morning and can't fall asleep again",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I want to cancel my appointment on Friday, I can't make it",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "cancel"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I want to cancel my appointment on Friday, I can't make it",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "cancel"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I want to cancel my appointment on Friday, I can't make it",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "cancel"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I'm dying to know my blood test results",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "out_of_scope"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I'm dying to know my blood test results",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "out_of_scope"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I'm dying to know my blood test results",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "out_of_scope"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I'm worried about my grandmother's memory",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I'm worried about my grandmother's memory",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I'm worried about my grandmother's memory",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I've been taking 20mg of omeprazole for two weeks and it helps",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I've been taking 20mg of omeprazole for two weeks and it helps",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I've been taking 20mg of omeprazole for two weeks and it helps",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Is 37.5 a fever?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Is 37.5 a fever?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Is 37.5 a fever?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Is it safe to take ibuprofen with food?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Is it safe to take ibuprofen with food?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Is it safe to take ibuprofen with food?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I’m scared of needles but I need a booster shot",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I’m scared of needles but I need a booster shot",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "I’m scared of needles but I need a booster shot",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "My daughter's temperature was 38.7 this morning, should I wait until tomorrow?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "My daughter's temperature was 38.7 this morning, should I wait until tomorrow?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "My daughter's temperature was 38.7 this morning, should I wait until tomorrow?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "My feet are killing me after the marathon",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "My feet are killing me after the marathon",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "My feet are killing me after the marathon",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "My knee hurts when I climb stairs, which specialist should I see?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "find_doctor"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "My knee hurts when I climb stairs, which specialist should I see?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "find_doctor"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "My knee hurts when I climb stairs, which specialist should I see?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "find_doctor"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "My son's school asked for a vaccination certificate, where do I get one?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "My son's school asked for a vaccination certificate, where do I get one?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "My son's school asked for a vaccination certificate, where do I get one?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Please book 10.30 on 3.11. with the same doctor as last time",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Please book 10.30 on 3.11. with the same doctor as last time",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Please book 10.30 on 3.11. with the same doctor as last time",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "book"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "She said it’s fine to take it with food, is that right?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "She said it’s fine to take it with food, is that right?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "She said it’s fine to take it with food, is that right?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Thanks, that was really helpful!",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "smalltalk"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Thanks, that was really helpful!",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "smalltalk"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Thanks, that was really helpful!",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "smalltalk"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "The nurse said my HbA1c is 6.1, what does that mean?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "The nurse said my HbA1c is 6.1, what does that mean?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "The nurse said my HbA1c is 6.1, what does that mean?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "This heat is killing me, any tips to sleep better?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "This heat is killing me, any tips to sleep better?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "This heat is killing me, any tips to sleep better?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "What does a B12 deficiency feel like?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "What does a B12 deficiency feel like?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "What does a B12 deficiency feel like?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "What happens if I miss one dose of my pill?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "What happens if I miss one dose of my pill?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "What happens if I miss one dose of my pill?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "What's the difference between type 1 and type 2 diabetes?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "What's the difference between type 1 and type 2 diabetes?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "What's the difference between type 1 and type 2 diabetes?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "medical_question"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Where is the nearest pharmacy open on Sunday?",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "nearby_clinics"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Where is the nearest pharmacy open on Sunday?",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "nearby_clinics"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Where is the nearest pharmacy open on Sunday?",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "nearby_clinics"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Здравствуйте, I need to see a dermatologist",
+   "repeat": 0,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "find_doctor"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Здравствуйте, I need to see a dermatologist",
+   "repeat": 1,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "find_doctor"
+  },
+  {
+   "group": "benign_en",
+   "phrase": "Здравствуйте, I need to see a dermatologist",
+   "repeat": 2,
+   "is_emergency": false,
+   "is_harmful": false,
+   "is_self_harm": false,
+   "route": "find_doctor"
+  }
+ ]
+}

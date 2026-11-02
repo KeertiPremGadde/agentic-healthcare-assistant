@@ -227,8 +227,10 @@ Set it up once, in your own terminal (never paste the key into a chat or a file)
    ```powershell
    gh secret list --repo KeertiPremGadde/agentic-healthcare-assistant
    ```
-4. **Run it once by hand** to see it work: Actions, "Eval gate", "Run workflow" on a branch, or
-   `gh workflow run eval-gate.yml --ref <branch>`. The job summary shows the gate output.
+4. **See it work.** The pull request that adds the workflow runs it (the live job is triggered because the
+   workflow file itself is on the list of paths it watches). After it has merged you can also start it by hand:
+   Actions, "Eval gate", "Run workflow", or `gh workflow run eval-gate.yml`. The job summary shows the gate
+   output and the result files are attached to the run for 14 days.
 
 Until the secret exists, a pull request that needs the live gate fails with a message that points here.
 Pull requests from forks and Dependabot skip the paid job (they get no secret). To rotate the key, create a new

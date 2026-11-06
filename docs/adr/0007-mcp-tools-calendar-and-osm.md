@@ -4,7 +4,7 @@ Status: accepted (Phase 4)
 
 ## Context
 Phase 3 nodes called the database directly. We want clinic operations as a reusable,
-self-describing service (usable by our graph, MCP Inspector, Claude Desktop), a calendar entry
+self-describing service (usable by our graph, MCP Inspector, any MCP client), a calendar entry
 for bookings, and a "real clinics nearby" lookup, without weakening the safety properties of
 Phase 3 (human confirmation, patient from login, DB-enforced uniqueness).
 

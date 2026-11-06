@@ -1,5 +1,5 @@
 """MedAgent clinic MCP server: scheduling tools for any MCP client (our graph, MCP Inspector,
-Claude Desktop).
+any other client).
 
     uv run python -m medagent.mcp_server                       # stdio (what the graph uses)
     uv run mcp dev src/medagent/mcp_server/server.py           # open in MCP Inspector

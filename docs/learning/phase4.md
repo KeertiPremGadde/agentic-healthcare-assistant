@@ -11,7 +11,7 @@ an MCP client, cancellation with human confirmation, an optional Google Calendar
 The Model Context Protocol is an open standard (JSON-RPC over stdio or HTTP) for exposing tools,
 resources and prompts to AI applications. A server declares typed tools with input and output
 schemas; any client discovers and calls them. For us that means scheduling is a reusable service:
-our LangGraph agent, MCP Inspector and Claude Desktop all use the same `book_appointment`, with the
+our LangGraph agent, MCP Inspector and any other MCP client all use the same `book_appointment`, with the
 same validation, instead of each re-implementing database access.
 
 ### Where does MCP sit in your architecture?

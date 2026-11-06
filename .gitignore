@@ -69,3 +69,9 @@ Thumbs.db
 *.log
 logs/
 .cache/
+
+# Local assistant instruction files (never committed)
+CLAUDE.md
+AGENTS.md
+.claude/
+docs/HANDOFF_PROMPT.md

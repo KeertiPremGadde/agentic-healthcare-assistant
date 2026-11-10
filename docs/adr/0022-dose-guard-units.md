@@ -1,6 +1,6 @@
 # 0022 – The dose guard sees amounts per kilogram and per day, and grams
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 The dose guard (ADR 0009) replaces any answer that states a dose of a medicine. The red-team probes

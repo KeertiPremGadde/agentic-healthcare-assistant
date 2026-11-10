@@ -1,6 +1,6 @@
 # 0026 – Character normalisation in front of the safety rules
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 The deterministic rules match plain spellings. The red-team baseline (ADR 0020) and free probes

@@ -1,5 +1,5 @@
 # ruff: noqa: E501
-"""Free comparison of cross-encoder rerankers against ScoreReranker (Phase 7, change 2).
+"""Free comparison of cross-encoder rerankers against ScoreReranker (ADR 0014, change 2).
 
     uv run python scripts/compare_rerankers.py [--models a b ...] [--top-n 20]
 

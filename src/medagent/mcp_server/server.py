@@ -6,7 +6,7 @@ any other client).
 
 Trust boundary: stdio only, spawned by a trusted local process. `book_appointment` and
 `cancel_appointment` take a `patient_id` that the *caller* must have authenticated; exposing this
-server over HTTP requires authentication first (Phase 5/8). Never print to stdout here: stdout
+server over HTTP requires authentication first. Never print to stdout here: stdout
 is the JSON-RPC channel. Logs go to stderr.
 """
 

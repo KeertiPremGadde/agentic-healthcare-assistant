@@ -1,6 +1,6 @@
 # 0012 – Langfuse tracing with content redacted by default
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 To debug and evaluate an agent you need to see what a run did: which nodes ran, how long each took,

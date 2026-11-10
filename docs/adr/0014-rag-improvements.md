@@ -1,6 +1,6 @@
 # 0014 – RAG improvements, each measured against the frozen baseline
 
-Status: accepted (Phase 7). All four changes are decided and measured.
+Status: accepted. All four changes are decided and measured.
 
 ## Context
 ADR 0013 froze the golden sets and recorded a Phase 2 baseline with its run-to-run spread. The rule

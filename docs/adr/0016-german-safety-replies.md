@@ -1,6 +1,6 @@
 # 0016 – German emergency and harmful-intent replies, chosen by the rule that matched
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 ADR 0015 localised the fixed texts of the medical-answer path. The two most important fixed texts

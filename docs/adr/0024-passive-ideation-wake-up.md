@@ -1,6 +1,6 @@
 # 0024 – A wish not to wake up gets the support reply, never the refusal
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 ADR 0023 left two passive-ideation phrases on the wrong reply:

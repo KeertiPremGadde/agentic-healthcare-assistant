@@ -1,4 +1,4 @@
-# Infrastructure (Phase 8)
+# Infrastructure
 
 Terraform for AWS. Planned modules:
 

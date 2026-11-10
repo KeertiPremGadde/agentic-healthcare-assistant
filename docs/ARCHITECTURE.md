@@ -30,7 +30,7 @@ flowchart TD
     GR -->|acute red flag| OUT
     GR -->|ok, or general question<br/>+ safety notice| SUP{supervisor<br/>structured-output router<br/>+ is_emergency flag}
     SUP -->|is_emergency| OUT
-    SUP -->|medical_question| RAG[medical_rag<br/>Phase 2 hybrid RAG · citations]
+    SUP -->|medical_question| RAG[medical_rag<br/>hybrid RAG · citations]
     SUP -->|find_doctor| DF[doctor_finder<br/>Specialty enum · DB lookup]
     SUP -->|book| BK[booking<br/>extract doctor/day/time · find a valid free slot]
     SUP -->|cancel| CX[cancel<br/>own upcoming appointments]
@@ -91,7 +91,7 @@ sequenceDiagram
     G-->>UI: "Booked ✔ Confirmation #A-1042"
 ```
 
-### Booking confirmation over HTTP (Phase 5)
+### Booking confirmation over HTTP
 
 ```mermaid
 sequenceDiagram
@@ -116,11 +116,13 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
-    PDF[Medical PDFs<br/>data/raw] --> L[Loader] --> CH[Chunker<br/>recursive, ~800 tokens, overlap]
-    CH --> MD[Metadata<br/>source, page, section]
-    MD --> EMB[Embeddings] --> PG[(pgvector)]
-    Q[User question] --> QR[Query rewrite] --> HY[Hybrid search<br/>vector + full-text]
-    PG --> HY --> RR[Reranker] --> CTX[Top-k context] --> ANS[LLM answer<br/>with citations]
+    SRC[MedlinePlus topics<br/>local PDFs, non-public] --> L[Loader] --> CH[Chunker<br/>~1,200 characters, overlap]
+    CH --> HD[Contextual header<br/>topic + section]
+    HD --> EMB[Local embeddings<br/>FastEmbed] --> PG[(pgvector)]
+    Q[User question] --> EN[English query<br/>for German questions] --> HY[Hybrid search<br/>vector + full-text]
+    PG --> HY --> RR[Cross-encoder reranker] --> TH{Score above<br/>RAG_MIN_SCORE?}
+    TH -->|yes| ANS[LLM answer<br/>with citations]
+    TH -->|no| IDK[I don't know]
 ```
 
 ## 5. Delivery pipeline (CI/CD)
@@ -129,13 +131,12 @@ flowchart LR
 flowchart LR
     DEV[feature branch] -->|push| PR[Pull request]
     PR --> CI[GitHub Actions CI<br/>ruff · mypy · pytest · gitleaks]
-    CI --> EV[Eval gate<br/>RAGAS / DeepEval thresholds]
+    CI --> EV[Eval gate<br/>baselines + live routing and booking evals]
     EV -->|merge| MAIN[main]
     MAIN -->|tag vX.Y.Z| CD[CD workflow]
     CD --> IMG[Build Docker image] --> ECR[(AWS ECR)]
-    ECR --> ECS[AWS ECS Fargate / App Runner]
-    TF[Terraform<br/>infra/terraform] --> ECS
-    ECS --> LIVE([Live URL])
+    ECR -.->|planned| ECS[AWS ECS Fargate]
+    TF[Terraform<br/>infra/terraform] -.->|planned| ECS
 ```
 
 ## 6. Repository layout
@@ -152,15 +153,17 @@ agentic-healthcare-assistant/
 │   ├── db/                  engine, session, models/
 │   ├── services/            pure domain logic (availability, validation)
 │   ├── schemas/             shared Pydantic models
-│   ├── guardrails/          emergency, PII, disclaimer
+│   ├── guardrails/          emergency, harmful intent, self-harm, dose, PII, normalisation
+│   ├── evals/               evaluation suites and scoring
+│   ├── integrations/        Google Calendar, OpenStreetMap
 │   ├── mcp_server/          MCP tool server
 │   └── observability/       tracing
 ├── tests/unit · tests/integration
-├── evals/                   datasets + eval scripts + results
+├── evals/                   datasets, thresholds, results
 ├── migrations/              Alembic
 ├── frontend/                Next.js app
 ├── infra/docker · infra/terraform
 ├── data/raw · data/processed  (git-ignored)
-├── docs/                    PLAN, ARCHITECTURE, SETUP, adr/
+├── docs/                    ARCHITECTURE, SETUP, adr/, screenshots/
 └── .github/                 workflows, templates, dependabot
 ```

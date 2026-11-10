@@ -6,7 +6,7 @@ readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "Keerti Prem Gadde" }]
 requires-python = ">=3.12,<3.14"
-# Phase 0 keeps only what the skeleton needs. Each phase adds its own deps (see docs/PLAN.md).
+
 dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.32",

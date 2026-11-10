@@ -56,7 +56,7 @@ CurrentUserDep = Annotated[CurrentUser, Depends(get_current_user)]
 
 
 def client_ip(request: Request) -> str:
-    """The peer address. Behind a reverse proxy (Phase 8) this is the proxy's address unless
+    """The peer address. Behind a reverse proxy this is the proxy's address unless
     uvicorn runs with --proxy-headers and a trusted --forwarded-allow-ips."""
     return request.client.host if request.client else "unknown"
 

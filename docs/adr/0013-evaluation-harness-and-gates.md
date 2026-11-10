@@ -1,6 +1,6 @@
 # 0013 – Evaluation harness: frozen golden sets, DB-state judging, exact safety gates
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 Phase 7 needs numbers that later changes (contextual chunk headers, a reranker, a different

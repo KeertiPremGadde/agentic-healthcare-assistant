@@ -1,6 +1,6 @@
 # 0019 – General questions about a red-flag topic are answered, not treated as an emergency
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 A message with a red-flag word gets one of two treatments: the emergency reply (someone may be in

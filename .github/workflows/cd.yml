@@ -1,4 +1,4 @@
-# Deploys the API to AWS on a version tag. Completed in Phase 8 (see docs/PLAN.md).
+# Deploys the API to AWS when a version tag is pushed.
 # Uses GitHub OIDC -> IAM role, so no AWS keys are stored in GitHub.
 name: CD
 
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   deploy:
-    if: vars.AWS_DEPLOY_ENABLED == 'true'   # set this repo variable once Phase 8 infra exists
+    if: vars.AWS_DEPLOY_ENABLED == 'true'   # set this repo variable once the AWS infrastructure exists
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -30,5 +30,5 @@ jobs:
         run: |
           docker build -f infra/docker/api.Dockerfile -t "$IMAGE" .
           docker push "$IMAGE"
-      # TODO(Phase 8): render ECS task definition with the new image and deploy
+      # TODO: render ECS task definition with the new image and deploy
       #   aws-actions/amazon-ecs-render-task-definition + amazon-ecs-deploy-task-definition

@@ -1,6 +1,6 @@
 # 0023 – Habitual self-harm statements get the support reply, not "call 112 now"
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 ADR 0021 added a supportive reply for non-acute self-harm. The older rules (ADRs 0016-0018) still

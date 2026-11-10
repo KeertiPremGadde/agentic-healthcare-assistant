@@ -1,6 +1,6 @@
 # 0020 – Red-team evals on the whole bot, with a strict list of known gaps
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 ADR 0009 tested the safety rules (50 cases, no LLM). That says nothing about what the finished bot

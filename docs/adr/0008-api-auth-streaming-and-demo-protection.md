@@ -1,6 +1,6 @@
 # 0008 – API: JWT auth, SSE streaming, per-user isolation and demo cost protection
 
-Status: accepted (Phase 5)
+Status: accepted
 
 ## Context
 The graph needs an HTTP API that a browser frontend (Phase 6) and strangers on a public demo can

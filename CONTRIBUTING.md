@@ -1,7 +1,7 @@
 # Contributing
 
-1. Pick the next unchecked task in [docs/PLAN.md](docs/PLAN.md).
-2. Branch from `main`: `git switch -c feat/phase1-data-layer`.
+1. Open an issue first for anything bigger than a small fix.
+2. Branch from `main`: `git switch -c feat/short-topic`.
 3. Commit with [Conventional Commits](https://www.conventionalcommits.org/): `feat(db): add appointment model`.
 4. Before pushing: `uv run ruff check . ; uv run mypy src ; uv run pytest` (pre-commit runs ruff + gitleaks).
 5. Open a PR using the template. CI must be green before merging (squash merge).

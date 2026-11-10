@@ -33,7 +33,7 @@ SWEEP = (0.5, 0.55, 0.6, 0.65, 0.7, 0.72, 0.74, 0.76, 0.78, 0.8)
 
 
 def _reranker_params(settings: Settings) -> dict[str, Any]:
-    """Which reranker produced a result file (the default changed from `score` in Phase 7)."""
+    """Which reranker produced a result file (the default changed from `score`, ADR 0014)."""
     if settings.reranker == "score":
         return {"reranker": "score"}
     return {

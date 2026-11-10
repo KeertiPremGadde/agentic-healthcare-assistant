@@ -1,6 +1,6 @@
 # 0004 – UTC storage, clinic-local schedules, DB-enforced slot uniqueness
 
-Status: accepted (Phase 1)
+Status: accepted
 
 ## Context
 The legacy bot used naive datetimes, hard-coded working hours in two places, and checked

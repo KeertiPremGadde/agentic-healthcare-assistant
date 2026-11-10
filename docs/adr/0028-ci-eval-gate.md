@@ -1,6 +1,6 @@
 # 0028 – The eval gate in CI: a free job always, a paid job when it matters
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 `evals/thresholds.yaml` and `scripts/run_evals.py gate` (ADR 0013) define what a change must not break, but

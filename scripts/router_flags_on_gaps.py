@@ -1,4 +1,4 @@
-"""Do the router's flags already catch the phrases the rules miss? (Phase 7 follow-up)
+"""Do the router's flags already catch the phrases the rules miss?
 
     uv run python scripts/router_flags_on_gaps.py [--repeats 3] [--max-usd 0.06]
     uv run python scripts/router_flags_on_gaps.py --set self_harm [--out-name NAME]

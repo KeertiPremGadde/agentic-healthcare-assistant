@@ -1,4 +1,4 @@
-"""Medical question -> Phase 2 RAG pipeline (cited answer or "I don't know")."""
+"""Medical question -> RAG pipeline (cited answer or "I don't know")."""
 
 import asyncio
 from typing import Any

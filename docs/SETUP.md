@@ -1,59 +1,50 @@
-# Setup – Windows
+# Setup
 
-## Status of this machine (checked 2026-10-31)
+The commands below are for Windows PowerShell; on macOS or Linux they are the same apart from
+`copy` (use `cp`).
 
-| Tool | Status | Needed for |
+## Requirements
+
+| Tool | Version | Needed for |
 |---|---|---|
-| Python 3.14 + **uv 0.9** | ✅ installed | uv installs Python 3.12 for the project automatically |
-| Git 2.45 | ✅ (user configured) | everything |
-| VS Code | ✅ | development |
-| Docker 29 | ✅ installed, **Docker Desktop not running** | Postgres (Phase 1+) |
-| Node 22 LTS / npm 11 | ✅ (Node 22 pinned in `frontend/.nvmrc`; newer also works locally) | frontend |
-| AWS CLI 2 | ✅ | deploy (Phase 8) |
-| GitHub CLI `gh` | ❌ missing | create repo + PRs from terminal |
-| Terraform | ❌ missing | infrastructure (Phase 8) |
+| [uv](https://docs.astral.sh/uv/) | 0.9+ | Python environment (installs Python 3.12 itself) |
+| Docker Desktop | any recent | Postgres + pgvector |
+| Node.js | 22 LTS (pinned in `frontend/.nvmrc`) | frontend |
+| GitHub CLI `gh` | optional | setting the CI secret |
+| AWS CLI 2, Terraform | optional | deployment |
 
-## Install the missing pieces
+## API keys
 
-```powershell
-winget install --id GitHub.cli
-winget install --id Hashicorp.Terraform
-winget install --id OpenJS.NodeJS.LTS      # Node 22 LTS (the frontend and CI use 22)
-```
-
-Then open a new terminal and log in:
-
-```powershell
-gh auth login
-```
-
-Start **Docker Desktop** from the Start menu (it must be running for `docker compose`).
-
-## Accounts / keys you will need
-
-| When | What | Where it goes |
+| Key | Needed for | Where it goes |
 |---|---|---|
-| Phase 2 | OpenAI (or Anthropic) API key | `.env` |
-| Phase 4 | Google Cloud project + Calendar API credentials | `secrets/` (git-ignored) |
-| Phase 7 | Langfuse Cloud project (free tier) | `.env` |
-| Phase 8 | AWS account with billing alerts, Vercel account | GitHub Actions secrets / OIDC role |
+| `ANTHROPIC_API_KEY` (or an OpenAI key) | chat, routing, answers | `.env` |
+| Google service account (optional) | Google Calendar sync | `secrets/` (git-ignored) |
+| Langfuse keys (optional) | tracing | `.env` |
 
 ## First run
 
+Start Docker Desktop first, then:
+
 ```powershell
-cd D:\agentic-healthcare-assistant
-copy .env.example .env
+git clone https://github.com/KeertiPremGadde/agentic-healthcare-assistant.git
+cd agentic-healthcare-assistant
+copy .env.example .env                        # then add ANTHROPIC_API_KEY
 uv sync
 uv run pre-commit install
-uv run pytest
-uv run python scripts/serve.py                # API: http://localhost:8000/docs and /demo
 docker compose up -d                          # Postgres + pgvector on :5432
-uv run alembic upgrade head                   # create/upgrade the schema
+uv run alembic upgrade head                   # create the schema
 uv run python scripts/seed.py                 # synthetic doctors, schedules, patients (idempotent)
-uv run python scripts/fetch_medlineplus.py     # download MedlinePlus topics into data/raw/ (git-ignored)
+uv run python scripts/fetch_medlineplus.py    # download MedlinePlus topics into data/raw/ (git-ignored)
 uv run python -m medagent.rag.ingest medlineplus   # embed locally (FastEmbed, no API key) into pgvector
-uv run python -m medagent.rag.ask "What are the symptoms of diabetes?"   # needs ANTHROPIC_API_KEY
-uv run python -m medagent.agents.chat --patient alex.example@example.com   # full agent (add --verbose for cost logs)
+uv run pytest -m "not llm"                    # tests without real LLM calls
+uv run python scripts/serve.py                # API: http://localhost:8000/docs
+```
+
+Quick checks without the web app:
+
+```powershell
+uv run python -m medagent.rag.ask "What are the symptoms of diabetes?"
+uv run python -m medagent.agents.chat --patient alex.example@example.com   # add --verbose for cost logs
 ```
 
 ## Recommended VS Code extensions
@@ -61,7 +52,7 @@ uv run python -m medagent.agents.chat --patient alex.example@example.com   # ful
 See `.vscode/extensions.json` (VS Code suggests them when you open the folder): Python, Ruff,
 Mypy, Docker, Mermaid preview, Even Better TOML, GitHub Actions, Terraform.
 
-## MCP server (Phase 4)
+## MCP server
 
 ```powershell
 uv run python -m medagent.mcp_server                    # stdio server (the chat starts it itself)
@@ -90,7 +81,7 @@ Booking works without it. To add appointments to one shared demo calendar via a 
    `GOOGLE_CALENDAR_ID=<calendar id>` (not `primary`).
 8. Check: `uv run python scripts/check_calendar.py` (creates and deletes one test event).
 
-## The API (Phase 5)
+## The API
 
 ```powershell
 uv run python scripts/serve.py        # http://localhost:8000/docs   (and /demo in local mode)
@@ -102,7 +93,7 @@ checkpointer needs. The server needs Docker Postgres running and `ANTHROPIC_API_
 ### JWT_SECRET (required outside local mode)
 
 `JWT_SECRET` signs login tokens: anyone who knows it can forge a login for any user. Generate a
-strong one and put the output in `.env` (never commit it, never paste it into chat):
+strong one and put the output in `.env` (never commit it):
 
 ```powershell
 uv run python -c "import secrets; print(secrets.token_urlsafe(48))"
@@ -120,7 +111,7 @@ secret logs everyone out (existing tokens stop verifying).
 
 1. Open http://localhost:8000/docs.
 2. `POST /v1/auth/register` -> *Try it out*: username e.g. `demo1`, password of 10+ characters.
-   Use fake data only.
+   Use made-up data only.
 3. Click **Authorize** (top right), enter the same username and password, **Authorize**.
 4. `POST /v1/chat`: set `stream` to `false`, body `{"message": "I have an itchy rash, who should I
    see?"}`. Copy `conversation_id` from the reply.
@@ -164,7 +155,7 @@ By default **no message text, passages or ids are sent** (see ADR 0012).
 2. Create an organisation and a project (for example `medagent`).
 3. Project settings, API Keys, "Create new API key". Copy the public key (`pk-lf-...`) and the secret
    key (`sk-lf-...`, shown once).
-4. Put them in `.env` yourself (it is git-ignored; never paste keys in chat or commit them):
+4. Put them in `.env` yourself (it is git-ignored; never commit keys):
    ```
    LANGFUSE_PUBLIC_KEY=pk-lf-...
    LANGFUSE_SECRET_KEY=sk-lf-...
@@ -180,7 +171,7 @@ By default **no message text, passages or ids are sent** (see ADR 0012).
 The free tier allows 50k units a month (traces, observations and scores). A turn costs about 17 to
 19 units. Lower `LANGFUSE_SAMPLE_RATE` if you expect more.
 
-## Running the evaluations (Phase 7)
+## Running the evaluations
 
 ```powershell
 uv run python scripts/run_evals.py retrieval        # free, no LLM (also prints the RAG_MIN_SCORE margins)
@@ -208,13 +199,13 @@ libraries is switched off in code (`src/medagent/evals/telemetry.py`) and a test
 Windows note: close the VS Code mypy/Python language server before `uv sync` in the main
 environment, or it holds `.pyd` files open ("Access is denied").
 
-## Eval gate in CI (Phase 7)
+## Eval gate in CI
 
 `.github/workflows/eval-gate.yml` has two jobs (ADR 0028). The free one needs nothing. The paid one runs the
 routing and booking evals against the real model on pull requests from this repository that touch the agent,
 guardrails, RAG, evals or dependencies, and needs one repository secret. It costs about $0.07 a run.
 
-Set it up once, in your own terminal (never paste the key into a chat or a file):
+Set it up once:
 
 1. **Create a separate key with a spend limit.** In the Anthropic Console, make a workspace for CI (for
    example `medagent-ci`), set its monthly spend limit to a few dollars, and create an API key inside it

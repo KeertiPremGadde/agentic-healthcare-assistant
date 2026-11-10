@@ -1,6 +1,6 @@
 # 0021 – Non-acute self-harm and passive ideation get a supportive reply
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 The red-team baseline (ADR 0020) showed that a person who says "I burn myself with a lighter when it

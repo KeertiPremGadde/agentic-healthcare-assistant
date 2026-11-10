@@ -69,3 +69,7 @@ Thumbs.db
 *.log
 logs/
 .cache/
+
+# Personal notes, kept locally
+docs/PLAN.md
+docs/learning/

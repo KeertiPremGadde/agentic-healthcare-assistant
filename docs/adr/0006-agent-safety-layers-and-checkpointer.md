@@ -1,6 +1,6 @@
 # 0006 – Agent graph: safety before the LLM, HITL booking, library-owned checkpointer
 
-Status: accepted (Phase 3)
+Status: accepted
 
 ## Context
 The assistant now takes actions (booking appointments) and talks about symptoms. It must

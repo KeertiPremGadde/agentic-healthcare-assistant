@@ -1,6 +1,6 @@
 # 0015 – Fixed medical-answer texts in German, chosen per turn
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 Since ADR 0014 a German medical question is retrieved with an English query and answered by the

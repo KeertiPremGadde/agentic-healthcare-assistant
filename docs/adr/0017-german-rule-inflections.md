@@ -1,6 +1,6 @@
 # 0017 – German emergency and harmful-intent rules: inflected forms
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 The German patterns were written in the dictionary form ("allergischer Schock", "blutet stark",

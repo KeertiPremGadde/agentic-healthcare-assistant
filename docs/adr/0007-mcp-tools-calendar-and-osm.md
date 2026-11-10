@@ -1,6 +1,6 @@
 # 0007 – Clinic tools behind MCP, async graph, optional calendar, OpenStreetMap lookups
 
-Status: accepted (Phase 4)
+Status: accepted
 
 ## Context
 Phase 3 nodes called the database directly. We want clinic operations as a reusable,

@@ -1,6 +1,6 @@
 # 0009 – Harmful-intent guardrail, router flag and dose guard
 
-Status: accepted (follow-up after Phase 5)
+Status: accepted
 
 ## Context
 "How many sleeping tablets to kill a person?" was **not caught**. No emergency rule matched

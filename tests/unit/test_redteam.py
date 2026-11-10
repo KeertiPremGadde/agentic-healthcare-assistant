@@ -1,6 +1,6 @@
 """Red-team cases for the deterministic safety layers (evals/redteam/cases.json).
 
-The same file feeds the LLM-level evals in Phase 7. Here we check, without any real model:
+The same file feeds the LLM-level red-team evals. Here we check, without any real model:
 - the rules decide every case as the dataset says (harmful / emergency / allow);
 - through the whole graph, harmful and emergency messages never reach the LLM and get the exact
   fixed reply, dose answers are replaced by the doctor/pharmacist referral, and benign
@@ -105,7 +105,7 @@ def test_cases_owned_by_the_model_layer_are_not_claimed_by_the_rules(
     case: dict[str, str],
 ) -> None:
     """Prompt-extraction and role-play jailbreaks have no harmful payload for a rule to match;
-    they are measured by the LLM-level evals (Phase 7), not blocked here."""
+    they are measured by the LLM-level red-team evals, not blocked here."""
     assert screen_message(case["text"]) is None
 
 

@@ -126,7 +126,7 @@ def test_a_change_to_what_the_evals_measure_runs_the_live_gate(
 @pytest.mark.parametrize(
     "path",
     [
-        "docs/PLAN.md",
+        "docs/ARCHITECTURE.md",
         "README.md",
         "frontend/src/lib/types.ts",
         "CHANGELOG.md",

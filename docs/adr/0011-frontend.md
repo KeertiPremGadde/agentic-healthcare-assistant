@@ -1,6 +1,6 @@
 # 0011 – Frontend: Next.js, a custom stream reader and token storage
 
-Status: accepted (Phase 6)
+Status: accepted
 
 ## Context
 The API (ADR 0008) streams Server-Sent Events with custom event types (`step`, `token`,

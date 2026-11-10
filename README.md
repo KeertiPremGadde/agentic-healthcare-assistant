@@ -1,18 +1,15 @@
 # MedAgent: Agentic AI Healthcare Assistant
 
-**Multi-agent LangGraph system for medical Q&A, symptom-to-specialist triage and appointment
-booking, with RAG, MCP tools, human-in-the-loop confirmation, evaluations and a CI/CD pipeline
-that deploys to AWS.**
+A multi-agent assistant that answers medical questions from a cited knowledge base, suggests the
+right specialist for a symptom, and books appointments after you confirm. Built with LangGraph,
+RAG on pgvector, MCP tools, FastAPI and Next.js, and tested with an evaluation suite that runs in CI.
 
 ![CI](https://github.com/KeertiPremGadde/agentic-healthcare-assistant/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![LangGraph](https://img.shields.io/badge/agents-LangGraph-green)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-> 🚧 In active development. See [docs/PLAN.md](docs/PLAN.md) for the roadmap and progress.
-> **Live demo:** _coming in Phase 8_
-
-> ⚠️ MedAgent is a portfolio project. It gives general health information only and is not a
+> MedAgent is a portfolio project. It gives general health information only and is not a
 > substitute for professional medical advice. All patient data is synthetic.
 
 ## What it does
@@ -80,7 +77,7 @@ More diagrams (agent graph, booking sequence, RAG pipeline, CI/CD): [docs/ARCHIT
 | Backend | FastAPI (async, SSE), Pydantic v2, SQLAlchemy 2, Alembic, PostgreSQL 16 |
 | Frontend | Next.js (App Router), TypeScript, Tailwind, shadcn/ui, SSE over `fetch`, Playwright |
 | Quality | pytest, RAGAS, DeepEval, Langfuse tracing, ruff, mypy, pre-commit, gitleaks |
-| Delivery | Docker, GitHub Actions (CI + OIDC CD), Terraform, AWS ECR + ECS Fargate |
+| Delivery | Docker, GitHub Actions (CI, eval gate, OIDC CD); AWS deployment with Terraform in progress |
 
 ## Quick start
 
@@ -99,9 +96,9 @@ Then the web app (Node 22):
 cd frontend ; npm ci ; npm run dev     # http://localhost:3000
 ```
 
-Open http://localhost:3000 for the chat UI, or http://localhost:8000/docs (try it: register, **Authorize**, `POST /v1/chat`) or
-http://localhost:8000/demo (a minimal page that shows the live stream). Full setup, including how
-to generate `JWT_SECRET`: [docs/SETUP.md](docs/SETUP.md)
+Open http://localhost:3000 for the chat UI. The API docs are at http://localhost:8000/docs (register,
+click **Authorize**, then try `POST /v1/chat`). Full setup, including how to generate `JWT_SECRET`:
+[docs/SETUP.md](docs/SETUP.md)
 
 ## API
 
@@ -132,7 +129,27 @@ Contributing workflow: [CONTRIBUTING.md](CONTRIBUTING.md) · Decisions: [docs/ad
 
 ## Evaluation results
 
-_Filled in during Phase 7 (RAGAS faithfulness, answer relevancy, routing accuracy, booking task success)._
+Measured with the harness in `evals/` (Claude Haiku 5.5, means of three runs). The thresholds in
+[evals/thresholds.yaml](evals/thresholds.yaml) are enforced in CI.
+
+| Area | Result |
+|---|---|
+| Routing (300 labelled messages) | 99.2% correct route, every emergency and harmful message flagged, no false flags |
+| Booking (27 scenarios) | 100% task success, no booking without confirmation or for the wrong patient |
+| Retrieval | hit@1 0.975, MRR 0.988 |
+| RAG answers (RAGAS) | faithfulness 0.88, context precision 0.93 |
+| Red team (195 attacks in 11 groups, 3 repeats) | all blocked or handled safely; no dose, prompt or tool-call leaks |
+
+Known limits: I wrote the red-team cases and the fixes myself, so the result means "no leak found by
+these attacks", not "no leak". Languages other than English and German, and tool abuse through chat,
+are not covered yet. Details: [ADR 0014](docs/adr/0014-rag-improvements.md),
+[ADR 0027](docs/adr/0027-final-red-team-run.md).
+
+## Roadmap
+
+- Deploy to AWS (ECS Fargate, RDS with pgvector) with Terraform. The CD workflow already builds and pushes the image; the
+  ECS deploy step and the infrastructure are still to do.
+- Red-team cases written by someone other than me, plus other languages and tool abuse.
 
 ## Data sources and attribution
 
@@ -142,7 +159,7 @@ _Filled in during Phase 7 (RAGAS faithfulness, answer relevancy, routing accurac
   every citation. MedlinePlus is not affiliated with this project and does not endorse it.
 - **Not used in the public demo:** NHS Health A-Z (licence requires 7-day refresh and does not
   address AI use, see [ADR 0005](docs/adr/0005-rag-retrieval-and-corpus-licensing.md)) and any book
-  or PDF we do not hold a licence to republish. Such files may be ingested locally for development
+  or PDF I don't hold a licence to republish. Such files may be ingested locally for development
   and are flagged non-public, so `KB_PUBLIC_ONLY=true` keeps them out of retrieval.
 - **Nearby clinics:** real places from [OpenStreetMap](https://www.openstreetmap.org/copyright),
   © OpenStreetMap contributors, available under the ODbL. Shown with attribution, cached for 24 h

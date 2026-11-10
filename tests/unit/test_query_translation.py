@@ -1,4 +1,4 @@
-"""Phase 7, change 3: German questions are retrieved with the router's English query.
+"""ADR 0014, change 3: German questions are retrieved with the router's English query.
 
 Three properties are pinned here because getting any of them wrong is worse than the feature is
 good: (1) the safety checks only ever see the user's own words, (2) an English question is

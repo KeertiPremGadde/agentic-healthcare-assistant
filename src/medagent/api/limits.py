@@ -1,7 +1,7 @@
 """Limits that protect a public demo that spends real money.
 
 1. `RateLimiter`: sliding window per key (IP or user), in memory. Fine for one server process;
-   several instances would each count separately (Phase 8: move to Redis).
+   several instances would each count separately (move to Redis before scaling out).
 2. `UsageStore`: per-user daily message cap and the GLOBAL daily budget, kept in Postgres so
    they survive restarts and are shared by every request. Day = UTC day.
 

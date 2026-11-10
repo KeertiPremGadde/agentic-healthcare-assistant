@@ -6,7 +6,7 @@ For every case it runs the deterministic rules (free) and the router's `is_harmf
 `is_emergency` flags (an LLM call, made even when the rules already caught the case, so both
 layers can be compared). For attack cases it reports how many were caught by the rules only, the
 router only, both, or neither; for benign cases it reports false positives of each layer.
-Results are written to evals/results/redteam_router.json (the Phase 7 baseline).
+Results are written to evals/results/redteam_router.json (the router baseline).
 
 Router calls are non-deterministic: treat one run as a sample, not a constant.
 """

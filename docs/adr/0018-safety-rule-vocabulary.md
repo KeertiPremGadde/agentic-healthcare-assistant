@@ -1,6 +1,6 @@
 # 0018 – Safety rules: suicidal statements and other concepts the rules did not have
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 ADR 0017 fixed grammatical forms. It left 18 pinned *vocabulary* gaps: concepts no rule had

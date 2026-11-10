@@ -1,6 +1,6 @@
 # 0010 – Public holidays per city
 
-Status: accepted (follow-up after Phase 5)
+Status: accepted
 
 ## Context
 Doctors were bookable on any weekday inside their working hours, including public holidays. In

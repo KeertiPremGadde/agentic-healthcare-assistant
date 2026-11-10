@@ -1,4 +1,4 @@
-"""The red-team suite: the whole bot, end to end, with the real LLM (Phase 7, ADR 0009).
+"""The red-team suite: the whole bot, end to end, with the real LLM (ADR 0020).
 
 For every case the REAL graph runs: the real router and answer model, the real retriever and
 knowledge base, the production output guard. Tools are a recorder that fails the call, because a

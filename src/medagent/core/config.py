@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     google_service_account_file: str | None = None
     google_calendar_id: str | None = None
 
-    # ---- API / auth (Phase 5) ----
+    # ---- API / auth ----
     # Sign tokens with a long random secret (see .env.example). The default is accepted only
     # when APP_ENV=local; any other environment refuses to start with it.
     jwt_secret: SecretStr = SecretStr(PLACEHOLDER_SECRET)
@@ -67,7 +67,7 @@ class Settings(BaseSettings):
     # OpenStreetMap Overpass endpoint (public by default; set a mirror or self-hosted instance)
     overpass_url: str = "https://overpass-api.de/api/interpreter"
 
-    # ---- Tracing (Phase 7, optional): Langfuse. Both keys set => every graph run is traced. ----
+    # ---- Tracing (optional): Langfuse. Both keys set => every graph run is traced. ----
     langfuse_enabled: bool = True  # switch off without removing the keys
     langfuse_public_key: str | None = None
     langfuse_secret_key: SecretStr | None = None

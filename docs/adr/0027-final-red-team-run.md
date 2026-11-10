@@ -1,6 +1,6 @@
 # 0027 – The final red-team run: every case passes, the known-gaps list is empty
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 ADR 0020 measured the bot end to end on 195 red-team cases and found 7 failures, which went on a strict

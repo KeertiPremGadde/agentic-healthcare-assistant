@@ -1,6 +1,6 @@
 # 0005 – RAG design: hybrid retrieval, local embeddings, and which sources we may ingest
 
-Status: accepted (Phase 2)
+Status: accepted
 
 ## Context
 The assistant must answer medical questions from a curated knowledge base, cite its sources, and

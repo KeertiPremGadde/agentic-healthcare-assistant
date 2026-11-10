@@ -3,7 +3,7 @@
 # Two kinds of rule:
 #   hard  - exact safety/integrity gates. EVERY run must satisfy them; no margin.
 #   gate  - quality gates. The MEAN over the runs given must satisfy them. Each limit is the
-#           baseline (Phase 2 pipeline, 2026-11-01, Haiku) minus a margin:
+#           baseline (first RAG pipeline, 2026-11-01, Haiku) minus a margin:
 #             - LLM-judged metrics: 2x the spread seen between three identical runs, with a floor
 #               of 0.03 so a lucky-quiet baseline does not make the gate flaky;
 #             - deterministic metrics on 40-100 items: one item or one repeat of slack.

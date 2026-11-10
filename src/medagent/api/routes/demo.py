@@ -1,5 +1,5 @@
-"""A tiny browser page to try the API and watch the SSE stream before the real frontend exists
-(Phase 6). Served only when APP_ENV=local. No data leaves the page except calls to this API; the
+"""A tiny browser page to try the API and watch the SSE stream without the frontend.
+Served only when APP_ENV=local. No data leaves the page except calls to this API; the
 token lives in a JavaScript variable (not localStorage) and model output is inserted as text,
 never as HTML."""
 

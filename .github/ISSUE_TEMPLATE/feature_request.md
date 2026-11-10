@@ -1,10 +1,8 @@
 ---
-name: Feature / task
-about: New capability or a PLAN.md task
+name: Feature request
+about: Suggest a new capability
 labels: enhancement
 ---
-
-**Phase** (from docs/PLAN.md):
 
 **Goal**
 

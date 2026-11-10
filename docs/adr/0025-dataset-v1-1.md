@@ -1,6 +1,6 @@
 # 0025 – Dataset v1.1: flag-only scoring, one reworded row, one hard negative
 
-Status: accepted (Phase 7)
+Status: accepted
 
 ## Context
 Three things in the frozen v1.0 sets proved to measure noise, found while the eval gate was being
